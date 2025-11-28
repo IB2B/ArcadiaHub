@@ -1,26 +1,416 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================
+   THEME C1 - Professional Blue (Default)
+   ============================================ */
+:root,
+[data-theme="c1"] {
+  /* Brand Colors */
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+  --primary-light: #DBEAFE;
+  --secondary: #1E40AF;
+  --accent: #0EA5E9;
+
+  /* Status Colors */
+  --success: #10B981;
+  --success-light: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-light: #FEF3C7;
+  --error: #EF4444;
+  --error-light: #FEE2E2;
+  --info: #3B82F6;
+  --info-light: #DBEAFE;
+
+  /* Background & Surface */
+  --background: #F8FAFC;
+  --card: #FFFFFF;
+  --card-hover: #F1F5F9;
+  --sidebar-bg: #FFFFFF;
+  --header-bg: #FFFFFF;
+
+  /* Text Colors */
+  --text: #1E293B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+
+  /* Border */
+  --border: #E2E8F0;
+  --border-focus: #3B82F6;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+  --gradient-accent: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%);
 }
 
+/* ============================================
+   THEME C2 - Modern Blue with Dark Accents
+   ============================================ */
+[data-theme="c2"] {
+  /* Brand Colors */
+  --primary: #3B82F6;
+  --primary-hover: #60A5FA;
+  --primary-light: #1E3A5F;
+  --secondary: #1E40AF;
+  --accent: #38BDF8;
+
+  /* Status Colors */
+  --success: #34D399;
+  --success-light: #064E3B;
+  --warning: #FBBF24;
+  --warning-light: #78350F;
+  --error: #F87171;
+  --error-light: #7F1D1D;
+  --info: #60A5FA;
+  --info-light: #1E3A5F;
+
+  /* Background & Surface */
+  --background: #F1F5F9;
+  --card: #FFFFFF;
+  --card-hover: #F8FAFC;
+  --sidebar-bg: #0F172A;
+  --header-bg: #1E293B;
+
+  /* Text Colors */
+  --text: #1E293B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  --sidebar-text: #E2E8F0;
+  --sidebar-text-muted: #94A3B8;
+
+  /* Border */
+  --border: #E2E8F0;
+  --border-focus: #3B82F6;
+  --sidebar-border: #334155;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+  --gradient-accent: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+}
+
+/* ============================================
+   THEME C3 - Soft Blue Gradient
+   ============================================ */
+[data-theme="c3"] {
+  /* Brand Colors */
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+  --primary-light: #EFF6FF;
+  --secondary: #8B5CF6;
+  --accent: #06B6D4;
+
+  /* Status Colors */
+  --success: #10B981;
+  --success-light: #ECFDF5;
+  --warning: #F59E0B;
+  --warning-light: #FFFBEB;
+  --error: #EF4444;
+  --error-light: #FEF2F2;
+  --info: #3B82F6;
+  --info-light: #EFF6FF;
+
+  /* Background & Surface */
+  --background: #F0F9FF;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-hover: rgba(255, 255, 255, 1);
+  --sidebar-bg: rgba(255, 255, 255, 0.8);
+  --header-bg: rgba(255, 255, 255, 0.9);
+
+  /* Text Colors */
+  --text: #1E293B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+
+  /* Border */
+  --border: rgba(59, 130, 246, 0.15);
+  --border-focus: #3B82F6;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(59, 130, 246, 0.1);
+  --shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
+  --shadow-md: 0 4px 12px rgba(59, 130, 246, 0.15);
+  --shadow-lg: 0 8px 25px rgba(59, 130, 246, 0.18);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  --gradient-accent: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+  --gradient-bg: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F5F3FF 100%);
+
+  /* Glass Effect */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --backdrop-blur: blur(12px);
+}
+
+/* ============================================
+   Tailwind Theme Configuration
+   ============================================ */
 @theme inline {
+  /* Custom breakpoints */
+  --breakpoint-xs: 480px;
+
+  /* Colors */
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-foreground: var(--text);
+  --color-primary: var(--primary);
+  --color-card: var(--card);
+  --color-border: var(--border);
+
+  /* Typography */
+  --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================
+   Base Styles
+   ============================================ */
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Theme C3 gradient background */
+[data-theme="c3"] body {
+  background: var(--gradient-bg);
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-bg {
+  background: var(--gradient-primary);
+}
+
+.glass-effect {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.9));
+  backdrop-filter: var(--backdrop-blur, blur(8px));
+  -webkit-backdrop-filter: var(--backdrop-blur, blur(8px));
+  border: 1px solid var(--glass-border, var(--border));
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow);
+}
+
+/* ============================================
+   Global Custom Scrollbar
+   ============================================ */
+
+/* Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: var(--text-muted) var(--card-hover);
+}
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--card-hover);
+  border-radius: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 6px;
+  border: 3px solid var(--card-hover);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: var(--primary);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--card-hover);
+}
+
+/* Slim scrollbar variant */
+.scrollbar-slim::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-slim::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+}
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Primary colored scrollbar */
+.scrollbar-primary::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.scrollbar-primary::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* ============================================
+   Focus Styles
+   ============================================ */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Animation Classes
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* ============================================
+   Status Badge Colors
+   ============================================ */
+.status-pending {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.status-in_progress {
+  background: var(--info-light);
+  color: var(--info);
+}
+
+.status-completed {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.status-cancelled {
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.status-suspended {
+  background: rgba(107, 114, 128, 0.15);
+  color: #6B7280;
+}
+
+/* ============================================
+   Safe Area Insets (iPhone notch support)
+   ============================================ */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* ============================================
+   Mobile-First Utilities
+   ============================================ */
+.touch-action-manipulation {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on interactive elements */
+.select-none-interactive {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Improve tap highlighting on mobile */
+.tap-highlight-transparent {
+  -webkit-tap-highlight-color: transparent;
 }
