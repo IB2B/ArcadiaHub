@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { login } from '@/lib/auth';
 import Button from '@/components/ui/Button';
@@ -9,6 +10,8 @@ import Input from '@/components/ui/Input';
 import Card, { CardContent } from '@/components/ui/Card';
 
 export default function LoginPage() {
+  const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
@@ -31,10 +34,10 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold gradient-text">Arcadia Hub</h1>
+            <h1 className="text-3xl font-bold gradient-text">{tCommon('appName')}</h1>
           </Link>
           <p className="mt-2 text-[var(--text-muted)]">
-            Sign in to your partner account
+            {t('loginSubtitle')}
           </p>
         </div>
 
@@ -53,7 +56,7 @@ export default function LoginPage() {
               )}
 
               <Input
-                label="Email"
+                label={t('email')}
                 name="email"
                 type="email"
                 placeholder="your@email.com"
@@ -67,7 +70,7 @@ export default function LoginPage() {
               />
 
               <Input
-                label="Password"
+                label={t('password')}
                 name="password"
                 type="password"
                 placeholder="••••••••"
@@ -87,18 +90,18 @@ export default function LoginPage() {
                     name="remember"
                     className="w-4 h-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
                   />
-                  <span className="text-sm text-[var(--text-muted)]">Remember me</span>
+                  <span className="text-sm text-[var(--text-muted)]">{t('rememberMe')}</span>
                 </label>
                 <Link
                   href="/forgot-password"
                   className="text-sm text-[var(--primary)] hover:underline"
                 >
-                  Forgot password?
+                  {t('forgotPassword')}
                 </Link>
               </div>
 
               <Button type="submit" fullWidth isLoading={isPending}>
-                Sign in
+                {t('signIn')}
               </Button>
             </form>
           </CardContent>
@@ -106,9 +109,9 @@ export default function LoginPage() {
 
         {/* Sign up link */}
         <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
-          Don&apos;t have an account?{' '}
+          {t('noAccount')}{' '}
           <Link href="/register" className="text-[var(--primary)] hover:underline font-medium">
-            Contact us to become a partner
+            {t('contactUs')}
           </Link>
         </p>
       </div>

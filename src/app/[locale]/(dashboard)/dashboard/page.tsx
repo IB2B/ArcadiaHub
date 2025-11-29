@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import { getTranslations } from 'next-intl/server';
 import { getDashboardData, type ActivityFeedItem } from '@/lib/data/dashboard';
 import { getCurrentUserProfile } from '@/lib/data/profiles';
 import { StatsCard, TimelineFeed } from '@/components/dashboard';
@@ -39,7 +40,28 @@ const eventTypeVariants: Record<string, 'primary' | 'success' | 'warning' | 'inf
   PHYSICAL: 'warning',
 };
 
+// Event type to translation key mapping
+const eventTypeKeys: Record<string, string> = {
+  TRAINING: 'training',
+  WORKSHOP: 'workshop',
+  WEBINAR: 'webinar',
+  PHYSICAL: 'physical',
+};
+
+// Case status to translation key mapping
+const caseStatusKeys: Record<string, string> = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  SUSPENDED: 'suspended',
+  CANCELLED: 'cancelled',
+};
+
 export default async function DashboardPage() {
+  const t = await getTranslations('dashboard');
+  const tCommon = await getTranslations('common');
+  const tCases = await getTranslations('cases');
+  const tEvents = await getTranslations('events');
   const dashboardData = await getDashboardData();
   const profile = await getCurrentUserProfile();
 
@@ -57,45 +79,45 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-2 sm:gap-3">
         <div className="flex items-start justify-between gap-2">
           <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)] leading-tight">
-            Welcome back, <span className="block xs:inline">{userName}</span>
+            {t('welcome')}, <span className="block xs:inline">{userName}</span>
           </h1>
           <Link href="/cases/new" className="flex-shrink-0">
             <Button size="sm" className="whitespace-nowrap">
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-              <span className="hidden xs:inline">New Case</span>
-              <span className="xs:hidden">New</span>
+              <span className="hidden xs:inline">{tCases('newCase')}</span>
+              <span className="xs:hidden">{tCommon('new')}</span>
             </Button>
           </Link>
         </div>
         <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-          Here&apos;s what&apos;s happening with your partnership today.
+          {t('partnershipUpdate')}
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatsCard
-          title="Active Cases"
+          title={t('activeCases')}
           value={dashboardData.stats.activeCases + dashboardData.stats.pendingCases}
           icon={statsIcons.cases}
           iconBg="bg-blue-100"
         />
         <StatsCard
-          title="Upcoming Events"
+          title={t('upcomingEvents')}
           value={dashboardData.stats.upcomingEvents}
           icon={statsIcons.events}
           iconBg="bg-purple-100"
         />
         <StatsCard
-          title="Unread Notifications"
+          title={t('unreadNotifications')}
           value={dashboardData.stats.unreadNotifications}
           icon={statsIcons.notifications}
           iconBg="bg-amber-100"
         />
         <StatsCard
-          title="New Documents"
+          title={t('newDocuments')}
           value={dashboardData.stats.newDocuments}
           icon={statsIcons.documents}
           iconBg="bg-green-100"
@@ -107,7 +129,7 @@ export default async function DashboardPage() {
         {/* Timeline Feed - Takes 2 columns on large screens */}
         <div className="lg:col-span-2 space-y-3 sm:space-y-4 order-2 lg:order-1">
           <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">Activity Feed</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">{t('activityFeed')}</h2>
           </div>
           {feedItems.length > 0 ? (
             <TimelineFeed items={feedItems} />
@@ -116,7 +138,7 @@ export default async function DashboardPage() {
               <CardContent>
                 <div className="text-center py-8">
                   <p className="text-[var(--text-muted)]">
-                    No recent activity. Your feed will show events, case updates, and new content.
+                    {t('noActivity')}
                   </p>
                 </div>
               </CardContent>
@@ -129,10 +151,10 @@ export default async function DashboardPage() {
           {/* Upcoming Events */}
           <Card>
             <CardHeader
-              title="Upcoming Events"
+              title={t('upcomingEvents')}
               action={
                 <Link href="/events">
-                  <Button variant="ghost" size="sm">See all</Button>
+                  <Button variant="ghost" size="sm">{t('seeAll')}</Button>
                 </Link>
               }
             />
@@ -156,14 +178,14 @@ export default async function DashboardPage() {
                         </p>
                       </div>
                       <Badge variant={eventTypeVariants[event.event_type] || 'default'} size="sm" className="hidden xs:inline-flex">
-                        {event.event_type}
+                        {tEvents(`types.${eventTypeKeys[event.event_type] || event.event_type.toLowerCase()}`)}
                       </Badge>
                     </Link>
                   ))}
                 </div>
               ) : (
                 <p className="text-xs sm:text-sm text-[var(--text-muted)] text-center py-4">
-                  No upcoming events
+                  {t('noUpcomingEvents')}
                 </p>
               )}
             </CardContent>
@@ -172,10 +194,10 @@ export default async function DashboardPage() {
           {/* Recent Cases */}
           <Card>
             <CardHeader
-              title="My Cases"
+              title={t('myCases')}
               action={
                 <Link href="/cases">
-                  <Button variant="ghost" size="sm">See all</Button>
+                  <Button variant="ghost" size="sm">{t('seeAll')}</Button>
                 </Link>
               }
             />
@@ -204,14 +226,14 @@ export default async function DashboardPage() {
                         }
                         size="sm"
                       >
-                        {caseItem.status?.replace('_', ' ')}
+                        {caseItem.status ? tCases(`statuses.${caseStatusKeys[caseItem.status] || caseItem.status.toLowerCase()}`) : ''}
                       </Badge>
                     </Link>
                   ))}
                 </div>
               ) : (
                 <p className="text-xs sm:text-sm text-[var(--text-muted)] text-center py-4">
-                  No cases yet. Create your first case to get started.
+                  {t('noCases')}
                 </p>
               )}
             </CardContent>
@@ -219,7 +241,7 @@ export default async function DashboardPage() {
 
           {/* Quick Actions */}
           <Card>
-            <CardHeader title="Quick Actions" />
+            <CardHeader title={t('quickActions')} />
             <CardContent>
               <div className="grid grid-cols-2 gap-2">
                 <Link href="/cases/new">
@@ -227,7 +249,7 @@ export default async function DashboardPage() {
                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span className="truncate">New Case</span>
+                    <span className="truncate">{tCases('newCase')}</span>
                   </Button>
                 </Link>
                 <Link href="/documents">
@@ -235,7 +257,7 @@ export default async function DashboardPage() {
                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
-                    <span className="truncate">Docs</span>
+                    <span className="truncate">{t('docs')}</span>
                   </Button>
                 </Link>
                 <Link href="/academy">
@@ -243,7 +265,7 @@ export default async function DashboardPage() {
                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342" />
                     </svg>
-                    <span className="truncate">Academy</span>
+                    <span className="truncate">{t('academy')}</span>
                   </Button>
                 </Link>
                 <Link href="/community">
@@ -251,7 +273,7 @@ export default async function DashboardPage() {
                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                     </svg>
-                    <span className="truncate">Community</span>
+                    <span className="truncate">{t('community')}</span>
                   </Button>
                 </Link>
               </div>

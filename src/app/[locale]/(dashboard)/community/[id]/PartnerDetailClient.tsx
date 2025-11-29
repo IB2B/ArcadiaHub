@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
@@ -48,9 +49,10 @@ interface SocialLinks {
 }
 
 export default function PartnerDetailClient({ partner }: PartnerDetailClientProps) {
+  const t = useTranslations('community');
   const displayName = partner.company_name ||
     `${partner.contact_first_name || ''} ${partner.contact_last_name || ''}`.trim() ||
-    'Partner';
+    t('partner');
 
   const fullAddress = [
     partner.address,
@@ -145,7 +147,7 @@ export default function PartnerDetailClient({ partner }: PartnerDetailClientProp
       {partner.description && (
         <Card padding="none">
           <CardHeader
-            title="About"
+            title={t('about')}
             className="p-4 border-b border-[var(--border)]"
           />
           <CardContent className="p-4">
@@ -160,7 +162,7 @@ export default function PartnerDetailClient({ partner }: PartnerDetailClientProp
       {Object.keys(socialLinks).length > 0 && (
         <Card padding="none">
           <CardHeader
-            title="Social Links"
+            title={t('socialLinks')}
             className="p-4 border-b border-[var(--border)]"
           />
           <CardContent className="p-4">

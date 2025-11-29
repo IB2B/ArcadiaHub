@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 
 // Compact icons for mobile nav
@@ -83,37 +84,38 @@ const menuIcons = {
   ),
 };
 
-interface NavItem {
+interface NavItemConfig {
   key: string;
-  label: string;
+  translationKey: string;
   href: string;
   icon: keyof typeof icons;
   badge?: number;
 }
 
-interface MenuItem {
+interface MenuItemConfig {
   key: string;
-  label: string;
+  translationKey: string;
   href: string;
   icon: keyof typeof menuIcons;
 }
 
-const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Home', href: '/dashboard', icon: 'dashboard' },
-  { key: 'community', label: 'Community', href: '/community', icon: 'community' },
-  { key: 'events', label: 'Events', href: '/events', icon: 'events' },
-  { key: 'cases', label: 'Cases', href: '/cases', icon: 'cases', badge: 3 },
+const navItemsConfig: NavItemConfig[] = [
+  { key: 'dashboard', translationKey: 'home', href: '/dashboard', icon: 'dashboard' },
+  { key: 'community', translationKey: 'community', href: '/community', icon: 'community' },
+  { key: 'events', translationKey: 'calendar', href: '/events', icon: 'events' },
+  { key: 'cases', translationKey: 'myCases', href: '/cases', icon: 'cases', badge: 3 },
 ];
 
-const moreMenuItems: MenuItem[] = [
-  { key: 'academy', label: 'Academy', href: '/academy', icon: 'academy' },
-  { key: 'documents', label: 'Documents', href: '/documents', icon: 'documents' },
-  { key: 'blog', label: 'Blog', href: '/blog', icon: 'blog' },
-  { key: 'settings', label: 'Settings', href: '/settings', icon: 'settings' },
+const moreMenuItemsConfig: MenuItemConfig[] = [
+  { key: 'academy', translationKey: 'academy', href: '/academy', icon: 'academy' },
+  { key: 'documents', translationKey: 'documents', href: '/documents', icon: 'documents' },
+  { key: 'blog', translationKey: 'blog', href: '/blog', icon: 'blog' },
+  { key: 'settings', translationKey: 'settings', href: '/settings', icon: 'settings' },
 ];
 
 function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -126,7 +128,7 @@ function BottomNav() {
   );
 
   // Check if any "more" menu item is active
-  const isMoreActive = moreMenuItems.some((item) => isActive(item.href));
+  const isMoreActive = moreMenuItemsConfig.some((item) => isActive(item.href));
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -176,7 +178,7 @@ function BottomNav() {
 
         {/* Menu Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">
-          <span className="text-sm font-semibold text-[var(--text)]">More</span>
+          <span className="text-sm font-semibold text-[var(--text)]">{t('more')}</span>
           <button
             onClick={() => setShowMoreMenu(false)}
             className="p-1.5 rounded-lg text-[var(--text-muted)] hover:bg-[var(--card-hover)] transition-colors"
@@ -187,7 +189,7 @@ function BottomNav() {
 
         {/* Menu Items */}
         <div className="grid grid-cols-4 gap-2 p-4">
-          {moreMenuItems.map((item) => {
+          {moreMenuItemsConfig.map((item) => {
             const active = isActive(item.href);
             return (
               <Link
@@ -205,7 +207,7 @@ function BottomNav() {
                 <span className={active ? 'text-[var(--primary)]' : ''}>
                   {menuIcons[item.icon]}
                 </span>
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <span className="text-[10px] font-medium">{t(item.translationKey)}</span>
               </Link>
             );
           })}
@@ -221,7 +223,7 @@ function BottomNav() {
         "
       >
         <div className="flex items-center justify-around h-14 sm:h-16 px-1 sm:px-2">
-          {navItems.map((item) => {
+          {navItemsConfig.map((item) => {
             const active = isActive(item.href);
             return (
               <Link
@@ -243,7 +245,7 @@ function BottomNav() {
                   )}
                 </span>
                 <span className={`text-[9px] sm:text-[10px] font-medium ${active ? 'font-semibold' : ''}`}>
-                  {item.label}
+                  {t(item.translationKey)}
                 </span>
                 {active && (
                   <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[var(--primary)]" />
@@ -266,7 +268,7 @@ function BottomNav() {
               {icons.more(showMoreMenu || isMoreActive)}
             </span>
             <span className={`text-[9px] sm:text-[10px] font-medium ${showMoreMenu || isMoreActive ? 'font-semibold' : ''}`}>
-              More
+              {t('more')}
             </span>
             {(showMoreMenu || isMoreActive) && (
               <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[var(--primary)]" />

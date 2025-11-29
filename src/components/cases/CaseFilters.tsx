@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
 
 interface CaseFiltersProps {
@@ -14,13 +15,13 @@ interface CaseFiltersProps {
   };
 }
 
-const statusOptions = [
-  { value: '', label: 'All Status' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'IN_PROGRESS', label: 'In Progress' },
-  { value: 'SUSPENDED', label: 'Suspended' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'CANCELLED', label: 'Cancelled' },
+const statusOptionsConfig = [
+  { value: '', key: 'allStatus' },
+  { value: 'PENDING', key: 'pending' },
+  { value: 'IN_PROGRESS', key: 'in_progress' },
+  { value: 'SUSPENDED', key: 'suspended' },
+  { value: 'COMPLETED', key: 'completed' },
+  { value: 'CANCELLED', key: 'cancelled' },
 ];
 
 const icons = {
@@ -42,6 +43,8 @@ const icons = {
 };
 
 function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
+  const t = useTranslations('cases');
+  const tCommon = useTranslations('common');
   const [search, setSearch] = useState(initialFilters?.search || '');
   const [status, setStatus] = useState(initialFilters?.status || '');
   const [showFilters, setShowFilters] = useState(false);
@@ -79,7 +82,7 @@ function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
             type="text"
             value={search}
             onChange={handleSearchChange}
-            placeholder="Search by code or client..."
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
           />
         </div>
@@ -103,9 +106,9 @@ function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
             onChange={handleStatusChange}
             className="h-full px-3 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
           >
-            {statusOptions.map((option) => (
+            {statusOptionsConfig.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {option.key === 'allStatus' ? t('allStatus') : t(`statuses.${option.key}`)}
               </option>
             ))}
           </select>
@@ -120,7 +123,7 @@ function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
             className="hidden md:flex"
           >
             {icons.clear}
-            <span className="ml-1">Clear</span>
+            <span className="ml-1">{t('clear')}</span>
           </Button>
         )}
       </div>
@@ -130,16 +133,16 @@ function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
         <div className="md:hidden p-3 bg-[var(--card)] border border-[var(--border)] rounded-lg space-y-3 animate-slideUp">
           <div>
             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">
-              Status
+              {t('status')}
             </label>
             <select
               value={status}
               onChange={handleStatusChange}
               className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
             >
-              {statusOptions.map((option) => (
+              {statusOptionsConfig.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.label}
+                  {option.key === 'allStatus' ? t('allStatus') : t(`statuses.${option.key}`)}
                 </option>
               ))}
             </select>
@@ -153,7 +156,7 @@ function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
               fullWidth
             >
               {icons.clear}
-              <span className="ml-1">Clear Filters</span>
+              <span className="ml-1">{t('clearFilters')}</span>
             </Button>
           )}
         </div>

@@ -1,10 +1,19 @@
 'use client';
 
 import { memo, useMemo, ReactNode } from 'react';
-import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
+import { useTranslations, useLocale } from 'next-intl';
+import { format, isToday, isYesterday, formatDistanceToNow, Locale } from 'date-fns';
+import { enUS, fr, it } from 'date-fns/locale';
 import Card, { CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
+
+// Date-fns locale mapping
+const dateLocales: Record<string, Locale> = {
+  en: enUS,
+  fr: fr,
+  it: it,
+};
 
 // Icons
 const icons = {
@@ -69,28 +78,28 @@ const typeColors: Record<FeedItemType, { bg: string; icon: string; badge: 'prima
   announcement: { bg: 'bg-red-100', icon: 'text-red-600', badge: 'error' },
 };
 
-const typeLabels: Record<FeedItemType, string> = {
-  event: 'Event',
-  case: 'Case Update',
-  content: 'New Content',
-  document: 'Document',
-  announcement: 'Announcement',
+const typeKeys: Record<FeedItemType, string> = {
+  event: 'event',
+  case: 'case',
+  content: 'content',
+  document: 'document',
+  announcement: 'announcement',
 };
 
-function formatTimestamp(date: Date): string {
+function formatTimestamp(date: Date, yesterdayLabel: string, locale: Locale): string {
   if (isToday(date)) {
-    return formatDistanceToNow(date, { addSuffix: true });
+    return formatDistanceToNow(date, { addSuffix: true, locale });
   }
   if (isYesterday(date)) {
-    return `Yesterday at ${format(date, 'h:mm a')}`;
+    return yesterdayLabel.replace('{time}', format(date, 'h:mm a', { locale }));
   }
-  return format(date, 'MMM d, yyyy');
+  return format(date, 'PPP', { locale });
 }
 
 // Memoized Feed Item Component
-const FeedItemCard = memo(function FeedItemCard({ item }: { item: FeedItem }) {
+const FeedItemCard = memo(function FeedItemCard({ item, typeLabel, yesterdayLabel, locale }: { item: FeedItem; typeLabel: string; yesterdayLabel: string; locale: Locale }) {
   const colors = typeColors[item.type];
-  const formattedTime = useMemo(() => formatTimestamp(item.timestamp), [item.timestamp]);
+  const formattedTime = useMemo(() => formatTimestamp(item.timestamp, yesterdayLabel, locale), [item.timestamp, yesterdayLabel, locale]);
 
   return (
     <Card hover className="group">
@@ -108,7 +117,7 @@ const FeedItemCard = memo(function FeedItemCard({ item }: { item: FeedItem }) {
             <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-1 xs:gap-2">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <Badge variant={colors.badge} size="sm">
-                  {typeLabels[item.type]}
+                  {typeLabel}
                 </Badge>
                 <span className="text-[10px] sm:text-xs text-[var(--text-light)]">{formattedTime}</span>
               </div>
@@ -176,7 +185,14 @@ const FeedSkeleton = memo(function FeedSkeleton() {
   );
 });
 
-function TimelineFeed({ items, loading = false, emptyMessage = 'No activity yet' }: TimelineFeedProps) {
+function TimelineFeed({ items, loading = false, emptyMessage }: TimelineFeedProps) {
+  const t = useTranslations('dashboard');
+  const localeCode = useLocale();
+  const dateLocale = dateLocales[localeCode] || enUS;
+
+  const resolvedEmptyMessage = emptyMessage || t('noActivity');
+  const yesterdayLabel = t('yesterdayAt');
+
   if (loading) {
     return (
       <div className="space-y-3 sm:space-y-4">
@@ -197,7 +213,7 @@ function TimelineFeed({ items, loading = false, emptyMessage = 'No activity yet'
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="text-sm sm:text-base text-[var(--text-muted)]">{emptyMessage}</p>
+            <p className="text-sm sm:text-base text-[var(--text-muted)]">{resolvedEmptyMessage}</p>
           </div>
         </CardContent>
       </Card>
@@ -207,7 +223,13 @@ function TimelineFeed({ items, loading = false, emptyMessage = 'No activity yet'
   return (
     <div className="space-y-3 sm:space-y-4">
       {items.map((item) => (
-        <FeedItemCard key={item.id} item={item} />
+        <FeedItemCard
+          key={item.id}
+          item={item}
+          typeLabel={t(`feedTypes.${typeKeys[item.type]}`)}
+          yesterdayLabel={yesterdayLabel}
+          locale={dateLocale}
+        />
       ))}
     </div>
   );

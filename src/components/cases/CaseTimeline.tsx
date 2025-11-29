@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import Badge from '@/components/ui/Badge';
 import { Database } from '@/types/database.types';
 
@@ -10,12 +11,12 @@ interface CaseTimelineProps {
   history: CaseHistory[];
 }
 
-const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; label: string }> = {
-  PENDING: { variant: 'warning', label: 'Pending' },
-  IN_PROGRESS: { variant: 'info', label: 'In Progress' },
-  SUSPENDED: { variant: 'default', label: 'Suspended' },
-  COMPLETED: { variant: 'success', label: 'Completed' },
-  CANCELLED: { variant: 'error', label: 'Cancelled' },
+const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; key: string }> = {
+  PENDING: { variant: 'warning', key: 'pending' },
+  IN_PROGRESS: { variant: 'info', key: 'in_progress' },
+  SUSPENDED: { variant: 'default', key: 'suspended' },
+  COMPLETED: { variant: 'success', key: 'completed' },
+  CANCELLED: { variant: 'error', key: 'cancelled' },
 };
 
 const icons = {
@@ -43,27 +44,29 @@ function formatDateTime(dateString: string | null): string {
   });
 }
 
-function getRelativeTime(dateString: string | null): string {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return formatDateTime(dateString);
-}
-
 function CaseTimeline({ history }: CaseTimelineProps) {
+  const t = useTranslations('cases');
+
+  const getRelativeTime = (dateString: string | null): string => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return t('justNow');
+    if (diffMins < 60) return t('minutesAgo', { count: diffMins });
+    if (diffHours < 24) return t('hoursAgo', { count: diffHours });
+    if (diffDays < 7) return t('daysAgo', { count: diffDays });
+    return formatDateTime(dateString);
+  };
+
   if (!history || history.length === 0) {
     return (
       <div className="text-center py-8 text-[var(--text-muted)]">
-        <p className="text-sm">No history available for this case.</p>
+        <p className="text-sm">{t('noHistory')}</p>
       </div>
     );
   }
@@ -101,17 +104,17 @@ function CaseTimeline({ history }: CaseTimelineProps) {
                 <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-3 sm:p-4">
                   {/* Status change */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-[var(--text)]">Status changed</span>
+                    <span className="text-sm font-medium text-[var(--text)]">{t('statusChanged')}</span>
                     {oldStatusConfig && (
                       <>
                         <Badge variant={oldStatusConfig.variant} size="sm">
-                          {oldStatusConfig.label}
+                          {t(`statuses.${oldStatusConfig.key}`)}
                         </Badge>
                         <span className="text-[var(--text-muted)]">&rarr;</span>
                       </>
                     )}
                     <Badge variant={newStatusConfig.variant} size="sm">
-                      {newStatusConfig.label}
+                      {t(`statuses.${newStatusConfig.key}`)}
                     </Badge>
                   </div>
 

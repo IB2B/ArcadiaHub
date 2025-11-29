@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import Card from '@/components/ui/Card';
 import PartnerCard from '@/components/community/PartnerCard';
 import { Database } from '@/types/database.types';
@@ -33,6 +34,7 @@ const icons = {
 };
 
 export default function CommunityPageClient({ partners, totalCount }: CommunityPageClientProps) {
+  const t = useTranslations('community');
   const [search, setSearch] = useState('');
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -94,10 +96,10 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
           </div>
           <div>
             <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
-              Partner Directory
+              {t('directory')}
             </h1>
             <p className="text-sm text-[var(--text-muted)]">
-              {totalCount} registered partner{totalCount !== 1 ? 's' : ''}
+              {t('registeredPartners', { count: totalCount })}
             </p>
           </div>
         </div>
@@ -115,7 +117,7 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, description, or city..."
+              placeholder={t('searchPlaceholder')}
               className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
             />
           </div>
@@ -126,7 +128,7 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
             >
-              <option value="">All Categories</option>
+              <option value="">{t('allCategories')}</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -140,7 +142,7 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
               onClick={clearFilters}
               className="px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-lg transition-colors"
             >
-              Clear
+              {t('clear')}
             </button>
           )}
         </div>
@@ -155,7 +157,7 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
                 : 'bg-[var(--card)] text-[var(--text-muted)] hover:bg-[var(--card-hover)]'
             }`}
           >
-            All
+            {t('all')}
           </button>
           {alphabet.map((letter) => (
             <button
@@ -187,12 +189,12 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
               {icons.empty}
             </div>
             <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              No partners found
+              {t('noPartners')}
             </h3>
             <p className="text-sm text-[var(--text-muted)] max-w-md">
               {hasFilters
-                ? 'Try adjusting your search or filters to find what you\'re looking for.'
-                : 'There are no partners in the directory yet.'}
+                ? t('adjustFilters')
+                : t('noPartnersYet')}
             </p>
           </div>
         </Card>
@@ -201,7 +203,7 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
       {/* Results count */}
       {filteredPartners.length > 0 && (
         <p className="text-sm text-[var(--text-muted)] text-center">
-          Showing {filteredPartners.length} of {partners.length} partners
+          {t('showingResults', { count: filteredPartners.length, total: partners.length })}
         </p>
       )}
     </div>

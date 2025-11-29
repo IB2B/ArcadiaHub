@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -58,11 +59,12 @@ const icons = {
 };
 
 export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
+  const t = useTranslations('profile');
   const [isEditing, setIsEditing] = useState(false);
 
   const displayName = profile.company_name ||
     `${profile.contact_first_name || ''} ${profile.contact_last_name || ''}`.trim() ||
-    'Partner';
+    t('partner');
 
   const fullAddress = [
     profile.address,
@@ -73,9 +75,9 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   ].filter(Boolean).join(', ');
 
   const roleLabel = {
-    PARTNER: 'Partner',
-    COMMERCIAL: 'Harlock Commercial',
-    ADMIN: 'Administrator',
+    PARTNER: t('partner'),
+    COMMERCIAL: t('commercial'),
+    ADMIN: t('administrator'),
   }[profile.role] || profile.role;
 
   return (
@@ -83,7 +85,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
-          My Profile
+          {t('title')}
         </h1>
         <Button
           variant={isEditing ? 'primary' : 'outline'}
@@ -91,7 +93,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
           onClick={() => setIsEditing(!isEditing)}
         >
           {icons.edit}
-          <span className="ml-1.5">{isEditing ? 'Save' : 'Edit'}</span>
+          <span className="ml-1.5">{isEditing ? t('save') : t('edit')}</span>
         </Button>
       </div>
 
@@ -107,7 +109,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             />
             {isEditing && (
               <Button variant="ghost" size="sm">
-                Change Logo
+                {t('changeLogo')}
               </Button>
             )}
           </div>
@@ -152,14 +154,14 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
         {/* Contact Information */}
         <Card padding="none">
           <CardHeader
-            title="Contact Information"
+            title={t('contactInfo')}
             className="p-4 border-b border-[var(--border)]"
           />
           <CardContent className="p-4 space-y-4">
             <div className="flex items-start gap-3">
               <div className="text-[var(--text-muted)]">{icons.user}</div>
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Contact Person</p>
+                <p className="text-xs text-[var(--text-muted)]">{t('contactPerson')}</p>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {`${profile.contact_first_name || ''} ${profile.contact_last_name || ''}`.trim() || '-'}
                 </p>
@@ -169,7 +171,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             <div className="flex items-start gap-3">
               <div className="text-[var(--text-muted)]">{icons.email}</div>
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Email</p>
+                <p className="text-xs text-[var(--text-muted)]">{t('email')}</p>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {profile.email}
                 </p>
@@ -179,7 +181,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             <div className="flex items-start gap-3">
               <div className="text-[var(--text-muted)]">{icons.phone}</div>
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Phone</p>
+                <p className="text-xs text-[var(--text-muted)]">{t('phone')}</p>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {profile.phone || '-'}
                 </p>
@@ -189,7 +191,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             <div className="flex items-start gap-3">
               <div className="text-[var(--text-muted)]">{icons.globe}</div>
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Website</p>
+                <p className="text-xs text-[var(--text-muted)]">{t('website')}</p>
                 {profile.website ? (
                   <a
                     href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
@@ -210,14 +212,14 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
         {/* Address */}
         <Card padding="none">
           <CardHeader
-            title="Address"
+            title={t('address')}
             className="p-4 border-b border-[var(--border)]"
           />
           <CardContent className="p-4 space-y-4">
             <div className="flex items-start gap-3">
               <div className="text-[var(--text-muted)]">{icons.building}</div>
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Company Name</p>
+                <p className="text-xs text-[var(--text-muted)]">{t('companyName')}</p>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {profile.company_name || '-'}
                 </p>
@@ -227,7 +229,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             <div className="flex items-start gap-3">
               <div className="text-[var(--text-muted)]">{icons.location}</div>
               <div>
-                <p className="text-xs text-[var(--text-muted)]">Full Address</p>
+                <p className="text-xs text-[var(--text-muted)]">{t('fullAddress')}</p>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {fullAddress || '-'}
                 </p>
@@ -240,7 +242,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
       {/* Security */}
       <Card padding="none">
         <CardHeader
-          title="Security"
+          title={t('security')}
           className="p-4 border-b border-[var(--border)]"
         />
         <CardContent className="p-4">
@@ -248,14 +250,14 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             <div className="flex items-center gap-3">
               <div className="text-[var(--text-muted)]">{icons.key}</div>
               <div>
-                <p className="text-sm font-medium text-[var(--text)]">Password</p>
+                <p className="text-sm font-medium text-[var(--text)]">{t('password')}</p>
                 <p className="text-xs text-[var(--text-muted)]">
-                  Last changed: Unknown
+                  {t('lastChanged')}
                 </p>
               </div>
             </div>
             <Button variant="outline" size="sm">
-              Change Password
+              {t('changePassword')}
             </Button>
           </div>
         </CardContent>

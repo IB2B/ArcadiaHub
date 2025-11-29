@@ -41,7 +41,7 @@ export default function LanguageSwitcher() {
         value={locale}
         onChange={(e) => switchLocale(e.target.value)}
         disabled={isPending}
-        className="bg-transparent text-sm font-medium cursor-pointer outline-none disabled:opacity-50 text-[var(--text)] pr-1"
+        className="bg-transparent text-sm font-medium cursor-pointer outline-none disabled:opacity-50 text-[var(--text)]"
       >
         {languages.map((lang) => (
           <option key={lang.code} value={lang.code}>

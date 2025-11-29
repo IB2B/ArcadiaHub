@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { Database } from '@/types/database.types';
@@ -15,9 +16,9 @@ interface DocumentsPageClientProps {
   };
 }
 
-const categoryConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+const categoryConfig: Record<string, { key: string; color: string; icon: React.ReactNode }> = {
   CONTRACTS: {
-    label: 'Contracts',
+    key: 'contracts',
     color: 'bg-blue-100 text-blue-600',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -26,7 +27,7 @@ const categoryConfig: Record<string, { label: string; color: string; icon: React
     ),
   },
   PRESENTATIONS: {
-    label: 'Presentations',
+    key: 'presentations',
     color: 'bg-purple-100 text-purple-600',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -35,7 +36,7 @@ const categoryConfig: Record<string, { label: string; color: string; icon: React
     ),
   },
   BRAND_KIT: {
-    label: 'Brand Kit',
+    key: 'brand_kit',
     color: 'bg-pink-100 text-pink-600',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -44,7 +45,7 @@ const categoryConfig: Record<string, { label: string; color: string; icon: React
     ),
   },
   MARKETING: {
-    label: 'Marketing',
+    key: 'marketing',
     color: 'bg-green-100 text-green-600',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -53,7 +54,7 @@ const categoryConfig: Record<string, { label: string; color: string; icon: React
     ),
   },
   GUIDELINES: {
-    label: 'Guidelines',
+    key: 'guidelines',
     color: 'bg-orange-100 text-orange-600',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -108,6 +109,7 @@ function getFileTypeIcon(fileType: string | null) {
 }
 
 export default function DocumentsPageClient({ documents, stats }: DocumentsPageClientProps) {
+  const t = useTranslations('documents');
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -151,10 +153,10 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
           </div>
           <div>
             <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
-              Documents
+              {t('title')}
             </h1>
             <p className="text-sm text-[var(--text-muted)]">
-              {stats.total} document{stats.total !== 1 ? 's' : ''} available
+              {t('documentsAvailable', { count: stats.total })}
             </p>
           </div>
         </div>
@@ -170,7 +172,7 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search documents..."
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
           />
         </div>
@@ -186,10 +188,10 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
               : 'bg-[var(--card)] text-[var(--text-muted)] hover:bg-[var(--card-hover)]'
           }`}
         >
-          All ({stats.total})
+          {t('all')} ({stats.total})
         </button>
         {categories.map((cat) => {
-          const config = categoryConfig[cat] || { label: cat, color: 'bg-gray-100 text-gray-600' };
+          const config = categoryConfig[cat] || { key: cat.toLowerCase(), color: 'bg-gray-100 text-gray-600' };
           return (
             <button
               key={cat}
@@ -200,7 +202,7 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
                   : 'bg-[var(--card)] text-[var(--text-muted)] hover:bg-[var(--card-hover)]'
               }`}
             >
-              {config.label} ({stats.byCategory[cat]})
+              {t(`categories.${config.key}`)} ({stats.byCategory[cat]})
             </button>
           );
         })}
@@ -210,14 +212,14 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
       {filteredDocuments.length > 0 ? (
         <div className="space-y-6">
           {Object.entries(documentsByCategory).map(([category, docs]) => {
-            const config = categoryConfig[category] || { label: category, color: 'bg-gray-100 text-gray-600', icon: icons.document };
+            const config = categoryConfig[category] || { key: category.toLowerCase(), color: 'bg-gray-100 text-gray-600', icon: icons.document };
             return (
               <div key={category}>
                 <div className="flex items-center gap-2 mb-3">
                   <div className={`p-1.5 rounded ${config.color}`}>
                     {config.icon}
                   </div>
-                  <h2 className="font-semibold text-[var(--text)]">{config.label}</h2>
+                  <h2 className="font-semibold text-[var(--text)]">{t(`categories.${config.key}`)}</h2>
                   <Badge variant="default" size="sm">{docs.length}</Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -271,12 +273,12 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
               {icons.empty}
             </div>
             <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              No documents found
+              {t('noDocuments')}
             </h3>
             <p className="text-sm text-[var(--text-muted)] max-w-md">
               {search || selectedCategory
-                ? 'Try adjusting your search or filters to find what you\'re looking for.'
-                : 'There are no documents available yet. Check back soon!'}
+                ? t('adjustFilters')
+                : t('noDocumentsYet')}
             </p>
           </div>
         </Card>

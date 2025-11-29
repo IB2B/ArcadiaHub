@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
 
 interface AddToCalendarButtonProps {
@@ -53,6 +54,7 @@ function AddToCalendarButton({
   endDate,
   location = '',
 }: AddToCalendarButtonProps) {
+  const t = useTranslations('events');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -123,22 +125,22 @@ function AddToCalendarButton({
 
   const options = [
     {
-      label: 'Google Calendar',
+      label: t('googleCalendar'),
       icon: icons.google,
       onClick: () => window.open(generateGoogleCalendarUrl(), '_blank'),
     },
     {
-      label: 'Apple Calendar',
+      label: t('appleCalendar'),
       icon: icons.apple,
       onClick: generateICSFile,
     },
     {
-      label: 'Outlook',
+      label: t('outlook'),
       icon: icons.outlook,
       onClick: () => window.open(generateOutlookUrl(), '_blank'),
     },
     {
-      label: 'Download .ics',
+      label: t('downloadIcs'),
       icon: icons.calendar,
       onClick: generateICSFile,
     },
@@ -153,7 +155,7 @@ function AddToCalendarButton({
         className="flex items-center gap-2"
       >
         {icons.calendar}
-        <span>Add to Calendar</span>
+        <span>{t('addToCalendar')}</span>
         {icons.chevronDown}
       </Button>
 

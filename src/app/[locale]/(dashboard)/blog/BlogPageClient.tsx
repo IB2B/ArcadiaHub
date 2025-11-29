@@ -152,63 +152,72 @@ export default function BlogPageClient({ posts, stats, categories }: BlogPageCli
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredPosts.map((post) => (
             <Link key={post.id} href={`/blog/${post.slug}`}>
-              <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
+              <Card padding="none" className="h-full hover:shadow-md transition-shadow cursor-pointer group overflow-hidden flex flex-col">
                 {/* Featured Image */}
-                {post.featured_image && (
-                  <div className="aspect-video w-full overflow-hidden rounded-t-xl -mt-4 -mx-4 mb-4">
+                {post.featured_image ? (
+                  <div className="aspect-video w-full overflow-hidden flex-shrink-0">
                     <img
                       src={post.featured_image}
                       alt={post.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
-                )}
-
-                {/* Category Badge */}
-                {post.category && (
-                  <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-[var(--primary-light)] text-[var(--primary)] mb-2">
-                    {post.category}
-                  </span>
-                )}
-
-                {/* Title */}
-                <h3 className="font-semibold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors line-clamp-2 mb-2">
-                  {post.title}
-                </h3>
-
-                {/* Excerpt */}
-                {post.excerpt && (
-                  <p className="text-sm text-[var(--text-muted)] line-clamp-3 mb-4">
-                    {post.excerpt}
-                  </p>
-                )}
-
-                {/* Meta Info */}
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-[var(--border)]">
-                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                    {icons.calendar}
-                    <span>{formatDate(post.published_at)}</span>
+                ) : (
+                  <div className="aspect-video w-full bg-[var(--card-hover)] flex items-center justify-center flex-shrink-0">
+                    <div className="text-[var(--text-light)]">
+                      {icons.article}
+                    </div>
                   </div>
-                  <span className="flex items-center gap-1 text-sm font-medium text-[var(--primary)] group-hover:gap-2 transition-all">
-                    {t('readMore')}
-                    {icons.arrow}
-                  </span>
+                )}
+
+                {/* Content */}
+                <div className="p-3 sm:p-4 flex flex-col flex-1">
+                  {/* Category Badge */}
+                  {post.category && (
+                    <span className="inline-block self-start px-2 py-1 text-xs font-medium rounded-full bg-[var(--primary-light)] text-[var(--primary)] mb-2">
+                      {post.category}
+                    </span>
+                  )}
+
+                  {/* Title */}
+                  <h3 className="font-semibold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors line-clamp-2 mb-2">
+                    {post.title}
+                  </h3>
+
+                  {/* Excerpt */}
+                  {post.excerpt && (
+                    <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-3">
+                      {post.excerpt}
+                    </p>
+                  )}
+
+                  {/* Meta Info */}
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-[var(--border)]">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                      {icons.calendar}
+                      <span>{formatDate(post.published_at)}</span>
+                    </div>
+                    <span className="flex items-center gap-1 text-sm font-medium text-[var(--primary)] group-hover:gap-2 transition-all">
+                      {t('readMore')}
+                      {icons.arrow}
+                    </span>
+                  </div>
+
+                  {/* Tags */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {post.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-[var(--card-hover)] text-[var(--text-muted)]"
+                        >
+                          {icons.tag}
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                {/* Tags */}
-                {post.tags && post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {post.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-[var(--card-hover)] text-[var(--text-muted)]"
-                      >
-                        {icons.tag}
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </Card>
             </Link>
           ))}

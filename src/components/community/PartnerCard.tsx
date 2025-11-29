@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -43,9 +44,10 @@ const icons = {
 };
 
 function PartnerCard({ partner }: PartnerCardProps) {
+  const t = useTranslations('community');
   const displayName = partner.company_name ||
     `${partner.contact_first_name || ''} ${partner.contact_last_name || ''}`.trim() ||
-    'Partner';
+    t('partner');
 
   const location = [partner.city, partner.region, partner.country]
     .filter(Boolean)

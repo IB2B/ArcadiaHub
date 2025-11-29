@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EventCard from '@/components/events/EventCard';
@@ -18,11 +19,11 @@ interface EventsPageClientProps {
 }
 
 const eventTypes = [
-  { value: '', label: 'All Types' },
-  { value: 'TRAINING', label: 'Training' },
-  { value: 'WORKSHOP', label: 'Workshop' },
-  { value: 'WEBINAR', label: 'Webinar' },
-  { value: 'PHYSICAL', label: 'In Person' },
+  { value: '', key: 'allTypes' },
+  { value: 'TRAINING', key: 'training' },
+  { value: 'WORKSHOP', key: 'workshop' },
+  { value: 'WEBINAR', key: 'webinar' },
+  { value: 'PHYSICAL', key: 'physical' },
 ];
 
 const icons = {
@@ -64,6 +65,7 @@ const icons = {
 };
 
 export default function EventsPageClient({ events, stats }: EventsPageClientProps) {
+  const t = useTranslations('events');
   const [search, setSearch] = useState('');
   const [eventType, setEventType] = useState('');
   const [showUpcoming, setShowUpcoming] = useState(true);
@@ -95,19 +97,19 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
 
   const statCards = [
     {
-      label: 'Total Events',
+      label: t('totalEvents'),
       value: stats.total,
       icon: icons.calendar,
       color: 'bg-[var(--primary-light)] text-[var(--primary)]',
     },
     {
-      label: 'Upcoming',
+      label: t('upcoming'),
       value: stats.upcoming,
       icon: icons.upcoming,
       color: 'bg-[var(--success-light)] text-[var(--success)]',
     },
     {
-      label: 'This Month',
+      label: t('thisMonth'),
       value: stats.thisMonth,
       icon: icons.month,
       color: 'bg-[var(--info-light)] text-[var(--info)]',
@@ -119,10 +121,10 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
       {/* Page Header */}
       <div className="flex flex-col gap-2 sm:gap-3">
         <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
-          Events Calendar
+          {t('title')}
         </h1>
         <p className="text-sm text-[var(--text-muted)]">
-          Browse and register for upcoming events
+          {t('subtitle')}
         </p>
       </div>
 
@@ -158,7 +160,7 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search events..."
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
           />
         </div>
@@ -171,7 +173,7 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
         >
           {eventTypes.map((type) => (
             <option key={type.value} value={type.value}>
-              {type.label}
+              {type.key === 'allTypes' ? t('allTypes') : t(`types.${type.key}`)}
             </option>
           ))}
         </select>
@@ -182,7 +184,7 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
           size="md"
           onClick={() => setShowUpcoming(!showUpcoming)}
         >
-          {showUpcoming ? 'Upcoming Only' : 'All Events'}
+          {showUpcoming ? t('upcomingOnly') : t('allEvents')}
         </Button>
       </div>
 
@@ -200,12 +202,12 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
               {icons.empty}
             </div>
             <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              No events found
+              {t('noEvents')}
             </h3>
             <p className="text-sm text-[var(--text-muted)] max-w-md">
               {search || eventType || showUpcoming
-                ? 'Try adjusting your filters to find what you\'re looking for.'
-                : 'There are no events scheduled at the moment. Check back soon!'}
+                ? t('adjustFilters')
+                : t('noEventsHint')}
             </p>
           </div>
         </Card>
@@ -214,7 +216,7 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
       {/* Results count */}
       {filteredEvents.length > 0 && (
         <p className="text-sm text-[var(--text-muted)] text-center">
-          Showing {filteredEvents.length} of {events.length} events
+          {t('showingResults', { count: filteredEvents.length, total: events.length })}
         </p>
       )}
     </div>

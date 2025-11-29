@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import AddToCalendarButton from '@/components/events/AddToCalendarButton';
@@ -11,11 +12,11 @@ interface EventDetailClientProps {
   event: Event;
 }
 
-const eventTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info'; label: string }> = {
-  TRAINING: { variant: 'primary', label: 'Training' },
-  WORKSHOP: { variant: 'success', label: 'Workshop' },
-  WEBINAR: { variant: 'info', label: 'Webinar' },
-  PHYSICAL: { variant: 'warning', label: 'In Person' },
+const eventTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info'; key: string }> = {
+  TRAINING: { variant: 'primary', key: 'training' },
+  WORKSHOP: { variant: 'success', key: 'workshop' },
+  WEBINAR: { variant: 'info', key: 'webinar' },
+  PHYSICAL: { variant: 'warning', key: 'physical' },
 };
 
 const icons = {
@@ -106,6 +107,7 @@ interface Attachment {
 }
 
 export default function EventDetailClient({ event }: EventDetailClientProps) {
+  const t = useTranslations('events');
   const typeConfig = eventTypeConfig[event.event_type] || eventTypeConfig.TRAINING;
   const isPast = isEventPast(event.start_datetime);
   const attachments = (event.attachments as Attachment[] | null) || [];
@@ -120,11 +122,11 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <Badge variant={typeConfig.variant} size="md">
-                  {typeConfig.label}
+                  {t(`types.${typeConfig.key}`)}
                 </Badge>
                 {isPast && (
                   <Badge variant="default" size="md">
-                    Past Event
+                    {t('pastEvent')}
                   </Badge>
                 )}
               </div>
@@ -149,7 +151,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
             <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--card-hover)]">
               <div className="text-[var(--primary)]">{icons.calendar}</div>
               <div>
-                <p className="text-[var(--text-muted)] text-xs">Date</p>
+                <p className="text-[var(--text-muted)] text-xs">{t('date')}</p>
                 <p className="font-medium text-[var(--text)]">
                   {formatEventDate(event.start_datetime)}
                 </p>
@@ -160,7 +162,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
             <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--card-hover)]">
               <div className="text-[var(--primary)]">{icons.clock}</div>
               <div>
-                <p className="text-[var(--text-muted)] text-xs">Time</p>
+                <p className="text-[var(--text-muted)] text-xs">{t('time')}</p>
                 <p className="font-medium text-[var(--text)]">
                   {formatEventTime(event.start_datetime, event.end_datetime)}
                 </p>
@@ -172,7 +174,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--card-hover)]">
                 <div className="text-[var(--primary)]">{icons.location}</div>
                 <div>
-                  <p className="text-[var(--text-muted)] text-xs">Location</p>
+                  <p className="text-[var(--text-muted)] text-xs">{t('location')}</p>
                   <p className="font-medium text-[var(--text)]">
                     {event.location}
                   </p>
@@ -185,14 +187,14 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--card-hover)]">
                 <div className="text-[var(--primary)]">{icons.link}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[var(--text-muted)] text-xs">Meeting Link</p>
+                  <p className="text-[var(--text-muted)] text-xs">{t('meetingLink')}</p>
                   <a
                     href={event.meeting_link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium text-[var(--primary)] hover:underline truncate block"
                   >
-                    Join Meeting
+                    {t('joinMeeting')}
                   </a>
                 </div>
               </div>
@@ -207,7 +209,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         <div className="lg:col-span-2">
           <Card padding="none">
             <CardHeader
-              title="Description"
+              title={t('description')}
               className="p-4 border-b border-[var(--border)]"
             />
             <CardContent className="p-4">
@@ -217,7 +219,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 </div>
               ) : (
                 <p className="text-sm text-[var(--text-muted)]">
-                  No description provided.
+                  {t('noDescription')}
                 </p>
               )}
             </CardContent>
@@ -230,7 +232,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           {event.recording_url && (
             <Card padding="none">
               <CardHeader
-                title="Recording"
+                title={t('recording')}
                 className="p-4 border-b border-[var(--border)]"
               />
               <CardContent className="p-4">
@@ -241,7 +243,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                   className="flex items-center gap-3 p-3 rounded-lg bg-[var(--primary-light)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white transition-colors"
                 >
                   <div>{icons.play}</div>
-                  <span className="font-medium">Watch Recording</span>
+                  <span className="font-medium">{t('watchRecording')}</span>
                   <div className="ml-auto">{icons.external}</div>
                 </a>
               </CardContent>
@@ -251,8 +253,8 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           {/* Attachments */}
           <Card padding="none">
             <CardHeader
-              title="Attachments"
-              subtitle={`${attachments.length} file${attachments.length !== 1 ? 's' : ''}`}
+              title={t('attachments')}
+              subtitle={t('files', { count: attachments.length })}
               className="p-4 border-b border-[var(--border)]"
             />
             <CardContent className="p-4">
@@ -282,7 +284,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 </div>
               ) : (
                 <p className="text-sm text-[var(--text-muted)] text-center py-4">
-                  No attachments
+                  {t('noAttachments')}
                 </p>
               )}
             </CardContent>

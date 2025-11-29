@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import CaseTimeline from '@/components/cases/CaseTimeline';
@@ -18,12 +19,12 @@ interface CaseDetailClientProps {
   caseData: CaseWithDetails;
 }
 
-const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; label: string }> = {
-  PENDING: { variant: 'warning', label: 'Pending' },
-  IN_PROGRESS: { variant: 'info', label: 'In Progress' },
-  SUSPENDED: { variant: 'default', label: 'Suspended' },
-  COMPLETED: { variant: 'success', label: 'Completed' },
-  CANCELLED: { variant: 'error', label: 'Cancelled' },
+const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; key: string }> = {
+  PENDING: { variant: 'warning', key: 'pending' },
+  IN_PROGRESS: { variant: 'info', key: 'in_progress' },
+  SUSPENDED: { variant: 'default', key: 'suspended' },
+  COMPLETED: { variant: 'success', key: 'completed' },
+  CANCELLED: { variant: 'error', key: 'cancelled' },
 };
 
 const icons = {
@@ -75,6 +76,7 @@ function getFileIcon(fileType: string | null) {
 }
 
 export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
+  const t = useTranslations('cases');
   const status = caseData.status || 'PENDING';
   const config = statusConfig[status] || statusConfig.PENDING;
   const documents = caseData.documents || [];
@@ -97,7 +99,7 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
                 {caseData.case_code}
               </h1>
               <Badge variant={config.variant} size="md" dot>
-                {config.label}
+                {t(`statuses.${config.key}`)}
               </Badge>
             </div>
 
@@ -111,14 +113,14 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
               {/* Opened Date */}
               <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                 {icons.calendar}
-                <span>Opened: {formatDate(caseData.opened_at)}</span>
+                <span>{t('opened')}: {formatDate(caseData.opened_at)}</span>
               </div>
 
               {/* Closed Date */}
               {caseData.closed_at && (
                 <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                   {icons.calendar}
-                  <span>Closed: {formatDate(caseData.closed_at)}</span>
+                  <span>{t('closed')}: {formatDate(caseData.closed_at)}</span>
                 </div>
               )}
             </div>
@@ -126,7 +128,7 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
             {/* Notes */}
             {caseData.notes && (
               <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                <h3 className="text-sm font-medium text-[var(--text)] mb-1">Notes</h3>
+                <h3 className="text-sm font-medium text-[var(--text)] mb-1">{t('notes')}</h3>
                 <p className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">
                   {caseData.notes}
                 </p>
@@ -142,8 +144,8 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
         <div className="lg:col-span-1">
           <Card padding="none">
             <CardHeader
-              title="Documents"
-              subtitle={`${documents.length} file${documents.length !== 1 ? 's' : ''}`}
+              title={t('documents')}
+              subtitle={t('fileCount', { count: documents.length })}
               className="p-4 border-b border-[var(--border)]"
             />
             <CardContent className="p-4">
@@ -182,7 +184,7 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
                     {icons.empty}
                   </div>
                   <p className="text-sm text-[var(--text-muted)]">
-                    No documents attached
+                    {t('noDocuments')}
                   </p>
                 </div>
               )}
@@ -194,8 +196,8 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
         <div className="lg:col-span-2">
           <Card padding="none">
             <CardHeader
-              title="Activity Timeline"
-              subtitle="Case history and updates"
+              title={t('activityTimeline')}
+              subtitle={t('caseHistoryUpdates')}
               className="p-4 border-b border-[var(--border)]"
             />
             <CardContent className="p-4">

@@ -1,11 +1,12 @@
 'use client';
 
-import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { memo, useState, useCallback, useRef, useEffect, useMemo, useTransition } from 'react';
 import { Link, usePathname } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { logout } from '@/lib/auth/actions';
 
 const icons = {
   search: (
@@ -57,11 +58,18 @@ interface HeaderProps {
 function Header({ user, notifications = [] }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [isLoggingOut, startLogoutTransition] = useTransition();
   const notificationRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const t = useTranslations('nav');
   const tCommon = useTranslations('common');
+
+  const handleLogout = useCallback(() => {
+    startLogoutTransition(async () => {
+      await logout();
+    });
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -307,8 +315,12 @@ function Header({ user, notifications = [] }: HeaderProps) {
                   </Link>
                 </div>
                 <div className="border-t border-[var(--border)] py-1">
-                  <button className="block w-full px-4 py-2 text-left text-sm text-[var(--error)] hover:bg-[var(--card-hover)]">
-                    Sign out
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="block w-full px-4 py-2 text-left text-sm text-[var(--error)] hover:bg-[var(--card-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoggingOut ? 'Signing out...' : t('signOut')}
                   </button>
                 </div>
               </div>

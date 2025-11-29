@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -12,12 +13,12 @@ interface CaseCardProps {
   caseData: Case;
 }
 
-const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; label: string }> = {
-  PENDING: { variant: 'warning', label: 'Pending' },
-  IN_PROGRESS: { variant: 'info', label: 'In Progress' },
-  SUSPENDED: { variant: 'default', label: 'Suspended' },
-  COMPLETED: { variant: 'success', label: 'Completed' },
-  CANCELLED: { variant: 'error', label: 'Cancelled' },
+const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; key: string }> = {
+  PENDING: { variant: 'warning', key: 'pending' },
+  IN_PROGRESS: { variant: 'info', key: 'in_progress' },
+  SUSPENDED: { variant: 'default', key: 'suspended' },
+  COMPLETED: { variant: 'success', key: 'completed' },
+  CANCELLED: { variant: 'error', key: 'cancelled' },
 };
 
 const icons = {
@@ -54,6 +55,7 @@ function formatDate(dateString: string | null): string {
 }
 
 function CaseCard({ caseData }: CaseCardProps) {
+  const t = useTranslations('cases');
   const status = caseData.status || 'PENDING';
   const config = statusConfig[status] || statusConfig.PENDING;
 
@@ -80,7 +82,7 @@ function CaseCard({ caseData }: CaseCardProps) {
                 </div>
               </div>
               <Badge variant={config.variant} size="sm" dot>
-                {config.label}
+                {t(`statuses.${config.key}`)}
               </Badge>
             </div>
 
@@ -88,11 +90,11 @@ function CaseCard({ caseData }: CaseCardProps) {
             <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-3 text-xs sm:text-sm text-[var(--text-muted)]">
               <div className="flex items-center gap-1">
                 {icons.calendar}
-                <span>Opened {formatDate(caseData.opened_at)}</span>
+                <span>{t('opened')}: {formatDate(caseData.opened_at)}</span>
               </div>
               {caseData.closed_at && (
                 <div className="flex items-center gap-1">
-                  <span>Closed {formatDate(caseData.closed_at)}</span>
+                  <span>{t('closed')}: {formatDate(caseData.closed_at)}</span>
                 </div>
               )}
             </div>
