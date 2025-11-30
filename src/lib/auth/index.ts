@@ -5,5 +5,8 @@ export {
   getSession,
   getUser,
   getCurrentProfile,
+  forgotPassword,
+  resetPassword,
+  updatePassword,
   type AuthResult,
 } from './actions';

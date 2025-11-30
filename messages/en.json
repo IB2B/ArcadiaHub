@@ -37,18 +37,32 @@
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
+    "newPassword": "New Password",
     "forgotPassword": "Forgot Password?",
     "resetPassword": "Reset Password",
     "loginTitle": "Welcome Back",
     "loginSubtitle": "Sign in to your partner account",
     "registerTitle": "Create Account",
     "registerSubtitle": "Join the Harlock partner network",
+    "forgotPasswordSubtitle": "Enter your email to receive a password reset link",
+    "resetPasswordSubtitle": "Enter your new password",
     "invalidCredentials": "Invalid email or password",
     "passwordMismatch": "Passwords do not match",
+    "passwordHint": "At least 8 characters",
     "rememberMe": "Remember me",
     "signIn": "Sign in",
     "noAccount": "Don't have an account?",
-    "contactUs": "Contact us to become a partner"
+    "contactUs": "Contact us to become a partner",
+    "sendResetLink": "Send Reset Link",
+    "checkYourEmail": "Check Your Email",
+    "resetLinkSent": "We've sent a password reset link to your email address. Please check your inbox.",
+    "backToLogin": "Back to Login",
+    "invalidResetLink": "Invalid Reset Link",
+    "invalidResetLinkDescription": "This password reset link is invalid or has expired. Please request a new one.",
+    "requestNewLink": "Request New Link",
+    "passwordResetSuccess": "Password Reset Successfully",
+    "redirectingToLogin": "Redirecting you to login...",
+    "sessionExpired": "Your session has expired. Please log in again."
   },
   "nav": {
     "home": "Home",
@@ -96,9 +110,10 @@
       "case": "Case Update",
       "content": "New Content",
       "document": "Document",
-      "announcement": "Announcement"
+      "announcement": "Announcement",
+      "blog": "Blog Post"
     },
-    "yesterdayAt": "Yesterday at {time}"
+    "yesterdayAt": "Yesterday at [TIME]"
   },
   "cases": {
     "title": "My Cases",
@@ -186,6 +201,10 @@
     "totalEvents": "Total Events",
     "upcomingEvents": "Upcoming Events",
     "pastEvents": "Past Events",
+    "listView": "List View",
+    "calendarView": "Calendar View",
+    "today": "Today",
+    "noEventsOnDay": "No events on this day",
     "types": {
       "training": "Training",
       "workshop": "Workshop",
@@ -242,6 +261,9 @@
     },
     "preview": "Preview",
     "download": "Download",
+    "openInNewTab": "Open in new tab",
+    "previewNotAvailable": "Preview not available",
+    "previewNotAvailableHint": "This file type cannot be previewed in the browser. Click the button below to download the file.",
     "totalDocuments": "Total Documents",
     "noDocuments": "No documents found",
     "noDocumentsHint": "There are no documents available in this category.",

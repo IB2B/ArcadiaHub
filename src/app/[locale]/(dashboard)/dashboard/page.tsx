@@ -67,11 +67,13 @@ export default async function DashboardPage() {
 
   const userName = profile?.contact_first_name || profile?.company_name || 'Partner';
 
-  // Convert activity feed items for the TimelineFeed component
-  const feedItems = dashboardData.activityFeed.map((item) => ({
-    ...item,
-    timestamp: new Date(item.timestamp),
-  }));
+  // Convert activity feed items for the TimelineFeed component and ensure proper sorting
+  const feedItems = dashboardData.activityFeed
+    .map((item) => ({
+      ...item,
+      timestamp: new Date(item.timestamp),
+    }))
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   return (
     <div className="space-y-4 sm:space-y-6">

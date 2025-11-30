@@ -110,3 +110,81 @@ export async function getCurrentProfile() {
 
   return profile;
 }
+
+export async function forgotPassword(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient();
+  const email = formData.get('email') as string;
+
+  if (!email) {
+    return { success: false, error: 'Email is required' };
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password`,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function resetPassword(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient();
+  const password = formData.get('password') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
+
+  if (!password || !confirmPassword) {
+    return { success: false, error: 'Password is required' };
+  }
+
+  if (password !== confirmPassword) {
+    return { success: false, error: 'Passwords do not match' };
+  }
+
+  if (password.length < 8) {
+    return { success: false, error: 'Password must be at least 8 characters' };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function updatePassword(currentPassword: string, newPassword: string): Promise<AuthResult> {
+  const supabase = await createClient();
+
+  // First verify current password by re-authenticating
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) {
+    return { success: false, error: 'User not found' };
+  }
+
+  // Try to sign in with current password to verify
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  });
+
+  if (signInError) {
+    return { success: false, error: 'Current password is incorrect' };
+  }
+
+  // Update to new password
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}

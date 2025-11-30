@@ -37,18 +37,32 @@
     "email": "Email",
     "password": "Mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
+    "newPassword": "Nouveau mot de passe",
     "forgotPassword": "Mot de passe oublie?",
     "resetPassword": "Reinitialiser le mot de passe",
     "loginTitle": "Bon Retour",
     "loginSubtitle": "Connectez-vous a votre compte partenaire",
     "registerTitle": "Creer un Compte",
     "registerSubtitle": "Rejoignez le reseau partenaire Harlock",
+    "forgotPasswordSubtitle": "Entrez votre email pour recevoir un lien de reinitialisation",
+    "resetPasswordSubtitle": "Entrez votre nouveau mot de passe",
     "invalidCredentials": "Email ou mot de passe invalide",
     "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordHint": "Au moins 8 caracteres",
     "rememberMe": "Se souvenir de moi",
     "signIn": "Se connecter",
     "noAccount": "Vous n'avez pas de compte?",
-    "contactUs": "Contactez-nous pour devenir partenaire"
+    "contactUs": "Contactez-nous pour devenir partenaire",
+    "sendResetLink": "Envoyer le lien",
+    "checkYourEmail": "Verifiez votre email",
+    "resetLinkSent": "Nous avons envoye un lien de reinitialisation a votre adresse email. Verifiez votre boite de reception.",
+    "backToLogin": "Retour a la connexion",
+    "invalidResetLink": "Lien invalide",
+    "invalidResetLinkDescription": "Ce lien de reinitialisation est invalide ou a expire. Veuillez en demander un nouveau.",
+    "requestNewLink": "Demander un nouveau lien",
+    "passwordResetSuccess": "Mot de passe reinitialise",
+    "redirectingToLogin": "Redirection vers la connexion...",
+    "sessionExpired": "Votre session a expire. Veuillez vous reconnecter."
   },
   "nav": {
     "home": "Accueil",
@@ -96,9 +110,10 @@
       "case": "Mise a jour Dossier",
       "content": "Nouveau Contenu",
       "document": "Document",
-      "announcement": "Annonce"
+      "announcement": "Annonce",
+      "blog": "Article de Blog"
     },
-    "yesterdayAt": "Hier a {time}"
+    "yesterdayAt": "Hier a [TIME]"
   },
   "cases": {
     "title": "Mes Dossiers",
@@ -186,6 +201,10 @@
     "totalEvents": "Total Evenements",
     "upcomingEvents": "Evenements a Venir",
     "pastEvents": "Evenements Passes",
+    "listView": "Vue Liste",
+    "calendarView": "Vue Calendrier",
+    "today": "Aujourd'hui",
+    "noEventsOnDay": "Aucun evenement ce jour",
     "types": {
       "training": "Formation",
       "workshop": "Atelier",
@@ -242,6 +261,9 @@
     },
     "preview": "Apercu",
     "download": "Telecharger",
+    "openInNewTab": "Ouvrir dans un nouvel onglet",
+    "previewNotAvailable": "Apercu non disponible",
+    "previewNotAvailableHint": "Ce type de fichier ne peut pas etre previsualise dans le navigateur. Cliquez sur le bouton ci-dessous pour telecharger le fichier.",
     "totalDocuments": "Total Documents",
     "noDocuments": "Aucun document trouve",
     "noDocumentsHint": "Il n'y a pas de documents disponibles dans cette categorie.",

@@ -3,6 +3,15 @@
 import { createClient } from '@/lib/database/server';
 import { Database, Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
+import {
+  notifyEventPublished,
+  notifyCaseCreated,
+  notifyCaseStatusChanged,
+  notifyAdminsCaseCreated,
+  notifyDocumentPublished,
+  notifyAcademyContentPublished,
+  notifyBlogPostPublished,
+} from '@/lib/services/notificationService';
 
 // ============================================================================
 // TYPES
@@ -338,6 +347,23 @@ export async function createCase(data: TablesInsert<'cases'>): Promise<{ success
     notes: 'Case created',
   });
 
+  // Notify the partner about their new case
+  if (result.partner_id) {
+    notifyCaseCreated({
+      id: result.id,
+      case_code: result.case_code,
+      partner_id: result.partner_id,
+      client_name: result.client_name,
+    }).catch(console.error);
+  }
+
+  // Notify admins about the new case
+  notifyAdminsCaseCreated({
+    id: result.id,
+    case_code: result.case_code,
+    client_name: result.client_name,
+  }).catch(console.error);
+
   revalidatePath('/admin/cases');
   return { success: true, data: result };
 }
@@ -346,7 +372,7 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
   const supabase = await createClient();
 
   // Get current case to track status change
-  const { data: currentCase } = await supabase.from('cases').select('status').eq('id', id).single();
+  const { data: currentCase } = await supabase.from('cases').select('status, case_code, partner_id').eq('id', id).single();
 
   const { error } = await supabase
     .from('cases')
@@ -357,7 +383,7 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
     return { success: false, error: error.message };
   }
 
-  // Add history entry if status changed
+  // Add history entry and notify partner if status changed
   if (data.status && currentCase?.status !== data.status) {
     await supabase.from('case_history').insert({
       case_id: id,
@@ -365,6 +391,17 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
       new_status: data.status,
       notes: historyNote || 'Status updated',
     });
+
+    // Notify the partner about the status change
+    if (currentCase?.partner_id && currentCase.status) {
+      notifyCaseStatusChanged({
+        id,
+        case_code: currentCase.case_code,
+        partner_id: currentCase.partner_id,
+        old_status: currentCase.status,
+        new_status: data.status,
+      }).catch(console.error);
+    }
   }
 
   revalidatePath('/admin/cases');
@@ -455,6 +492,16 @@ export async function createEvent(data: TablesInsert<'events'>): Promise<{ succe
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Notify all partners about the new event
+  if (result) {
+    notifyEventPublished({
+      id: result.id,
+      title: result.title,
+      event_type: result.event_type,
+      start_datetime: result.start_datetime,
+    }).catch(console.error); // Non-blocking
   }
 
   revalidatePath('/admin/events');
@@ -569,6 +616,15 @@ export async function createAcademyContent(data: TablesInsert<'academy_content'>
     return { success: false, error: error.message };
   }
 
+  // Notify partners if academy content is published
+  if (result.is_published) {
+    notifyAcademyContentPublished({
+      id: result.id,
+      title: result.title,
+      content_type: result.content_type,
+    }).catch(console.error);
+  }
+
   revalidatePath('/admin/academy');
   revalidatePath('/academy');
   return { success: true, data: result };
@@ -576,6 +632,20 @@ export async function createAcademyContent(data: TablesInsert<'academy_content'>
 
 export async function updateAcademyContent(id: string, data: TablesUpdate<'academy_content'>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
+
+  // Check if content is being published for the first time
+  if (data.is_published === true) {
+    const { data: current } = await supabase.from('academy_content').select('is_published, title, content_type').eq('id', id).single();
+
+    // Notify partners when content is newly published
+    if (current?.is_published === false) {
+      notifyAcademyContentPublished({
+        id,
+        title: data.title || current.title,
+        content_type: data.content_type || current.content_type,
+      }).catch(console.error);
+    }
+  }
 
   const { error } = await supabase
     .from('academy_content')
@@ -674,6 +744,15 @@ export async function createDocument(data: TablesInsert<'documents'>): Promise<{
     return { success: false, error: error.message };
   }
 
+  // Notify partners if document is published
+  if (result.is_published) {
+    notifyDocumentPublished({
+      id: result.id,
+      title: result.title,
+      category: result.category,
+    }).catch(console.error);
+  }
+
   revalidatePath('/admin/documents');
   revalidatePath('/documents');
   return { success: true, data: result };
@@ -681,6 +760,22 @@ export async function createDocument(data: TablesInsert<'documents'>): Promise<{
 
 export async function updateDocument(id: string, data: TablesUpdate<'documents'>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
+
+  // Check if document is being published for the first time
+  let wasPublished = false;
+  if (data.is_published === true) {
+    const { data: current } = await supabase.from('documents').select('is_published, title, category').eq('id', id).single();
+    wasPublished = current?.is_published === false;
+
+    // Notify partners when document is newly published
+    if (wasPublished && current) {
+      notifyDocumentPublished({
+        id,
+        title: data.title || current.title,
+        category: data.category || current.category,
+      }).catch(console.error);
+    }
+  }
 
   const { error } = await supabase
     .from('documents')
@@ -776,6 +871,14 @@ export async function createBlogPost(data: TablesInsert<'blog_posts'>): Promise<
     return { success: false, error: error.message };
   }
 
+  // Notify partners if blog post is published
+  if (result.is_published) {
+    notifyBlogPostPublished({
+      slug: result.slug,
+      title: result.title,
+    }).catch(console.error);
+  }
+
   revalidatePath('/admin/blog');
   revalidatePath('/blog');
   return { success: true, data: result };
@@ -783,6 +886,19 @@ export async function createBlogPost(data: TablesInsert<'blog_posts'>): Promise<
 
 export async function updateBlogPost(id: string, data: TablesUpdate<'blog_posts'>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
+
+  // Check if blog post is being published for the first time
+  if (data.is_published === true) {
+    const { data: current } = await supabase.from('blog_posts').select('is_published, slug, title').eq('id', id).single();
+
+    // Notify partners when blog post is newly published
+    if (current?.is_published === false) {
+      notifyBlogPostPublished({
+        slug: data.slug || current.slug,
+        title: data.title || current.title,
+      }).catch(console.error);
+    }
+  }
 
   const { error } = await supabase
     .from('blog_posts')

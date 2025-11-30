@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { createDocument, updateDocument } from '@/lib/data/admin';
+import { uploadFileFromFormData } from '@/lib/services/storage';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import Toggle from '@/components/ui/Toggle';
+import FileUpload from '@/components/ui/FileUpload';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 
 type Document = Tables<'documents'>;
@@ -147,6 +149,35 @@ export default function DocumentForm({ documentData }: DocumentFormProps) {
     label: tDocs(`categories.${cat}`),
   }));
 
+  // File upload handler
+  const handleFileUpload = useCallback(async (formData: FormData) => {
+    const result = await uploadFileFromFormData(formData, 'documents', 'file');
+    return result;
+  }, []);
+
+  // Handle file change from FileUpload component
+  const handleFileChange = useCallback((url: string | null, file?: File) => {
+    if (url) {
+      setFormData((prev) => ({
+        ...prev,
+        file_url: url,
+        file_type: file?.name.split('.').pop()?.toUpperCase() || prev.file_type,
+        file_size: file?.size?.toString() || prev.file_size,
+      }));
+      if (errors.file_url) {
+        setErrors((prev) => ({ ...prev, file_url: undefined }));
+      }
+    } else if (!url && !file) {
+      // Cleared
+      setFormData((prev) => ({
+        ...prev,
+        file_url: '',
+        file_type: '',
+        file_size: '',
+      }));
+    }
+  }, [errors.file_url]);
+
   return (
     <form onSubmit={handleSubmit}>
       {/* Message */}
@@ -196,16 +227,29 @@ export default function DocumentForm({ documentData }: DocumentFormProps) {
         <Card>
           <CardHeader title="File Information" />
           <CardContent className="space-y-4">
-            <Input
-              label={tDocs('fileUrl')}
-              type="url"
+            <FileUpload
+              label="Document File"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip"
+              maxSize={50 * 1024 * 1024}
               value={formData.file_url}
-              onChange={(e) => updateField('file_url', e.target.value)}
+              onChange={handleFileChange}
+              uploadAction={handleFileUpload}
               error={errors.file_url}
-              required
-              placeholder="https://..."
-              hint="URL to the document file"
+              hint="Upload PDF, Word, Excel, PowerPoint, or ZIP files"
             />
+
+            {/* Manual URL option */}
+            <div className="pt-2 border-t border-[var(--border)]">
+              <p className="text-xs text-[var(--text-muted)] mb-2">Or enter URL manually:</p>
+              <Input
+                label={tDocs('fileUrl')}
+                type="url"
+                value={formData.file_url}
+                onChange={(e) => updateField('file_url', e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label={tDocs('fileType')}

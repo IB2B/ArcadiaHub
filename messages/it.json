@@ -37,18 +37,32 @@
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Conferma Password",
+    "newPassword": "Nuova Password",
     "forgotPassword": "Password dimenticata?",
     "resetPassword": "Reimposta Password",
     "loginTitle": "Bentornato",
     "loginSubtitle": "Accedi al tuo account partner",
     "registerTitle": "Crea Account",
     "registerSubtitle": "Unisciti alla rete partner Harlock",
+    "forgotPasswordSubtitle": "Inserisci la tua email per ricevere un link di reimpostazione",
+    "resetPasswordSubtitle": "Inserisci la tua nuova password",
     "invalidCredentials": "Email o password non valida",
     "passwordMismatch": "Le password non corrispondono",
+    "passwordHint": "Almeno 8 caratteri",
     "rememberMe": "Ricordami",
     "signIn": "Accedi",
     "noAccount": "Non hai un account?",
-    "contactUs": "Contattaci per diventare partner"
+    "contactUs": "Contattaci per diventare partner",
+    "sendResetLink": "Invia Link",
+    "checkYourEmail": "Controlla la tua email",
+    "resetLinkSent": "Abbiamo inviato un link di reimpostazione al tuo indirizzo email. Controlla la tua casella di posta.",
+    "backToLogin": "Torna al login",
+    "invalidResetLink": "Link non valido",
+    "invalidResetLinkDescription": "Questo link di reimpostazione non e valido o e scaduto. Richiedine uno nuovo.",
+    "requestNewLink": "Richiedi nuovo link",
+    "passwordResetSuccess": "Password reimpostata",
+    "redirectingToLogin": "Reindirizzamento al login...",
+    "sessionExpired": "La tua sessione e scaduta. Accedi di nuovo."
   },
   "nav": {
     "home": "Home",
@@ -96,9 +110,10 @@
       "case": "Aggiornamento Pratica",
       "content": "Nuovo Contenuto",
       "document": "Documento",
-      "announcement": "Annuncio"
+      "announcement": "Annuncio",
+      "blog": "Articolo Blog"
     },
-    "yesterdayAt": "Ieri alle {time}"
+    "yesterdayAt": "Ieri alle [TIME]"
   },
   "cases": {
     "title": "Le Mie Pratiche",
@@ -186,6 +201,10 @@
     "totalEvents": "Eventi Totali",
     "upcomingEvents": "Prossimi Eventi",
     "pastEvents": "Eventi Passati",
+    "listView": "Vista Lista",
+    "calendarView": "Vista Calendario",
+    "today": "Oggi",
+    "noEventsOnDay": "Nessun evento in questo giorno",
     "types": {
       "training": "Formazione",
       "workshop": "Workshop",
@@ -242,6 +261,9 @@
     },
     "preview": "Anteprima",
     "download": "Scarica",
+    "openInNewTab": "Apri in una nuova scheda",
+    "previewNotAvailable": "Anteprima non disponibile",
+    "previewNotAvailableHint": "Questo tipo di file non puo essere visualizzato in anteprima nel browser. Clicca il pulsante qui sotto per scaricare il file.",
     "totalDocuments": "Documenti Totali",
     "noDocuments": "Nessun documento trovato",
     "noDocumentsHint": "Non ci sono documenti disponibili in questa categoria.",

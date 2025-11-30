@@ -5,9 +5,11 @@ import { useTranslations } from 'next-intl';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EventCard from '@/components/events/EventCard';
+import CalendarView from '@/components/events/CalendarView';
 import { Database } from '@/types/database.types';
 
 type Event = Database['public']['Tables']['events']['Row'];
+type ViewMode = 'list' | 'calendar';
 
 interface EventsPageClientProps {
   events: Event[];
@@ -69,6 +71,7 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
   const [search, setSearch] = useState('');
   const [eventType, setEventType] = useState('');
   const [showUpcoming, setShowUpcoming] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -186,15 +189,41 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
         >
           {showUpcoming ? t('upcomingOnly') : t('allEvents')}
         </Button>
+
+        {/* View Mode Toggle */}
+        <div className="flex rounded-lg border border-[var(--border)] overflow-hidden">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 ${viewMode === 'list' ? 'bg-[var(--primary)] text-white' : 'bg-[var(--card)] text-[var(--text-muted)] hover:bg-[var(--card-hover)]'}`}
+            title={t('listView')}
+          >
+            {icons.list}
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`p-2 ${viewMode === 'calendar' ? 'bg-[var(--primary)] text-white' : 'bg-[var(--card)] text-[var(--text-muted)] hover:bg-[var(--card-hover)]'}`}
+            title={t('calendarView')}
+          >
+            {icons.grid}
+          </button>
+        </div>
       </div>
 
-      {/* Events List */}
-      {filteredEvents.length > 0 ? (
-        <div className="space-y-3 sm:space-y-4">
-          {filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
+      {/* Events View */}
+      {viewMode === 'calendar' ? (
+        <CalendarView events={filteredEvents} />
+      ) : filteredEvents.length > 0 ? (
+        <>
+          <div className="space-y-3 sm:space-y-4">
+            {filteredEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+          {/* Results count */}
+          <p className="text-sm text-[var(--text-muted)] text-center">
+            {t('showingResults', { count: filteredEvents.length, total: events.length })}
+          </p>
+        </>
       ) : (
         <Card>
           <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
@@ -211,13 +240,6 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
             </p>
           </div>
         </Card>
-      )}
-
-      {/* Results count */}
-      {filteredEvents.length > 0 && (
-        <p className="text-sm text-[var(--text-muted)] text-center">
-          {t('showingResults', { count: filteredEvents.length, total: events.length })}
-        </p>
       )}
     </div>
   );

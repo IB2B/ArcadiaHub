@@ -77,9 +77,14 @@ const menuIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   ),
-  close: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  admin: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+    </svg>
+  ),
+  profile: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
     </svg>
   ),
 };
@@ -110,14 +115,31 @@ const moreMenuItemsConfig: MenuItemConfig[] = [
   { key: 'academy', translationKey: 'academy', href: '/academy', icon: 'academy' },
   { key: 'documents', translationKey: 'documents', href: '/documents', icon: 'documents' },
   { key: 'blog', translationKey: 'blog', href: '/blog', icon: 'blog' },
+  { key: 'profile', translationKey: 'profile', href: '/profile', icon: 'profile' },
   { key: 'settings', translationKey: 'settings', href: '/settings', icon: 'settings' },
 ];
 
-function BottomNav() {
+// Admin menu item (shown conditionally)
+const adminMenuItem: MenuItemConfig = {
+  key: 'admin', translationKey: 'adminDashboard', href: '/admin', icon: 'admin'
+};
+
+interface BottomNavProps {
+  userRole?: string;
+}
+
+function BottomNav({ userRole }: BottomNavProps) {
   const pathname = usePathname();
   const t = useTranslations('nav');
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Build menu items based on user role
+  const isAdmin = userRole === 'ADMIN' || userRole === 'COMMERCIAL';
+  const menuItems = isAdmin
+    ? [adminMenuItem, ...moreMenuItemsConfig]
+    : moreMenuItemsConfig;
 
   const isActive = useCallback(
     (href: string) => {
@@ -128,12 +150,16 @@ function BottomNav() {
   );
 
   // Check if any "more" menu item is active
-  const isMoreActive = moreMenuItemsConfig.some((item) => isActive(item.href));
+  const isMoreActive = menuItems.some((item) => isActive(item.href));
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside (but not on the toggle button)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isOutsideMenu = menuRef.current && !menuRef.current.contains(target);
+      const isOutsideButton = buttonRef.current && !buttonRef.current.contains(target);
+
+      if (isOutsideMenu && isOutsideButton) {
         setShowMoreMenu(false);
       }
     };
@@ -172,24 +198,13 @@ function BottomNav() {
         `}
       >
         {/* Handle bar */}
-        <div className="flex justify-center pt-2 pb-1">
+        <div className="flex justify-center pt-3 pb-2">
           <div className="w-10 h-1 rounded-full bg-[var(--border)]" />
         </div>
 
-        {/* Menu Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">
-          <span className="text-sm font-semibold text-[var(--text)]">{t('more')}</span>
-          <button
-            onClick={() => setShowMoreMenu(false)}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:bg-[var(--card-hover)] transition-colors"
-          >
-            {menuIcons.close}
-          </button>
-        </div>
-
         {/* Menu Items */}
-        <div className="grid grid-cols-4 gap-2 p-4">
-          {moreMenuItemsConfig.map((item) => {
+        <div className="grid grid-cols-3 gap-2 p-4 pt-2">
+          {menuItems.map((item) => {
             const active = isActive(item.href);
             return (
               <Link
@@ -256,6 +271,7 @@ function BottomNav() {
 
           {/* More Button */}
           <button
+            ref={buttonRef}
             onClick={toggleMoreMenu}
             className={`
               relative flex flex-col items-center justify-center

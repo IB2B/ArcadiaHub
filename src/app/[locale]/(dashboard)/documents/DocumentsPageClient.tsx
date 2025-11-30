@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import DocumentPreview from '@/components/documents/DocumentPreview';
 import { Database } from '@/types/database.types';
 
 type Document = Database['public']['Tables']['documents']['Row'];
@@ -75,6 +76,12 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
     </svg>
   ),
+  preview: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    </svg>
+  ),
   folder: (
     <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
@@ -112,6 +119,7 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
   const t = useTranslations('documents');
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
@@ -224,42 +232,49 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {docs.map((doc) => (
-                    <a
-                      key={doc.id}
-                      href={doc.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <Card hover className="group h-full">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 text-[var(--text-muted)]">
-                            {getFileTypeIcon(doc.file_type)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-medium text-[var(--text)] line-clamp-2 mb-1">
-                              {doc.title}
-                            </h3>
-                            {doc.description && (
-                              <p className="text-xs text-[var(--text-muted)] line-clamp-2 mb-2">
-                                {doc.description}
-                              </p>
+                    <Card key={doc.id} hover className="group h-full">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 text-[var(--text-muted)]">
+                          {getFileTypeIcon(doc.file_type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-[var(--text)] line-clamp-2 mb-1">
+                            {doc.title}
+                          </h3>
+                          {doc.description && (
+                            <p className="text-xs text-[var(--text-muted)] line-clamp-2 mb-2">
+                              {doc.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                            {doc.file_type && (
+                              <span className="uppercase">{doc.file_type}</span>
                             )}
-                            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                              {doc.file_type && (
-                                <span className="uppercase">{doc.file_type}</span>
-                              )}
-                              {doc.file_size && (
-                                <span>{formatFileSize(doc.file_size)}</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex-shrink-0 text-[var(--text-light)] group-hover:text-[var(--primary)] transition-colors">
-                            {icons.download}
+                            {doc.file_size && (
+                              <span>{formatFileSize(doc.file_size)}</span>
+                            )}
                           </div>
                         </div>
-                      </Card>
-                    </a>
+                        <div className="flex-shrink-0 flex items-center gap-1">
+                          <button
+                            onClick={() => setPreviewDocument(doc)}
+                            className="p-1.5 rounded-lg text-[var(--text-light)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
+                            title={t('preview')}
+                          >
+                            {icons.preview}
+                          </button>
+                          <a
+                            href={doc.file_url}
+                            download
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1.5 rounded-lg text-[var(--text-light)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
+                            title={t('download')}
+                          >
+                            {icons.download}
+                          </a>
+                        </div>
+                      </div>
+                    </Card>
                   ))}
                 </div>
               </div>
@@ -283,6 +298,13 @@ export default function DocumentsPageClient({ documents, stats }: DocumentsPageC
           </div>
         </Card>
       )}
+
+      {/* Document Preview Modal */}
+      <DocumentPreview
+        isOpen={!!previewDocument}
+        onClose={() => setPreviewDocument(null)}
+        document={previewDocument}
+      />
     </div>
   );
 }

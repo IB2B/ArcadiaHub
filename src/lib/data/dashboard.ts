@@ -7,6 +7,7 @@ import { getUpcomingEvents } from './events';
 import { getMyNotifications, getUnreadCount } from './notifications';
 import { getLatestAcademyContent } from './academy';
 import { getLatestDocuments } from './documents';
+import { getLatestBlogPosts } from './blog';
 import { Database } from '@/types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -15,10 +16,11 @@ type Event = Database['public']['Tables']['events']['Row'];
 type Notification = Database['public']['Tables']['notifications']['Row'];
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 type Document = Database['public']['Tables']['documents']['Row'];
+type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
 
 export type ActivityFeedItem = {
   id: string;
-  type: 'event' | 'case' | 'content' | 'document' | 'announcement';
+  type: 'event' | 'case' | 'content' | 'document' | 'announcement' | 'blog';
   title: string;
   description?: string;
   timestamp: Date;
@@ -82,6 +84,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     unreadCount,
     latestContent,
     latestDocuments,
+    latestBlogPosts,
   ] = await Promise.all([
     getCurrentUserProfile(),
     getCaseStats(user.id),
@@ -91,6 +94,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     getUnreadCount(),
     getLatestAcademyContent(3),
     getLatestDocuments(3),
+    getLatestBlogPosts(3),
   ]);
 
   // Build activity feed from various sources
@@ -110,14 +114,14 @@ export async function getDashboardData(): Promise<DashboardData> {
     });
   });
 
-  // Add upcoming events to feed
+  // Add upcoming events to feed (use created_at for sorting, not the event date)
   upcomingEvents.slice(0, 3).forEach((e) => {
     activityFeed.push({
       id: `event-${e.id}`,
       type: 'event',
       title: e.title,
       description: e.description || undefined,
-      timestamp: new Date(e.start_datetime),
+      timestamp: new Date(e.created_at || new Date()),
       metadata: {
         category: e.event_type,
       },
@@ -149,6 +153,22 @@ export async function getDashboardData(): Promise<DashboardData> {
       timestamp: new Date(d.created_at || new Date()),
       metadata: {
         category: d.category,
+      },
+    });
+  });
+
+  // Add latest blog posts to feed
+  latestBlogPosts.forEach((b) => {
+    activityFeed.push({
+      id: `blog-${b.id}`,
+      type: 'blog',
+      title: b.title,
+      description: b.excerpt || undefined,
+      timestamp: new Date(b.published_at || b.created_at || new Date()),
+      image: b.featured_image || undefined,
+      metadata: {
+        category: b.category || undefined,
+        link: `/blog/${b.slug}`,
       },
     });
   });

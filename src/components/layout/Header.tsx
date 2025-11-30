@@ -3,10 +3,14 @@
 import { memo, useState, useCallback, useRef, useEffect, useMemo, useTransition } from 'react';
 import { Link, usePathname } from '@/navigation';
 import { useTranslations } from 'next-intl';
+import { formatDistanceToNow } from 'date-fns';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { logout } from '@/lib/auth/actions';
+import { Database } from '@/types/database.types';
+
+type Notification = Database['public']['Tables']['notifications']['Row'];
 
 const icons = {
   search: (
@@ -31,15 +35,6 @@ const icons = {
   ),
 };
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-  type: 'info' | 'event' | 'case';
-}
-
 interface BreadcrumbSegment {
   label: string;
   href: string;
@@ -53,9 +48,12 @@ interface HeaderProps {
     role: string;
   };
   notifications?: Notification[];
+  unreadCount?: number;
+  onMarkAsRead?: (id: string) => void;
+  onMarkAllAsRead?: () => void;
 }
 
-function Header({ user, notifications = [] }: HeaderProps) {
+function Header({ user, notifications = [], unreadCount: propUnreadCount, onMarkAsRead, onMarkAllAsRead }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();
@@ -71,7 +69,16 @@ function Header({ user, notifications = [] }: HeaderProps) {
     });
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = propUnreadCount ?? notifications.filter((n) => !n.is_read).length;
+
+  const formatNotificationTime = useCallback((createdAt: string | null) => {
+    if (!createdAt) return '';
+    try {
+      return formatDistanceToNow(new Date(createdAt), { addSuffix: true });
+    } catch {
+      return '';
+    }
+  }, []);
 
   const toggleNotifications = useCallback(() => {
     setShowNotifications((prev) => !prev);
@@ -255,19 +262,43 @@ function Header({ user, notifications = [] }: HeaderProps) {
                     </div>
                   ) : (
                     notifications.map((notification) => (
-                      <Link
+                      <div
                         key={notification.id}
-                        href="#"
-                        className={`block px-4 py-3 hover:bg-[var(--card-hover)] transition-colors ${
-                          !notification.read ? 'bg-[var(--primary-light)]' : ''
+                        onClick={() => {
+                          if (!notification.is_read && onMarkAsRead) {
+                            onMarkAsRead(notification.id);
+                          }
+                        }}
+                        className={`block px-4 py-3 hover:bg-[var(--card-hover)] transition-colors cursor-pointer ${
+                          !notification.is_read ? 'bg-[var(--primary-light)]' : ''
                         }`}
                       >
-                        <p className="text-sm font-medium text-[var(--text)]">{notification.title}</p>
-                        <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-[var(--text-light)] mt-1">{notification.time}</p>
-                      </Link>
+                        {notification.link ? (
+                          <Link href={notification.link} className="block">
+                            <p className="text-sm font-medium text-[var(--text)]">{notification.title}</p>
+                            {notification.message && (
+                              <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">
+                                {notification.message}
+                              </p>
+                            )}
+                            <p className="text-xs text-[var(--text-light)] mt-1">
+                              {formatNotificationTime(notification.created_at)}
+                            </p>
+                          </Link>
+                        ) : (
+                          <>
+                            <p className="text-sm font-medium text-[var(--text)]">{notification.title}</p>
+                            {notification.message && (
+                              <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">
+                                {notification.message}
+                              </p>
+                            )}
+                            <p className="text-xs text-[var(--text-light)] mt-1">
+                              {formatNotificationTime(notification.created_at)}
+                            </p>
+                          </>
+                        )}
+                      </div>
                     ))
                   )}
                 </div>
