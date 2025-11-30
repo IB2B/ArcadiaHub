@@ -51,7 +51,7 @@ export default function AcademyClient({ initialData, initialFilters }: AcademyCl
   const [contentToDelete, setContentToDelete] = useState<AcademyContent | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Generate year options (from current year to 5 years ago)
+  // Generate year  options (from current year to 5 years ago)
   const currentYear = new Date().getFullYear();
   const yearOptions = [
     { value: '', label: 'All Years' },
