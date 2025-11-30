@@ -8,6 +8,7 @@ type Document = Database['public']['Tables']['documents']['Row'];
 export async function getDocuments(options?: {
   category?: string;
   folderPath?: string;
+  search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ data: Document[]; count: number }> {
@@ -23,6 +24,9 @@ export async function getDocuments(options?: {
   }
   if (options?.folderPath) {
     query = query.eq('folder_path', options.folderPath);
+  }
+  if (options?.search) {
+    query = query.or(`title.ilike.%${options.search}%,description.ilike.%${options.search}%`);
   }
   if (options?.limit) {
     query = query.limit(options.limit);
@@ -77,6 +81,23 @@ export async function getDocumentsByCategory(): Promise<Record<string, number>> 
     acc[doc.category] = (acc[doc.category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+}
+
+export async function getDocument(documentId: string): Promise<Document | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('id', documentId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching document:', error);
+    return null;
+  }
+
+  return data;
 }
 
 export async function getDocumentStats(): Promise<{

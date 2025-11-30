@@ -28,7 +28,26 @@
     "selected": "Selected",
     "minutes": "minutes",
     "hours": "hours",
-    "new": "New"
+    "new": "New",
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "results": "results",
+      "firstPage": "First page",
+      "lastPage": "Last page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page"
+    }
+  },
+  "landing": {
+    "signIn": "Sign In",
+    "partnerOnly": "Partner Access Only",
+    "heroTitle": "Your Complete",
+    "heroHighlight": "Partner Portal",
+    "heroSubtitle": "Access training resources, manage cases, connect with the community, and grow your business with Harlock's comprehensive partner platform.",
+    "accessPortal": "Access Portal",
+    "allRightsReserved": "All rights reserved."
   },
   "auth": {
     "login": "Login",
@@ -68,11 +87,14 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "myCases": "My Cases",
+    "cases": "Cases",
     "community": "Community",
     "calendar": "Calendar",
+    "events": "Events",
     "academy": "Academy",
     "documents": "Documents",
     "blog": "Blog",
+    "activity": "Activity",
     "profile": "Profile",
     "settings": "Settings",
     "admin": "Admin",
@@ -114,6 +136,14 @@
       "blog": "Blog Post"
     },
     "yesterdayAt": "Yesterday at [TIME]"
+  },
+  "activity": {
+    "title": "Activity Feed",
+    "subtitle": "{count, plural, =0 {No activities yet} =1 {1 activity} other {# activities}}",
+    "allActivity": "All",
+    "noActivity": "No Activity",
+    "noActivityYet": "Your activity feed is empty. Activities will appear here as you interact with the platform.",
+    "noActivityFiltered": "No activities found for this filter. Try selecting a different category."
   },
   "cases": {
     "title": "My Cases",
@@ -242,7 +272,14 @@
       "slides": "Slides",
       "podcast": "Podcast",
       "recording": "Event Recording"
-    }
+    },
+    "backToAcademy": "Back to Academy",
+    "details": "Details",
+    "relatedContent": "Related Content",
+    "noPreview": "No preview available",
+    "downloadMaterials": "Download Materials",
+    "downloadHint": "Download slides, documents, and additional resources",
+    "podcast": "Podcast Episode"
   },
   "documents": {
     "title": "Documents",
@@ -267,9 +304,16 @@
     "totalDocuments": "Total Documents",
     "noDocuments": "No documents found",
     "noDocumentsHint": "There are no documents available in this category.",
-    "fileSize": "Size",
-    "fileType": "Type",
-    "lastUpdated": "Last Updated"
+    "fileSize": "File Size",
+    "fileType": "File Type",
+    "lastUpdated": "Last Updated",
+    "backToDocuments": "Back to Documents",
+    "downloadFile": "Download File",
+    "fileDetails": "File Details",
+    "category": "Category",
+    "uploadedOn": "Uploaded On",
+    "relatedDocuments": "Related Documents",
+    "documentPreview": "Document Preview"
   },
   "blog": {
     "title": "Blog",

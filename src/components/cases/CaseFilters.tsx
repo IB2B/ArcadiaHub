@@ -1,14 +1,11 @@
 'use client';
 
-import { memo, useState, useCallback } from 'react';
+import { memo, useState, useCallback, useTransition } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
 
 interface CaseFiltersProps {
-  onFilterChange: (filters: {
-    search: string;
-    status: string;
-  }) => void;
   initialFilters?: {
     search?: string;
     status?: string;
@@ -42,50 +39,71 @@ const icons = {
   ),
 };
 
-function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
+function CaseFilters({ initialFilters }: CaseFiltersProps) {
   const t = useTranslations('cases');
-  const tCommon = useTranslations('common');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState(initialFilters?.search || '');
-  const [status, setStatus] = useState(initialFilters?.status || '');
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearch(value);
-    onFilterChange({ search: value, status });
-  }, [status, onFilterChange]);
+  const updateURL = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      params.delete('page');
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
+    },
+    [router, searchParams]
+  );
+
+  const handleSearch = useCallback(() => {
+    updateURL({ search });
+  }, [search, updateURL]);
 
   const handleStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setStatus(value);
-    onFilterChange({ search, status: value });
-  }, [search, onFilterChange]);
+    updateURL({ status: e.target.value });
+  }, [updateURL]);
 
   const handleClearFilters = useCallback(() => {
     setSearch('');
-    setStatus('');
-    onFilterChange({ search: '', status: '' });
-  }, [onFilterChange]);
+    updateURL({ search: '', status: '' });
+  }, [updateURL]);
 
-  const hasActiveFilters = search || status;
+  const hasActiveFilters = initialFilters?.search || initialFilters?.status;
 
   return (
     <div className="space-y-3">
       {/* Search and Toggle */}
-      <div className="flex gap-2 sm:gap-3">
+      <div className={`flex gap-2 sm:gap-3 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
         {/* Search Input */}
-        <div className="relative flex-1">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSearch();
+          }}
+          className="relative flex-1"
+        >
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
             {icons.search}
           </span>
           <input
             type="text"
             value={search}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearch(e.target.value)}
+            onBlur={handleSearch}
             placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
           />
-        </div>
+        </form>
 
         {/* Filter Toggle (Mobile) */}
         <button
@@ -102,7 +120,7 @@ function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
         {/* Status Select (Desktop) */}
         <div className="hidden md:block">
           <select
-            value={status}
+            value={initialFilters?.status || ''}
             onChange={handleStatusChange}
             className="h-full px-3 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
           >
@@ -136,7 +154,7 @@ function CaseFilters({ onFilterChange, initialFilters }: CaseFiltersProps) {
               {t('status')}
             </label>
             <select
-              value={status}
+              value={initialFilters?.status || ''}
               onChange={handleStatusChange}
               className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
             >

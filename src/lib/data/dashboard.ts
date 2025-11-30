@@ -52,6 +52,137 @@ export type DashboardData = {
   activityFeed: ActivityFeedItem[];
 };
 
+export async function getActivityFeed(options?: {
+  limit?: number;
+  offset?: number;
+  type?: string;
+}): Promise<{ data: ActivityFeedItem[]; count: number }> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: [], count: 0 };
+  }
+
+  const limit = options?.limit || 10;
+  const offset = options?.offset || 0;
+  const filterType = options?.type;
+
+  // Fetch more items from each source to ensure we have enough after filtering
+  const fetchLimit = limit + offset + 20;
+
+  const [
+    casesResult,
+    events,
+    content,
+    documents,
+    blogPosts,
+  ] = await Promise.all([
+    getMyCases({ limit: fetchLimit }),
+    getUpcomingEvents(fetchLimit),
+    getLatestAcademyContent(fetchLimit),
+    getLatestDocuments(fetchLimit),
+    getLatestBlogPosts(fetchLimit),
+  ]);
+
+  const activityFeed: ActivityFeedItem[] = [];
+
+  // Add cases
+  if (!filterType || filterType === 'case') {
+    casesResult.data.forEach((c) => {
+      activityFeed.push({
+        id: `case-${c.id}`,
+        type: 'case',
+        title: `Case ${c.case_code}: ${c.client_name}`,
+        description: c.notes || undefined,
+        timestamp: new Date(c.updated_at || c.created_at || new Date()),
+        metadata: {
+          status: c.status || 'PENDING',
+          link: `/cases/${c.id}`,
+        },
+      });
+    });
+  }
+
+  // Add events
+  if (!filterType || filterType === 'event') {
+    events.forEach((e) => {
+      activityFeed.push({
+        id: `event-${e.id}`,
+        type: 'event',
+        title: e.title,
+        description: e.description || undefined,
+        timestamp: new Date(e.created_at || new Date()),
+        metadata: {
+          category: e.event_type,
+          link: `/events/${e.id}`,
+        },
+      });
+    });
+  }
+
+  // Add academy content
+  if (!filterType || filterType === 'content') {
+    content.forEach((c) => {
+      activityFeed.push({
+        id: `content-${c.id}`,
+        type: 'content',
+        title: c.title,
+        description: c.description || undefined,
+        timestamp: new Date(c.created_at || new Date()),
+        image: c.thumbnail_url || undefined,
+        metadata: {
+          category: c.content_type,
+          link: `/academy/${c.id}`,
+        },
+      });
+    });
+  }
+
+  // Add documents
+  if (!filterType || filterType === 'document') {
+    documents.forEach((d) => {
+      activityFeed.push({
+        id: `document-${d.id}`,
+        type: 'document',
+        title: d.title,
+        description: d.description || undefined,
+        timestamp: new Date(d.created_at || new Date()),
+        metadata: {
+          category: d.category,
+          link: `/documents/${d.id}`,
+        },
+      });
+    });
+  }
+
+  // Add blog posts
+  if (!filterType || filterType === 'blog') {
+    blogPosts.forEach((b) => {
+      activityFeed.push({
+        id: `blog-${b.id}`,
+        type: 'blog',
+        title: b.title,
+        description: b.excerpt || undefined,
+        timestamp: new Date(b.published_at || b.created_at || new Date()),
+        image: b.featured_image || undefined,
+        metadata: {
+          category: b.category || undefined,
+          link: `/blog/${b.slug}`,
+        },
+      });
+    });
+  }
+
+  // Sort by timestamp (newest first)
+  activityFeed.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+  const totalCount = activityFeed.length;
+  const paginatedData = activityFeed.slice(offset, offset + limit);
+
+  return { data: paginatedData, count: totalCount };
+}
+
 export async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createClient();
 
@@ -89,7 +220,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     getCurrentUserProfile(),
     getCaseStats(user.id),
     getUpcomingEvents(5),
-    getMyCases(),
+    getMyCases({ limit: 5 }),
     getMyNotifications({ limit: 10 }),
     getUnreadCount(),
     getLatestAcademyContent(3),
@@ -101,7 +232,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const activityFeed: ActivityFeedItem[] = [];
 
   // Add recent cases to feed
-  recentCases.slice(0, 3).forEach((c) => {
+  recentCases.data.slice(0, 3).forEach((c) => {
     activityFeed.push({
       id: `case-${c.id}`,
       type: 'case',
@@ -187,7 +318,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       newDocuments: latestDocuments.length,
     },
     upcomingEvents,
-    recentCases: recentCases.slice(0, 5),
+    recentCases: recentCases.data.slice(0, 5),
     notifications,
     activityFeed: activityFeed.slice(0, 10),
   };

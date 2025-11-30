@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import CaseCard from '@/components/cases/CaseCard';
 import CaseFilters from '@/components/cases/CaseFilters';
+import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
 
 type Case = Database['public']['Tables']['cases']['Row'];
@@ -16,6 +18,16 @@ interface CasesPageClientProps {
     pending: number;
     inProgress: number;
     completed: number;
+  };
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+  initialFilters: {
+    search: string;
+    status: string;
   };
 }
 
@@ -47,34 +59,27 @@ const icons = {
   ),
 };
 
-export default function CasesPageClient({ cases, stats }: CasesPageClientProps) {
+export default function CasesPageClient({
+  cases,
+  stats,
+  pagination,
+  initialFilters,
+}: CasesPageClientProps) {
   const t = useTranslations('cases');
-  const tCommon = useTranslations('common');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  const [filters, setFilters] = useState({ search: '', status: '' });
-
-  const handleFilterChange = useCallback((newFilters: { search: string; status: string }) => {
-    setFilters(newFilters);
-  }, []);
-
-  const filteredCases = useMemo(() => {
-    return cases.filter((c) => {
-      // Search filter
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        const matchesCode = c.case_code.toLowerCase().includes(searchLower);
-        const matchesClient = c.client_name.toLowerCase().includes(searchLower);
-        if (!matchesCode && !matchesClient) return false;
-      }
-
-      // Status filter
-      if (filters.status && c.status !== filters.status) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [cases, filters]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('page', page.toString());
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
+    },
+    [router, searchParams]
+  );
 
   const statCards = [
     {
@@ -137,39 +142,48 @@ export default function CasesPageClient({ cases, stats }: CasesPageClientProps) 
       </div>
 
       {/* Filters */}
-      <CaseFilters onFilterChange={handleFilterChange} />
+      <CaseFilters initialFilters={initialFilters} />
 
-      {/* Cases List */}
-      {filteredCases.length > 0 ? (
-        <div className="space-y-3 sm:space-y-4">
-          {filteredCases.map((caseData) => (
-            <CaseCard key={caseData.id} caseData={caseData} />
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-            <div className="text-[var(--text-light)] mb-4">
-              {icons.empty}
+      {/* Loading State */}
+      <div className={`transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+        {/* Cases List */}
+        {cases.length > 0 ? (
+          <>
+            <div className="space-y-3 sm:space-y-4">
+              {cases.map((caseData) => (
+                <CaseCard key={caseData.id} caseData={caseData} />
+              ))}
             </div>
-            <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              {t('noCases')}
-            </h3>
-            <p className="text-sm text-[var(--text-muted)] max-w-md">
-              {filters.search || filters.status
-                ? t('adjustFilters')
-                : t('noCasesHint')}
-            </p>
-          </div>
-        </Card>
-      )}
-
-      {/* Results count */}
-      {filteredCases.length > 0 && (
-        <p className="text-sm text-[var(--text-muted)] text-center">
-          {tCommon('showing')} {filteredCases.length} {tCommon('of')} {cases.length}
-        </p>
-      )}
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                itemsPerPage={pagination.itemsPerPage}
+                onPageChange={handlePageChange}
+                isLoading={isPending}
+              />
+            )}
+          </>
+        ) : (
+          <Card>
+            <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+              <div className="text-[var(--text-light)] mb-4">
+                {icons.empty}
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
+                {t('noCases')}
+              </h3>
+              <p className="text-sm text-[var(--text-muted)] max-w-md">
+                {initialFilters.search || initialFilters.status
+                  ? t('adjustFilters')
+                  : t('noCasesHint')}
+              </p>
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

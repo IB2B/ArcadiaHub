@@ -28,7 +28,26 @@
     "selected": "Selectionne",
     "minutes": "minutes",
     "hours": "heures",
-    "new": "Nouveau"
+    "new": "Nouveau",
+    "pagination": {
+      "showing": "Affichage de",
+      "to": "a",
+      "of": "sur",
+      "results": "resultats",
+      "firstPage": "Premiere page",
+      "lastPage": "Derniere page",
+      "previousPage": "Page precedente",
+      "nextPage": "Page suivante"
+    }
+  },
+  "landing": {
+    "signIn": "Connexion",
+    "partnerOnly": "Acces Partenaires Uniquement",
+    "heroTitle": "Votre Portail",
+    "heroHighlight": "Partenaire Complet",
+    "heroSubtitle": "Accedez aux ressources de formation, gerez les dossiers, connectez-vous avec la communaute et developpez votre activite avec la plateforme partenaire complete de Harlock.",
+    "accessPortal": "Acceder au Portail",
+    "allRightsReserved": "Tous droits reserves."
   },
   "auth": {
     "login": "Connexion",
@@ -68,11 +87,14 @@
     "home": "Accueil",
     "dashboard": "Tableau de Bord",
     "myCases": "Mes Dossiers",
+    "cases": "Dossiers",
     "community": "Communaute",
     "calendar": "Calendrier",
+    "events": "Evenements",
     "academy": "Academy",
     "documents": "Documents",
     "blog": "Blog",
+    "activity": "Activite",
     "profile": "Profil",
     "settings": "Parametres",
     "admin": "Admin",
@@ -114,6 +136,14 @@
       "blog": "Article de Blog"
     },
     "yesterdayAt": "Hier a [TIME]"
+  },
+  "activity": {
+    "title": "Fil d'Activite",
+    "subtitle": "{count, plural, =0 {Aucune activite} =1 {1 activite} other {# activites}}",
+    "allActivity": "Tout",
+    "noActivity": "Aucune Activite",
+    "noActivityYet": "Votre fil d'activite est vide. Les activites apparaitront ici au fur et a mesure de vos interactions.",
+    "noActivityFiltered": "Aucune activite trouvee pour ce filtre. Essayez de selectionner une autre categorie."
   },
   "cases": {
     "title": "Mes Dossiers",
@@ -242,7 +272,13 @@
       "slides": "Diapositives",
       "podcast": "Podcast",
       "recording": "Enregistrement d'Evenement"
-    }
+    },
+    "details": "Details",
+    "relatedContent": "Contenu Similaire",
+    "noPreview": "Apercu non disponible",
+    "downloadMaterials": "Telecharger les Materiaux",
+    "downloadHint": "Telecharger les slides, documents et ressources supplementaires",
+    "podcast": "Episode de Podcast"
   },
   "documents": {
     "title": "Documents",
@@ -267,9 +303,15 @@
     "totalDocuments": "Total Documents",
     "noDocuments": "Aucun document trouve",
     "noDocumentsHint": "Il n'y a pas de documents disponibles dans cette categorie.",
-    "fileSize": "Taille",
-    "fileType": "Type",
-    "lastUpdated": "Derniere Mise a Jour"
+    "fileSize": "Taille du Fichier",
+    "fileType": "Type de Fichier",
+    "lastUpdated": "Derniere Mise a Jour",
+    "downloadFile": "Telecharger le Fichier",
+    "fileDetails": "Details du Fichier",
+    "category": "Categorie",
+    "uploadedOn": "Telecharge le",
+    "relatedDocuments": "Documents Similaires",
+    "documentPreview": "Apercu du Document"
   },
   "blog": {
     "title": "Blog",

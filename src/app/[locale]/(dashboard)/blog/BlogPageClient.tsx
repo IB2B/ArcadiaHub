@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
+import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
 
 type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
@@ -15,6 +17,16 @@ interface BlogPageClientProps {
     byCategory: Record<string, number>;
   };
   categories: string[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+  initialFilters: {
+    search: string;
+    category: string;
+  };
 }
 
 const icons = {
@@ -51,30 +63,62 @@ const icons = {
   ),
 };
 
-export default function BlogPageClient({ posts, stats, categories }: BlogPageClientProps) {
+export default function BlogPageClient({
+  posts,
+  stats,
+  categories,
+  pagination,
+  initialFilters,
+}: BlogPageClientProps) {
   const t = useTranslations('blog');
   const tCommon = useTranslations('common');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  const [filters, setFilters] = useState({ search: '', category: '' });
+  const [search, setSearch] = useState(initialFilters.search);
+  const [category, setCategory] = useState(initialFilters.category);
 
-  const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
-      // Search filter
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        const matchesTitle = post.title.toLowerCase().includes(searchLower);
-        const matchesExcerpt = post.excerpt?.toLowerCase().includes(searchLower);
-        if (!matchesTitle && !matchesExcerpt) return false;
+  // Update URL with new params
+  const updateURL = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      // Reset to page 1 when filters change (unless page is explicitly set)
+      if (!updates.page) {
+        params.delete('page');
       }
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
+    },
+    [router, searchParams]
+  );
 
-      // Category filter
-      if (filters.category && post.category !== filters.category) {
-        return false;
-      }
+  const handleSearch = useCallback(() => {
+    updateURL({ search });
+  }, [search, updateURL]);
 
-      return true;
-    });
-  }, [posts, filters]);
+  const handleCategoryChange = useCallback(
+    (newCategory: string) => {
+      setCategory(newCategory);
+      updateURL({ category: newCategory });
+    },
+    [updateURL]
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      updateURL({ page: page.toString() });
+    },
+    [updateURL]
+  );
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
@@ -92,9 +136,7 @@ export default function BlogPageClient({ posts, stats, categories }: BlogPageCli
         <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
           {t('title')}
         </h1>
-        <p className="text-sm text-[var(--text-muted)]">
-          {t('subtitle')}
-        </p>
+        <p className="text-sm text-[var(--text-muted)]">{t('subtitle')}</p>
       </div>
 
       {/* Stats Card */}
@@ -118,134 +160,150 @@ export default function BlogPageClient({ posts, stats, categories }: BlogPageCli
       <Card padding="sm">
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search */}
-          <div className="relative flex-1">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSearch();
+            }}
+            className="relative flex-1"
+          >
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--text-muted)]">
               {icons.search}
             </div>
             <input
               type="text"
               placeholder={tCommon('searchPlaceholder')}
-              value={filters.search}
-              onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onBlur={handleSearch}
               className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent text-sm"
             />
-          </div>
+          </form>
 
           {/* Category Filter */}
           <select
-            value={filters.category}
-            onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}
+            value={category}
+            onChange={(e) => handleCategoryChange(e.target.value)}
             className="px-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent text-sm min-w-[140px]"
           >
-            <option value="">{tCommon('all')} {t('category')}</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
+            <option value="">
+              {tCommon('all')} {t('category')}
+            </option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
               </option>
             ))}
           </select>
         </div>
       </Card>
 
-      {/* Blog Posts Grid */}
-      {filteredPosts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredPosts.map((post) => (
-            <Link key={post.id} href={`/blog/${post.slug}`}>
-              <Card padding="none" className="h-full hover:shadow-md transition-shadow cursor-pointer group overflow-hidden flex flex-col">
-                {/* Featured Image */}
-                {post.featured_image ? (
-                  <div className="aspect-video w-full overflow-hidden flex-shrink-0">
-                    <img
-                      src={post.featured_image}
-                      alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                ) : (
-                  <div className="aspect-video w-full bg-[var(--card-hover)] flex items-center justify-center flex-shrink-0">
-                    <div className="text-[var(--text-light)]">
-                      {icons.article}
+      {/* Loading State Overlay */}
+      <div className={`transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+        {/* Blog Posts Grid */}
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {posts.map((post) => (
+              <Link key={post.id} href={`/blog/${post.slug}`}>
+                <Card
+                  padding="none"
+                  className="h-full hover:shadow-md transition-shadow cursor-pointer group overflow-hidden flex flex-col"
+                >
+                  {/* Featured Image */}
+                  {post.featured_image ? (
+                    <div className="aspect-video w-full overflow-hidden flex-shrink-0">
+                      <img
+                        src={post.featured_image}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="p-3 sm:p-4 flex flex-col flex-1">
-                  {/* Category Badge */}
-                  {post.category && (
-                    <span className="inline-block self-start px-2 py-1 text-xs font-medium rounded-full bg-[var(--primary-light)] text-[var(--primary)] mb-2">
-                      {post.category}
-                    </span>
-                  )}
-
-                  {/* Title */}
-                  <h3 className="font-semibold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors line-clamp-2 mb-2">
-                    {post.title}
-                  </h3>
-
-                  {/* Excerpt */}
-                  {post.excerpt && (
-                    <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-3">
-                      {post.excerpt}
-                    </p>
-                  )}
-
-                  {/* Meta Info */}
-                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-[var(--border)]">
-                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                      {icons.calendar}
-                      <span>{formatDate(post.published_at)}</span>
-                    </div>
-                    <span className="flex items-center gap-1 text-sm font-medium text-[var(--primary)] group-hover:gap-2 transition-all">
-                      {t('readMore')}
-                      {icons.arrow}
-                    </span>
-                  </div>
-
-                  {/* Tags */}
-                  {post.tags && post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {post.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-[var(--card-hover)] text-[var(--text-muted)]"
-                        >
-                          {icons.tag}
-                          {tag}
-                        </span>
-                      ))}
+                  ) : (
+                    <div className="aspect-video w-full bg-[var(--card-hover)] flex items-center justify-center flex-shrink-0">
+                      <div className="text-[var(--text-light)]">{icons.article}</div>
                     </div>
                   )}
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-            <div className="text-[var(--text-light)] mb-4">
-              {icons.empty}
-            </div>
-            <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              {t('noPosts')}
-            </h3>
-            <p className="text-sm text-[var(--text-muted)] max-w-md">
-              {filters.search || filters.category
-                ? tCommon('noResults')
-                : t('noPostsHint')}
-            </p>
+
+                  {/* Content */}
+                  <div className="p-3 sm:p-4 flex flex-col flex-1">
+                    {/* Category Badge */}
+                    {post.category && (
+                      <span className="inline-block self-start px-2 py-1 text-xs font-medium rounded-full bg-[var(--primary-light)] text-[var(--primary)] mb-2">
+                        {post.category}
+                      </span>
+                    )}
+
+                    {/* Title */}
+                    <h3 className="font-semibold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors line-clamp-2 mb-2">
+                      {post.title}
+                    </h3>
+
+                    {/* Excerpt */}
+                    {post.excerpt && (
+                      <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-3">
+                        {post.excerpt}
+                      </p>
+                    )}
+
+                    {/* Meta Info */}
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-[var(--border)]">
+                      <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                        {icons.calendar}
+                        <span>{formatDate(post.published_at)}</span>
+                      </div>
+                      <span className="flex items-center gap-1 text-sm font-medium text-[var(--primary)] group-hover:gap-2 transition-all">
+                        {t('readMore')}
+                        {icons.arrow}
+                      </span>
+                    </div>
+
+                    {/* Tags */}
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {post.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-[var(--card-hover)] text-[var(--text-muted)]"
+                          >
+                            {icons.tag}
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </Link>
+            ))}
           </div>
-        </Card>
-      )}
+        ) : (
+          <Card>
+            <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+              <div className="text-[var(--text-light)] mb-4">{icons.empty}</div>
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
+                {t('noPosts')}
+              </h3>
+              <p className="text-sm text-[var(--text-muted)] max-w-md">
+                {initialFilters.search || initialFilters.category
+                  ? tCommon('noResults')
+                  : t('noPostsHint')}
+              </p>
+            </div>
+          </Card>
+        )}
 
-      {/* Results count */}
-      {filteredPosts.length > 0 && (
-        <p className="text-sm text-[var(--text-muted)] text-center">
-          {tCommon('showing')} {filteredPosts.length} {tCommon('of')} {posts.length}
-        </p>
-      )}
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            itemsPerPage={pagination.itemsPerPage}
+            onPageChange={handlePageChange}
+            isLoading={isPending}
+          />
+        )}
+      </div>
     </div>
   );
 }

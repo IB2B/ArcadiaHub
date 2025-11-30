@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
 
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
@@ -15,6 +17,17 @@ interface AcademyPageClientProps {
     totalContent: number;
     totalVideos: number;
     totalDuration: number;
+  };
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+  initialFilters: {
+    search: string;
+    contentType: string;
+    year: string;
   };
 }
 
@@ -106,6 +119,7 @@ const icons = {
 };
 
 const contentTypeValues = ['VIDEO', 'GALLERY', 'SLIDES', 'PODCAST', 'RECORDING'];
+const yearValues = [2025, 2024, 2023, 2022, 2021, 2020];
 
 function formatDuration(minutes: number | null): string {
   if (!minutes) return '';
@@ -117,38 +131,67 @@ function formatDuration(minutes: number | null): string {
   return `${mins}m`;
 }
 
-export default function AcademyPageClient({ content, stats }: AcademyPageClientProps) {
+export default function AcademyPageClient({
+  content,
+  stats,
+  pagination,
+  initialFilters,
+}: AcademyPageClientProps) {
   const t = useTranslations('academy');
-  const [search, setSearch] = useState('');
-  const [contentType, setContentType] = useState('');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  // Get unique years
-  const years = useMemo(() => {
-    const yearsSet = new Set<number>();
-    content.forEach((c) => {
-      if (c.year) yearsSet.add(c.year);
-    });
-    return Array.from(yearsSet).sort((a, b) => b - a);
-  }, [content]);
+  const [search, setSearch] = useState(initialFilters.search);
+  const [contentType, setContentType] = useState(initialFilters.contentType);
+  const [selectedYear, setSelectedYear] = useState(initialFilters.year);
 
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-
-  // Filter content
-  const filteredContent = useMemo(() => {
-    return content.filter((item) => {
-      if (search) {
-        const searchLower = search.toLowerCase();
-        const matchesTitle = item.title.toLowerCase().includes(searchLower);
-        const matchesDesc = item.description?.toLowerCase().includes(searchLower);
-        if (!matchesTitle && !matchesDesc) return false;
+  const updateURL = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      if (!updates.page) {
+        params.delete('page');
       }
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
+    },
+    [router, searchParams]
+  );
 
-      if (contentType && item.content_type !== contentType) return false;
-      if (selectedYear && item.year !== selectedYear) return false;
+  const handleSearch = useCallback(() => {
+    updateURL({ search });
+  }, [search, updateURL]);
 
-      return true;
-    });
-  }, [content, search, contentType, selectedYear]);
+  const handleContentTypeChange = useCallback(
+    (value: string) => {
+      setContentType(value);
+      updateURL({ contentType: value });
+    },
+    [updateURL]
+  );
+
+  const handleYearChange = useCallback(
+    (value: string) => {
+      setSelectedYear(value);
+      updateURL({ year: value });
+    },
+    [updateURL]
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      updateURL({ page: page.toString() });
+    },
+    [updateURL]
+  );
 
   const statCards = [
     {
@@ -178,9 +221,7 @@ export default function AcademyPageClient({ content, stats }: AcademyPageClientP
         <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
           {t('title')}
         </h1>
-        <p className="text-sm text-[var(--text-muted)]">
-          {t('subtitle')}
-        </p>
+        <p className="text-sm text-[var(--text-muted)]">{t('subtitle')}</p>
       </div>
 
       {/* Stats Cards */}
@@ -207,7 +248,13 @@ export default function AcademyPageClient({ content, stats }: AcademyPageClientP
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search */}
-        <div className="relative flex-1">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSearch();
+          }}
+          className="relative flex-1"
+        >
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
             {icons.search}
           </span>
@@ -215,15 +262,16 @@ export default function AcademyPageClient({ content, stats }: AcademyPageClientP
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onBlur={handleSearch}
             placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
           />
-        </div>
+        </form>
 
         {/* Type Filter */}
         <select
           value={contentType}
-          onChange={(e) => setContentType(e.target.value)}
+          onChange={(e) => handleContentTypeChange(e.target.value)}
           className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
         >
           <option value="">{t('allTypes')}</option>
@@ -235,110 +283,114 @@ export default function AcademyPageClient({ content, stats }: AcademyPageClientP
         </select>
 
         {/* Year Filter */}
-        {years.length > 0 && (
-          <select
-            value={selectedYear || ''}
-            onChange={(e) => setSelectedYear(e.target.value ? Number(e.target.value) : null)}
-            className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
-          >
-            <option value="">{t('allYears')}</option>
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        )}
+        <select
+          value={selectedYear}
+          onChange={(e) => handleYearChange(e.target.value)}
+          className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
+        >
+          <option value="">{t('allYears')}</option>
+          {yearValues.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Content Grid */}
-      {filteredContent.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredContent.map((item) => {
-            const typeConfig = contentTypeConfig[item.content_type] || contentTypeConfig.VIDEO;
-            return (
-              <Link key={item.id} href={`/academy/${item.id}`}>
-                <Card hover className="group h-full">
-                  {/* Thumbnail */}
-                  <div className="relative aspect-video bg-[var(--card-hover)] rounded-lg mb-3 overflow-hidden">
-                    {item.thumbnail_url ? (
-                      <img
-                        src={item.thumbnail_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
-                        {typeConfig.icon}
-                      </div>
-                    )}
-                    {/* Play overlay for videos */}
-                    {item.content_type === 'VIDEO' && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center text-[var(--primary)]">
-                          {icons.play}
+      {/* Loading State */}
+      <div className={`transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+        {/* Content Grid */}
+        {content.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {content.map((item) => {
+              const typeConfig = contentTypeConfig[item.content_type] || contentTypeConfig.VIDEO;
+              return (
+                <Link key={item.id} href={`/academy/${item.id}`}>
+                  <Card hover className="group h-full">
+                    {/* Thumbnail */}
+                    <div className="relative aspect-video bg-[var(--card-hover)] rounded-lg mb-3 overflow-hidden">
+                      {item.thumbnail_url ? (
+                        <img
+                          src={item.thumbnail_url}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
+                          {typeConfig.icon}
                         </div>
+                      )}
+                      {/* Play overlay for videos */}
+                      {item.content_type === 'VIDEO' && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center text-[var(--primary)]">
+                            {icons.play}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant={typeConfig.variant} size="sm">
+                        {t(`types.${typeConfig.key}`)}
+                      </Badge>
+                      {item.year && (
+                        <Badge variant="default" size="sm">
+                          {item.year}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <h3 className="text-sm sm:text-base font-semibold text-[var(--text)] line-clamp-2 mb-1">
+                      {item.title}
+                    </h3>
+
+                    {item.description && (
+                      <p className="text-xs sm:text-sm text-[var(--text-muted)] line-clamp-2 mb-2">
+                        {item.description}
+                      </p>
+                    )}
+
+                    {item.duration_minutes && (
+                      <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                        {icons.clock}
+                        <span>{formatDuration(item.duration_minutes)}</span>
                       </div>
                     )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant={typeConfig.variant} size="sm">
-                      {t(`types.${typeConfig.key}`)}
-                    </Badge>
-                    {item.year && (
-                      <Badge variant="default" size="sm">
-                        {item.year}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <h3 className="text-sm sm:text-base font-semibold text-[var(--text)] line-clamp-2 mb-1">
-                    {item.title}
-                  </h3>
-
-                  {item.description && (
-                    <p className="text-xs sm:text-sm text-[var(--text-muted)] line-clamp-2 mb-2">
-                      {item.description}
-                    </p>
-                  )}
-
-                  {item.duration_minutes && (
-                    <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                      {icons.clock}
-                      <span>{formatDuration(item.duration_minutes)}</span>
-                    </div>
-                  )}
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
-      ) : (
-        <Card>
-          <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-            <div className="text-[var(--text-light)] mb-4">
-              {icons.empty}
-            </div>
-            <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              {t('noContent')}
-            </h3>
-            <p className="text-sm text-[var(--text-muted)] max-w-md">
-              {search || contentType || selectedYear
-                ? t('adjustFilters')
-                : t('noContentHint')}
-            </p>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
-        </Card>
-      )}
+        ) : (
+          <Card>
+            <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+              <div className="text-[var(--text-light)] mb-4">{icons.empty}</div>
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
+                {t('noContent')}
+              </h3>
+              <p className="text-sm text-[var(--text-muted)] max-w-md">
+                {initialFilters.search || initialFilters.contentType || initialFilters.year
+                  ? t('adjustFilters')
+                  : t('noContentHint')}
+              </p>
+            </div>
+          </Card>
+        )}
 
-      {/* Results count */}
-      {filteredContent.length > 0 && (
-        <p className="text-sm text-[var(--text-muted)] text-center">
-          {t('showingResults', { count: filteredContent.length, total: content.length })}
-        </p>
-      )}
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            itemsPerPage={pagination.itemsPerPage}
+            onPageChange={handlePageChange}
+            isLoading={isPending}
+          />
+        )}
+      </div>
     </div>
   );
 }

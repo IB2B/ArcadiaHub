@@ -13,11 +13,6 @@ import { Database } from '@/types/database.types';
 type Notification = Database['public']['Tables']['notifications']['Row'];
 
 const icons = {
-  search: (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-    </svg>
-  ),
   bell: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -61,7 +56,6 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
   const profileRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const t = useTranslations('nav');
-  const tCommon = useTranslations('common');
 
   const handleLogout = useCallback(() => {
     startLogoutTransition(async () => {
@@ -207,31 +201,10 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
           )}
         </div>
 
-        {/* Center: Search (desktop) - only show when no breadcrumbs */}
-        {breadcrumbs.length <= 1 && (
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
-                {icons.search}
-              </span>
-              <input
-                type="text"
-                placeholder={tCommon('searchPlaceholder')}
-                className="w-full pl-10 pr-4 py-2 bg-[var(--card-hover)] border-0 rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-              />
-            </div>
-          </div>
-        )}
-
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
           {/* Language Switcher */}
           <LanguageSwitcher />
-
-          {/* Mobile search */}
-          <button className="md:hidden p-2 rounded-lg text-[var(--text-muted)] hover:bg-[var(--card-hover)] transition-colors">
-            {icons.search}
-          </button>
 
           {/* Notifications */}
           <div ref={notificationRef} className="relative">
@@ -248,7 +221,7 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
 
             {/* Notifications Dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden animate-slideUp">
+              <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden animate-slideUp z-50">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                   <h3 className="font-semibold text-[var(--text)]">Notifications</h3>
                   {unreadCount > 0 && (
@@ -326,7 +299,7 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
 
             {/* Profile Dropdown */}
             {showProfile && (
-              <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-56 max-w-[224px] bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden animate-slideUp">
+              <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-56 max-w-[224px] bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden animate-slideUp z-50">
                 <div className="px-4 py-3 border-b border-[var(--border)]">
                   <p className="font-medium text-[var(--text)]">{user?.name}</p>
                   <p className="text-xs text-[var(--text-muted)]">{user?.email}</p>

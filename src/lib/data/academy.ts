@@ -9,6 +9,7 @@ export async function getAcademyContent(options?: {
   contentType?: string;
   year?: number;
   theme?: string;
+  search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ data: AcademyContent[]; count: number }> {
@@ -27,6 +28,9 @@ export async function getAcademyContent(options?: {
   }
   if (options?.theme) {
     query = query.eq('theme', options.theme);
+  }
+  if (options?.search) {
+    query = query.or(`title.ilike.%${options.search}%,description.ilike.%${options.search}%`);
   }
   if (options?.limit) {
     query = query.limit(options.limit);

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EventCard from '@/components/events/EventCard';
 import CalendarView from '@/components/events/CalendarView';
+import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
 
 type Event = Database['public']['Tables']['events']['Row'];
@@ -17,6 +19,17 @@ interface EventsPageClientProps {
     total: number;
     upcoming: number;
     thisMonth: number;
+  };
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+  initialFilters: {
+    search: string;
+    eventType: string;
+    upcoming: string;
   };
 }
 
@@ -66,37 +79,66 @@ const icons = {
   ),
 };
 
-export default function EventsPageClient({ events, stats }: EventsPageClientProps) {
+export default function EventsPageClient({
+  events,
+  stats,
+  pagination,
+  initialFilters,
+}: EventsPageClientProps) {
   const t = useTranslations('events');
-  const [search, setSearch] = useState('');
-  const [eventType, setEventType] = useState('');
-  const [showUpcoming, setShowUpcoming] = useState(true);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const [search, setSearch] = useState(initialFilters.search);
+  const [eventType, setEventType] = useState(initialFilters.eventType);
+  const [showUpcoming, setShowUpcoming] = useState(initialFilters.upcoming === 'true');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
-  const filteredEvents = useMemo(() => {
-    return events.filter((event) => {
-      // Search filter
-      if (search) {
-        const searchLower = search.toLowerCase();
-        const matchesTitle = event.title.toLowerCase().includes(searchLower);
-        const matchesDesc = event.description?.toLowerCase().includes(searchLower);
-        if (!matchesTitle && !matchesDesc) return false;
+  const updateURL = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      if (!updates.page) {
+        params.delete('page');
       }
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
+    },
+    [router, searchParams]
+  );
 
-      // Type filter
-      if (eventType && event.event_type !== eventType) {
-        return false;
-      }
+  const handleSearch = useCallback(() => {
+    updateURL({ search });
+  }, [search, updateURL]);
 
-      // Upcoming filter
-      if (showUpcoming) {
-        const eventDate = new Date(event.start_datetime);
-        if (eventDate < new Date()) return false;
-      }
+  const handleEventTypeChange = useCallback(
+    (value: string) => {
+      setEventType(value);
+      updateURL({ eventType: value });
+    },
+    [updateURL]
+  );
 
-      return true;
-    });
-  }, [events, search, eventType, showUpcoming]);
+  const handleUpcomingToggle = useCallback(() => {
+    const newValue = !showUpcoming;
+    setShowUpcoming(newValue);
+    updateURL({ upcoming: newValue ? 'true' : '' });
+  }, [showUpcoming, updateURL]);
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      updateURL({ page: page.toString() });
+    },
+    [updateURL]
+  );
 
   const statCards = [
     {
@@ -126,9 +168,7 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
         <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
           {t('title')}
         </h1>
-        <p className="text-sm text-[var(--text-muted)]">
-          {t('subtitle')}
-        </p>
+        <p className="text-sm text-[var(--text-muted)]">{t('subtitle')}</p>
       </div>
 
       {/* Stats Cards */}
@@ -155,7 +195,13 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search */}
-        <div className="relative flex-1">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSearch();
+          }}
+          className="relative flex-1"
+        >
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
             {icons.search}
           </span>
@@ -163,15 +209,16 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onBlur={handleSearch}
             placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
           />
-        </div>
+        </form>
 
         {/* Type Filter */}
         <select
           value={eventType}
-          onChange={(e) => setEventType(e.target.value)}
+          onChange={(e) => handleEventTypeChange(e.target.value)}
           className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
         >
           {eventTypes.map((type) => (
@@ -185,7 +232,7 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
         <Button
           variant={showUpcoming ? 'primary' : 'outline'}
           size="md"
-          onClick={() => setShowUpcoming(!showUpcoming)}
+          onClick={handleUpcomingToggle}
         >
           {showUpcoming ? t('upcomingOnly') : t('allEvents')}
         </Button>
@@ -209,38 +256,46 @@ export default function EventsPageClient({ events, stats }: EventsPageClientProp
         </div>
       </div>
 
-      {/* Events View */}
-      {viewMode === 'calendar' ? (
-        <CalendarView events={filteredEvents} />
-      ) : filteredEvents.length > 0 ? (
-        <>
-          <div className="space-y-3 sm:space-y-4">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-          {/* Results count */}
-          <p className="text-sm text-[var(--text-muted)] text-center">
-            {t('showingResults', { count: filteredEvents.length, total: events.length })}
-          </p>
-        </>
-      ) : (
-        <Card>
-          <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-            <div className="text-[var(--text-light)] mb-4">
-              {icons.empty}
+      {/* Loading State */}
+      <div className={`transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+        {/* Events View */}
+        {viewMode === 'calendar' ? (
+          <CalendarView events={events} />
+        ) : events.length > 0 ? (
+          <>
+            <div className="space-y-3 sm:space-y-4">
+              {events.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
             </div>
-            <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              {t('noEvents')}
-            </h3>
-            <p className="text-sm text-[var(--text-muted)] max-w-md">
-              {search || eventType || showUpcoming
-                ? t('adjustFilters')
-                : t('noEventsHint')}
-            </p>
-          </div>
-        </Card>
-      )}
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                itemsPerPage={pagination.itemsPerPage}
+                onPageChange={handlePageChange}
+                isLoading={isPending}
+              />
+            )}
+          </>
+        ) : (
+          <Card>
+            <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+              <div className="text-[var(--text-light)] mb-4">{icons.empty}</div>
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
+                {t('noEvents')}
+              </h3>
+              <p className="text-sm text-[var(--text-muted)] max-w-md">
+                {initialFilters.search || initialFilters.eventType || initialFilters.upcoming
+                  ? t('adjustFilters')
+                  : t('noEventsHint')}
+              </p>
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

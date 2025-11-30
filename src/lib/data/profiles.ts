@@ -53,6 +53,7 @@ export async function updateProfile(
 export async function getPartners(options?: {
   category?: string;
   isActive?: boolean;
+  search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ data: Profile[]; count: number }> {
@@ -69,6 +70,9 @@ export async function getPartners(options?: {
   if (options?.isActive !== undefined) {
     query = query.eq('is_active', options.isActive);
   }
+  if (options?.search) {
+    query = query.or(`company_name.ilike.%${options.search}%,contact_first_name.ilike.%${options.search}%,contact_last_name.ilike.%${options.search}%,city.ilike.%${options.search}%`);
+  }
   if (options?.limit) {
     query = query.limit(options.limit);
   }
@@ -76,7 +80,7 @@ export async function getPartners(options?: {
     query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
   }
 
-  query = query.order('created_at', { ascending: false });
+  query = query.order('company_name', { ascending: true });
 
   const { data, count, error } = await query;
 

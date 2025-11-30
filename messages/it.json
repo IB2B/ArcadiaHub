@@ -28,7 +28,26 @@
     "selected": "Selezionato",
     "minutes": "minuti",
     "hours": "ore",
-    "new": "Nuovo"
+    "new": "Nuovo",
+    "pagination": {
+      "showing": "Mostrando da",
+      "to": "a",
+      "of": "di",
+      "results": "risultati",
+      "firstPage": "Prima pagina",
+      "lastPage": "Ultima pagina",
+      "previousPage": "Pagina precedente",
+      "nextPage": "Pagina successiva"
+    }
+  },
+  "landing": {
+    "signIn": "Accedi",
+    "partnerOnly": "Accesso Solo Partner",
+    "heroTitle": "Il Tuo Portale",
+    "heroHighlight": "Partner Completo",
+    "heroSubtitle": "Accedi alle risorse formative, gestisci i casi, connettiti con la community e fai crescere il tuo business con la piattaforma partner completa di Harlock.",
+    "accessPortal": "Accedi al Portale",
+    "allRightsReserved": "Tutti i diritti riservati."
   },
   "auth": {
     "login": "Accedi",
@@ -68,11 +87,14 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "myCases": "Le Mie Pratiche",
+    "cases": "Pratiche",
     "community": "Community",
     "calendar": "Calendario",
+    "events": "Eventi",
     "academy": "Academy",
     "documents": "Documenti",
     "blog": "Blog",
+    "activity": "Attivita",
     "profile": "Profilo",
     "settings": "Impostazioni",
     "admin": "Admin",
@@ -114,6 +136,14 @@
       "blog": "Articolo Blog"
     },
     "yesterdayAt": "Ieri alle [TIME]"
+  },
+  "activity": {
+    "title": "Feed Attivita",
+    "subtitle": "{count, plural, =0 {Nessuna attivita} =1 {1 attivita} other {# attivita}}",
+    "allActivity": "Tutto",
+    "noActivity": "Nessuna Attivita",
+    "noActivityYet": "Il tuo feed attivita e vuoto. Le attivita appariranno qui man mano che interagisci con la piattaforma.",
+    "noActivityFiltered": "Nessuna attivita trovata per questo filtro. Prova a selezionare una categoria diversa."
   },
   "cases": {
     "title": "Le Mie Pratiche",
@@ -242,7 +272,13 @@
       "slides": "Slide",
       "podcast": "Podcast",
       "recording": "Registrazione Evento"
-    }
+    },
+    "details": "Dettagli",
+    "relatedContent": "Contenuti Correlati",
+    "noPreview": "Anteprima non disponibile",
+    "downloadMaterials": "Scarica Materiali",
+    "downloadHint": "Scarica slide, documenti e risorse aggiuntive",
+    "podcast": "Episodio Podcast"
   },
   "documents": {
     "title": "Documenti",
@@ -267,9 +303,15 @@
     "totalDocuments": "Documenti Totali",
     "noDocuments": "Nessun documento trovato",
     "noDocumentsHint": "Non ci sono documenti disponibili in questa categoria.",
-    "fileSize": "Dimensione",
-    "fileType": "Tipo",
-    "lastUpdated": "Ultimo Aggiornamento"
+    "fileSize": "Dimensione File",
+    "fileType": "Tipo File",
+    "lastUpdated": "Ultimo Aggiornamento",
+    "downloadFile": "Scarica File",
+    "fileDetails": "Dettagli File",
+    "category": "Categoria",
+    "uploadedOn": "Caricato il",
+    "relatedDocuments": "Documenti Correlati",
+    "documentPreview": "Anteprima Documento"
   },
   "blog": {
     "title": "Blog",

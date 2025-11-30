@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import PartnerCard from '@/components/community/PartnerCard';
+import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -11,9 +13,17 @@ type Profile = Database['public']['Tables']['profiles']['Row'];
 interface CommunityPageClientProps {
   partners: Profile[];
   totalCount: number;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+  initialFilters: {
+    search: string;
+    category: string;
+  };
 }
-
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const icons = {
   search: (
@@ -33,58 +43,64 @@ const icons = {
   ),
 };
 
-export default function CommunityPageClient({ partners, totalCount }: CommunityPageClientProps) {
+export default function CommunityPageClient({
+  partners,
+  totalCount,
+  pagination,
+  initialFilters,
+}: CommunityPageClientProps) {
   const t = useTranslations('community');
-  const [search, setSearch] = useState('');
-  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  // Get unique categories
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
-    partners.forEach((p) => {
-      if (p.category) cats.add(p.category);
-    });
-    return Array.from(cats).sort();
-  }, [partners]);
+  const [search, setSearch] = useState(initialFilters.search);
+  const selectedCategory = initialFilters.category;
 
-  // Filter partners
-  const filteredPartners = useMemo(() => {
-    return partners.filter((partner) => {
-      const name = partner.company_name ||
-        `${partner.contact_first_name || ''} ${partner.contact_last_name || ''}`.trim();
-
-      // Search filter
-      if (search) {
-        const searchLower = search.toLowerCase();
-        const matchesName = name.toLowerCase().includes(searchLower);
-        const matchesDesc = partner.description?.toLowerCase().includes(searchLower);
-        const matchesCity = partner.city?.toLowerCase().includes(searchLower);
-        if (!matchesName && !matchesDesc && !matchesCity) return false;
+  const updateURL = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      if (!updates.page) {
+        params.delete('page');
       }
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
+    },
+    [router, searchParams]
+  );
 
-      // Letter filter
-      if (selectedLetter) {
-        const firstLetter = name.charAt(0).toUpperCase();
-        if (firstLetter !== selectedLetter) return false;
-      }
+  const handleSearch = useCallback(() => {
+    updateURL({ search });
+  }, [search, updateURL]);
 
-      // Category filter
-      if (selectedCategory && partner.category !== selectedCategory) {
-        return false;
-      }
+  const handleCategoryChange = useCallback(
+    (category: string) => {
+      updateURL({ category });
+    },
+    [updateURL]
+  );
 
-      return true;
-    });
-  }, [partners, search, selectedLetter, selectedCategory]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      updateURL({ page: page.toString() });
+    },
+    [updateURL]
+  );
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearch('');
-    setSelectedLetter(null);
-    setSelectedCategory('');
-  };
+    updateURL({ search: '', category: '' });
+  }, [updateURL]);
 
-  const hasFilters = search || selectedLetter || selectedCategory;
+  const hasFilters = initialFilters.search || initialFilters.category;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -106,106 +122,77 @@ export default function CommunityPageClient({ partners, totalCount }: CommunityP
       </div>
 
       {/* Filters */}
-      <div className="space-y-3">
-        {/* Search and Category */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
-              {icons.search}
-            </span>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('searchPlaceholder')}
-              className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-            />
-          </div>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSearch();
+          }}
+          className="relative flex-1"
+        >
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+            {icons.search}
+          </span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onBlur={handleSearch}
+            placeholder={t('searchPlaceholder')}
+            className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder:text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+          />
+        </form>
 
-          {categories.length > 0 && (
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
-            >
-              <option value="">{t('allCategories')}</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          )}
-
-          {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-lg transition-colors"
-            >
-              {t('clear')}
-            </button>
-          )}
-        </div>
-
-        {/* Alphabet Filter */}
-        <div className="flex flex-wrap gap-1">
+        {hasFilters && (
           <button
-            onClick={() => setSelectedLetter(null)}
-            className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-              selectedLetter === null
-                ? 'bg-[var(--primary)] text-white'
-                : 'bg-[var(--card)] text-[var(--text-muted)] hover:bg-[var(--card-hover)]'
-            }`}
+            onClick={clearFilters}
+            className="px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-lg transition-colors"
           >
-            {t('all')}
+            {t('clear')}
           </button>
-          {alphabet.map((letter) => (
-            <button
-              key={letter}
-              onClick={() => setSelectedLetter(selectedLetter === letter ? null : letter)}
-              className={`w-7 h-7 text-xs font-medium rounded transition-colors ${
-                selectedLetter === letter
-                  ? 'bg-[var(--primary)] text-white'
-                  : 'bg-[var(--card)] text-[var(--text-muted)] hover:bg-[var(--card-hover)]'
-              }`}
-            >
-              {letter}
-            </button>
-          ))}
-        </div>
+        )}
       </div>
 
-      {/* Partners Grid */}
-      {filteredPartners.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredPartners.map((partner) => (
-            <PartnerCard key={partner.id} partner={partner} />
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-            <div className="text-[var(--text-light)] mb-4">
-              {icons.empty}
+      {/* Loading State */}
+      <div className={`transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+        {/* Partners Grid */}
+        {partners.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {partners.map((partner) => (
+                <PartnerCard key={partner.id} partner={partner} />
+              ))}
             </div>
-            <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
-              {t('noPartners')}
-            </h3>
-            <p className="text-sm text-[var(--text-muted)] max-w-md">
-              {hasFilters
-                ? t('adjustFilters')
-                : t('noPartnersYet')}
-            </p>
-          </div>
-        </Card>
-      )}
-
-      {/* Results count */}
-      {filteredPartners.length > 0 && (
-        <p className="text-sm text-[var(--text-muted)] text-center">
-          {t('showingResults', { count: filteredPartners.length, total: partners.length })}
-        </p>
-      )}
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                itemsPerPage={pagination.itemsPerPage}
+                onPageChange={handlePageChange}
+                isLoading={isPending}
+              />
+            )}
+          </>
+        ) : (
+          <Card>
+            <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+              <div className="text-[var(--text-light)] mb-4">
+                {icons.empty}
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text)] mb-1">
+                {t('noPartners')}
+              </h3>
+              <p className="text-sm text-[var(--text-muted)] max-w-md">
+                {hasFilters
+                  ? t('adjustFilters')
+                  : t('noPartnersYet')}
+              </p>
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

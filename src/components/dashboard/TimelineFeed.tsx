@@ -4,6 +4,7 @@ import { memo, useMemo, ReactNode } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { format, isToday, isYesterday, formatDistanceToNow, Locale } from 'date-fns';
 import { enUS, fr, it } from 'date-fns/locale';
+import { Link } from '@/navigation';
 import Card, { CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
@@ -93,6 +94,34 @@ const typeKeys: Record<FeedItemType, string> = {
   blog: 'blog',
 };
 
+// Get link URL based on item type and ID
+function getItemLink(item: FeedItem): string | null {
+  // If metadata has an explicit link, use it
+  if (item.metadata?.link) {
+    return item.metadata.link;
+  }
+
+  // Extract the actual ID from the prefixed ID (e.g., "case-123" -> "123")
+  const actualId = item.id.split('-').slice(1).join('-');
+
+  switch (item.type) {
+    case 'case':
+      return `/cases/${actualId}`;
+    case 'event':
+      return `/events/${actualId}`;
+    case 'blog':
+      return `/blog`; // Blog items should have metadata.link with slug
+    case 'content':
+      return `/academy/${actualId}`;
+    case 'document':
+      return `/documents/${actualId}`;
+    case 'announcement':
+      return null; // Announcements don't have a detail page
+    default:
+      return null;
+  }
+}
+
 function formatTimestamp(date: Date, yesterdayLabel: string, locale: Locale): string {
   if (isToday(date)) {
     return formatDistanceToNow(date, { addSuffix: true, locale });
@@ -107,9 +136,10 @@ function formatTimestamp(date: Date, yesterdayLabel: string, locale: Locale): st
 const FeedItemCard = memo(function FeedItemCard({ item, typeLabel, yesterdayLabel, locale }: { item: FeedItem; typeLabel: string; yesterdayLabel: string; locale: Locale }) {
   const colors = typeColors[item.type];
   const formattedTime = useMemo(() => formatTimestamp(item.timestamp, yesterdayLabel, locale), [item.timestamp, yesterdayLabel, locale]);
+  const link = useMemo(() => getItemLink(item), [item]);
 
-  return (
-    <Card hover className="group">
+  const cardContent = (
+    <Card hover className="group cursor-pointer">
       <CardContent>
         <div className="flex gap-3 sm:gap-4">
           {/* Icon */}
@@ -169,6 +199,17 @@ const FeedItemCard = memo(function FeedItemCard({ item, typeLabel, yesterdayLabe
       </CardContent>
     </Card>
   );
+
+  // Wrap in Link if we have a valid link
+  if (link) {
+    return (
+      <Link href={link} className="block">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 });
 
 // Loading Skeleton

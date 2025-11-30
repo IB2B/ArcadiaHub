@@ -9,6 +9,7 @@ type EventInsert = Database['public']['Tables']['events']['Insert'];
 export async function getEvents(options?: {
   eventType?: string;
   upcoming?: boolean;
+  search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ data: Event[]; count: number }> {
@@ -24,6 +25,9 @@ export async function getEvents(options?: {
   }
   if (options?.upcoming) {
     query = query.gte('start_datetime', new Date().toISOString());
+  }
+  if (options?.search) {
+    query = query.or(`title.ilike.%${options.search}%,description.ilike.%${options.search}%`);
   }
   if (options?.limit) {
     query = query.limit(options.limit);

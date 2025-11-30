@@ -132,9 +132,12 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 space-y-3 sm:space-y-4 order-2 lg:order-1">
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">{t('activityFeed')}</h2>
+            <Link href="/activity">
+              <Button variant="ghost" size="sm">{t('seeAll')}</Button>
+            </Link>
           </div>
           {feedItems.length > 0 ? (
-            <TimelineFeed items={feedItems} />
+            <TimelineFeed items={feedItems.slice(0, 5)} />
           ) : (
             <Card>
               <CardContent>

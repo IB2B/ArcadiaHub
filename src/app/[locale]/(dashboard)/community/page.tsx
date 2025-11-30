@@ -1,8 +1,48 @@
 import { getPartners } from '@/lib/data/profiles';
 import CommunityPageClient from './CommunityPageClient';
 
-export default async function CommunityPage() {
-  const { data: partners, count } = await getPartners({ isActive: true, limit: 100 });
+const PAGE_SIZE = 12;
 
-  return <CommunityPageClient partners={partners} totalCount={count} />;
+interface CommunityPageProps {
+  searchParams: Promise<{
+    page?: string;
+    search?: string;
+    category?: string;
+  }>;
+}
+
+export default async function CommunityPage({ searchParams }: CommunityPageProps) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || '1', 10));
+  const search = params.search || '';
+  const category = params.category || '';
+
+  const offset = (page - 1) * PAGE_SIZE;
+
+  const { data: partners, count } = await getPartners({
+    isActive: true,
+    search: search || undefined,
+    category: category || undefined,
+    limit: PAGE_SIZE,
+    offset,
+  });
+
+  const totalPages = Math.ceil(count / PAGE_SIZE);
+
+  return (
+    <CommunityPageClient
+      partners={partners}
+      totalCount={count}
+      pagination={{
+        currentPage: page,
+        totalPages,
+        totalItems: count,
+        itemsPerPage: PAGE_SIZE,
+      }}
+      initialFilters={{
+        search,
+        category,
+      }}
+    />
+  );
 }

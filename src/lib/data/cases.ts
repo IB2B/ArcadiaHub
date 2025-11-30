@@ -79,24 +79,45 @@ export async function getMyCase(caseId: string): Promise<CaseWithDetails | null>
   return data as unknown as CaseWithDetails;
 }
 
-export async function getMyCases(): Promise<Case[]> {
+export async function getMyCases(options?: {
+  search?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ data: Case[]; count: number }> {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) return { data: [], count: 0 };
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('cases')
-    .select('*')
-    .eq('partner_id', user.id)
-    .order('created_at', { ascending: false });
+    .select('*', { count: 'exact' })
+    .eq('partner_id', user.id);
+
+  if (options?.search) {
+    query = query.or(`case_code.ilike.%${options.search}%,client_name.ilike.%${options.search}%`);
+  }
+  if (options?.status) {
+    query = query.eq('status', options.status);
+  }
+  if (options?.limit) {
+    query = query.limit(options.limit);
+  }
+  if (options?.offset) {
+    query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+  }
+
+  query = query.order('created_at', { ascending: false });
+
+  const { data, count, error } = await query;
 
   if (error) {
     console.error('Error fetching my cases:', error);
-    return [];
+    return { data: [], count: 0 };
   }
 
-  return data || [];
+  return { data: data || [], count: count || 0 };
 }
 
 export async function createCase(

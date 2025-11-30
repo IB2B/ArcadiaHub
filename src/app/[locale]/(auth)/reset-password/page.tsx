@@ -8,6 +8,7 @@ import { resetPassword } from '@/lib/auth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card, { CardContent } from '@/components/ui/Card';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function ResetPasswordPage() {
   const t = useTranslations('auth');
@@ -46,7 +47,12 @@ export default function ResetPasswordPage() {
 
   if (!hasToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--background)]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--background)] relative">
+        {/* Language Switcher */}
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher />
+        </div>
+
         <div className="w-full max-w-md">
           <Card>
             <CardContent className="text-center py-8">
@@ -74,7 +80,12 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--background)]">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--background)] relative">
+      {/* Language Switcher */}
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
