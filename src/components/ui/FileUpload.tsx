@@ -219,16 +219,11 @@ export default function FileUpload({
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-[var(--text)] truncate">
-                {selectedFile?.name || (value ? 'Uploaded file' : '')}
+                {selectedFile?.name || (value ? 'Current image' : '')}
               </p>
               {selectedFile && (
                 <p className="text-xs text-[var(--text-muted)]">
                   {formatFileSize(selectedFile.size)}
-                </p>
-              )}
-              {value && !selectedFile && (
-                <p className="text-xs text-[var(--text-muted)] truncate">
-                  {value}
                 </p>
               )}
             </div>

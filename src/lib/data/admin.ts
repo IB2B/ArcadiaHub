@@ -230,6 +230,56 @@ export async function deletePartner(id: string): Promise<{ success: boolean; err
   return { success: true };
 }
 
+/**
+ * Upload partner logo to storage
+ */
+export async function uploadPartnerLogo(
+  formData: FormData
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  const supabase = await createClient();
+
+  const file = formData.get('file') as File;
+  const partnerId = formData.get('partnerId') as string;
+
+  if (!file || file.size === 0) {
+    return { success: false, error: 'No file provided' };
+  }
+
+  // Validate file type
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!validTypes.includes(file.type)) {
+    return { success: false, error: 'Invalid file type. Please upload an image.' };
+  }
+
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    return { success: false, error: 'File too large. Maximum size is 5MB.' };
+  }
+
+  const timestamp = Date.now();
+  const ext = file.name.split('.').pop();
+  const path = `${partnerId || 'temp'}-${timestamp}.${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from('partner-logos')
+    .upload(path, file, {
+      cacheControl: '3600',
+      upsert: true,
+    });
+
+  if (error) {
+    console.error('Error uploading partner logo:', error);
+    return { success: false, error: error.message };
+  }
+
+  // Get public URL
+  const { data: urlData } = supabase.storage
+    .from('partner-logos')
+    .getPublicUrl(data.path);
+
+  return { success: true, url: urlData.publicUrl };
+}
+
 // ============================================================================
 // CASE MANAGEMENT
 // ============================================================================

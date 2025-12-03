@@ -4,13 +4,14 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
-import { createPartner, updatePartner } from '@/lib/data/admin';
+import { createPartner, updatePartner, uploadPartnerLogo } from '@/lib/data/admin';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import Toggle from '@/components/ui/Toggle';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
+import FileUpload from '@/components/ui/FileUpload';
 
 type Profile = Tables<'profiles'>;
 
@@ -26,8 +27,10 @@ interface FormErrors {
 export default function PartnerForm({ partner, categories }: PartnerFormProps) {
   const t = useTranslations('admin');
   const tPartners = useTranslations('admin.partners');
+  const tPartnersForm = useTranslations('admin.partners.form');
   const tForm = useTranslations('admin.form');
   const tMessages = useTranslations('admin.messages');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [errors, setErrors] = useState<FormErrors>({});
@@ -51,7 +54,12 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
     website: partner?.website || '',
     description: partner?.description || '',
     is_active: partner?.is_active ?? true,
+    logo_url: partner?.logo_url || '',
   });
+
+  // Track if adding new category
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState('');
 
   // Update field
   const updateField = (field: string, value: string | boolean) => {
@@ -109,6 +117,7 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
             website: formData.website || null,
             description: formData.description || null,
             is_active: formData.is_active,
+            logo_url: formData.logo_url || null,
           };
 
           const result = await updatePartner(partner.id, updateData);
@@ -132,9 +141,41 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
   const categoryOptions = [
     { value: '', label: tForm('selectOption') },
     ...categories.map((cat) => ({ value: cat, label: cat })),
-    // Allow adding new category
-    { value: '__new__', label: '+ Add new category' },
+    { value: '__new__', label: tPartnersForm('addCategory') },
   ];
+
+  // Handle category change
+  const handleCategoryChange = (value: string) => {
+    if (value === '__new__') {
+      setIsAddingCategory(true);
+      setNewCategory('');
+    } else {
+      setIsAddingCategory(false);
+      updateField('category', value);
+    }
+  };
+
+  // Confirm new category
+  const confirmNewCategory = () => {
+    if (newCategory.trim()) {
+      updateField('category', newCategory.trim());
+      setIsAddingCategory(false);
+    }
+  };
+
+  // Cancel new category
+  const cancelNewCategory = () => {
+    setIsAddingCategory(false);
+    setNewCategory('');
+  };
+
+  // Handle logo upload
+  const handleLogoUpload = async (formData: FormData): Promise<{ success: boolean; url?: string; error?: string }> => {
+    if (partner?.id) {
+      formData.append('partnerId', partner.id);
+    }
+    return uploadPartnerLogo(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -152,10 +193,21 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Basic Information */}
+        {/* Logo & Basic Information */}
         <Card>
           <CardHeader title={tPartners('details')} />
           <CardContent className="space-y-4">
+            <FileUpload
+              label={tPartnersForm('companyLogo')}
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              maxSize={5 * 1024 * 1024}
+              value={formData.logo_url}
+              onChange={(url) => updateField('logo_url', url || '')}
+              uploadAction={handleLogoUpload}
+              showPreview={true}
+              previewType="image"
+              hint={tPartnersForm('logoHint')}
+            />
             <Input
               label={tPartners('companyName')}
               value={formData.company_name}
@@ -174,12 +226,12 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="First Name"
+                label={tPartnersForm('firstName')}
                 value={formData.contact_first_name}
                 onChange={(e) => updateField('contact_first_name', e.target.value)}
               />
               <Input
-                label="Last Name"
+                label={tPartnersForm('lastName')}
                 value={formData.contact_last_name}
                 onChange={(e) => updateField('contact_last_name', e.target.value)}
               />
@@ -189,14 +241,45 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
               value={formData.phone}
               onChange={(e) => updateField('phone', e.target.value)}
             />
-            <Select
-              label={tPartners('category')}
-              options={categoryOptions}
-              value={formData.category}
-              onChange={(e) => updateField('category', e.target.value === '__new__' ? '' : e.target.value)}
-            />
+            {isAddingCategory ? (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-[var(--text)]">
+                  {tPartners('category')}
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    placeholder={tPartnersForm('newCategoryPlaceholder')}
+                    className="flex-1"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        confirmNewCategory();
+                      } else if (e.key === 'Escape') {
+                        cancelNewCategory();
+                      }
+                    }}
+                  />
+                  <Button type="button" size="sm" onClick={confirmNewCategory}>
+                    {tPartnersForm('add')}
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={cancelNewCategory}>
+                    {tCommon('cancel')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Select
+                label={tPartners('category')}
+                options={categoryOptions}
+                value={formData.category}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+              />
+            )}
             <Input
-              label="Website"
+              label={tPartnersForm('website')}
               type="url"
               value={formData.website}
               onChange={(e) => updateField('website', e.target.value)}
@@ -208,33 +291,33 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
 
         {/* Address */}
         <Card>
-          <CardHeader title="Address" />
+          <CardHeader title={tPartnersForm('address')} />
           <CardContent className="space-y-4">
             <Input
-              label="Street Address"
+              label={tPartnersForm('streetAddress')}
               value={formData.address}
               onChange={(e) => updateField('address', e.target.value)}
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="City"
+                label={tPartnersForm('city')}
                 value={formData.city}
                 onChange={(e) => updateField('city', e.target.value)}
               />
               <Input
-                label="Region/State"
+                label={tPartnersForm('region')}
                 value={formData.region}
                 onChange={(e) => updateField('region', e.target.value)}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="Country"
+                label={tPartnersForm('country')}
                 value={formData.country}
                 onChange={(e) => updateField('country', e.target.value)}
               />
               <Input
-                label="Postal Code"
+                label={tPartnersForm('postalCode')}
                 value={formData.postal_code}
                 onChange={(e) => updateField('postal_code', e.target.value)}
               />
@@ -244,13 +327,12 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
 
         {/* Description */}
         <Card className="lg:col-span-2">
-          <CardHeader title="Description" />
+          <CardHeader title={tPartnersForm('description')} />
           <CardContent>
             <Textarea
               value={formData.description}
               onChange={(e) => updateField('description', e.target.value)}
               rows={4}
-              placeholder="Partner description..."
             />
           </CardContent>
         </Card>
@@ -261,7 +343,7 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
           <CardContent>
             <Toggle
               label={tPartners('active')}
-              description="Active partners can log in and access the platform"
+              description={tPartnersForm('activeDescription')}
               checked={formData.is_active}
               onChange={(e) => updateField('is_active', e.target.checked)}
             />

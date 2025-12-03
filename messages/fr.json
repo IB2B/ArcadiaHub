@@ -72,6 +72,7 @@
     "signIn": "Se connecter",
     "noAccount": "Vous n'avez pas de compte?",
     "contactUs": "Contactez-nous pour devenir partenaire",
+    "requestAccess": "Demander l'acces",
     "sendResetLink": "Envoyer le lien",
     "checkYourEmail": "Verifiez votre email",
     "resetLinkSent": "Nous avons envoye un lien de reinitialisation a votre adresse email. Verifiez votre boite de reception.",
@@ -82,6 +83,69 @@
     "passwordResetSuccess": "Mot de passe reinitialise",
     "redirectingToLogin": "Redirection vers la connexion...",
     "sessionExpired": "Votre session a expire. Veuillez vous reconnecter."
+  },
+  "requestAccess": {
+    "title": "Quelque chose de special arrive pour vous...",
+    "subtitle": "Repondez a quelques questions simples et aidez-nous a rendre cette surprise vraiment unique",
+    "steps": {
+      "personal": "Info Personnelles",
+      "company": "Info Entreprise"
+    },
+    "personalInfo": "Informations Personnelles",
+    "companyInfo": "Informations de l'Entreprise",
+    "fields": {
+      "firstName": "Prenom",
+      "firstNamePlaceholder": "Entrez votre prenom",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Entrez votre nom",
+      "phone": "Telephone Mobile",
+      "phonePlaceholder": "+39 333 1234567",
+      "personalEmail": "Email Personnel",
+      "personalEmailPlaceholder": "votre.email@exemple.com",
+      "description": "Description",
+      "descriptionPlaceholder": "Role, notes, relations, etc.",
+      "professionalPhoto": "Photo Professionnelle",
+      "uploadPhoto": "Cliquez pour telecharger votre photo",
+      "photoUploaded": "Photo telechargee avec succes",
+      "companyName": "Raison Sociale",
+      "companyNamePlaceholder": "Nom de votre entreprise",
+      "legalAddress": "Siege Social",
+      "legalAddressPlaceholder": "Via Roma 1, 00100 Roma RM",
+      "operationalAddress": "Adresse Operationnelle",
+      "operationalAddressPlaceholder": "Via Milano 10, 20100 Milano MI",
+      "businessPhone": "Telephone Entreprise",
+      "businessPhonePlaceholder": "+39 02 12345678",
+      "genericEmail": "Email General",
+      "genericEmailPlaceholder": "info@entreprise.com",
+      "pec": "PEC (Email Certifie)",
+      "pecPlaceholder": "entreprise@pec.it",
+      "pecHint": "Adresse email certifiee italienne",
+      "companyDescription": "Description de l'Entreprise",
+      "companyDescriptionPlaceholder": "Secteur, activites principales, etc.",
+      "companyLogo": "Logo de l'Entreprise",
+      "uploadLogo": "Cliquez pour telecharger le logo",
+      "logoUploaded": "Logo telecharge avec succes",
+      "maxSize": "Max 10 Mo",
+      "uploading": "Téléchargement..."
+    },
+    "errors": {
+      "required": "Ce champ est obligatoire",
+      "invalidEmail": "Veuillez entrer une adresse email valide",
+      "invalidFileType": "Type de fichier invalide. Veuillez telecharger une image (JPG, PNG, GIF ou WebP)",
+      "fileTooLarge": "Le fichier est trop volumineux (max 10 Mo)",
+      "uploadFailed": "Echec du telechargement",
+      "submitFailed": "Echec de l'envoi. Veuillez reessayer."
+    },
+    "next": "Suivant",
+    "back": "Retour",
+    "submit": "Envoyer la Demande",
+    "alreadyHaveAccount": "Vous avez deja un compte?",
+    "signIn": "Se connecter",
+    "success": {
+      "title": "Demande Envoyee!",
+      "message": "Merci pour votre interet! Nous examinerons votre demande et vous contacterons bientot.",
+      "backToLogin": "Retour a la Connexion"
+    }
   },
   "nav": {
     "home": "Accueil",
@@ -448,6 +512,7 @@
     "title": "Panneau Admin",
     "nav": {
       "dashboard": "Tableau de Bord",
+      "accessRequests": "Demandes d'Acces",
       "partners": "Partenaires",
       "cases": "Dossiers",
       "events": "Evenements",
@@ -508,7 +573,50 @@
       "filter": "Filtrer",
       "clearFilters": "Effacer les Filtres",
       "export": "Exporter",
-      "import": "Importer"
+      "import": "Importer",
+      "view": "Voir"
+    },
+    "accessRequests": {
+      "title": "Demandes d'Acces",
+      "subtitle": "Examiner et gerer les demandes d'acces des partenaires",
+      "noRequests": "Aucune demande d'acces trouvee",
+      "confirmDelete": "Supprimer la Demande d'Acces",
+      "deleteWarning": "Etes-vous sur de vouloir supprimer cette demande d'acces ? Cette action est irreversible.",
+      "table": {
+        "contact": "Contact",
+        "company": "Entreprise",
+        "status": "Statut",
+        "date": "Date"
+      },
+      "filters": {
+        "all": "Toutes les Demandes",
+        "pending": "En Attente",
+        "approved": "Approuvees",
+        "rejected": "Rejetees"
+      },
+      "status": {
+        "pending": "En Attente",
+        "approved": "Approuvee",
+        "rejected": "Rejetee"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "reject": "Rejeter"
+      },
+      "detail": {
+        "title": "Details de la Demande d'Acces",
+        "personalInfo": "Informations Personnelles",
+        "companyInfo": "Informations Entreprise",
+        "legalAddress": "Adresse Legale",
+        "operationalAddress": "Adresse Operationnelle",
+        "submitted": "Soumise le",
+        "reviewed": "Examinee le",
+        "reviewedBy": "Examinee par",
+        "notes": "Notes",
+        "addNotes": "Ajouter des notes (optionnel)",
+        "notesPlaceholder": "Ajouter des notes sur cette demande...",
+        "close": "Fermer"
+      }
     },
     "partners": {
       "title": "Gestion des Partenaires",

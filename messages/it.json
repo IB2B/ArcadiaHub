@@ -29,6 +29,7 @@
     "minutes": "minuti",
     "hours": "ore",
     "new": "Nuovo",
+    "add": "Aggiungi",
     "pagination": {
       "showing": "Mostrando da",
       "to": "a",
@@ -38,6 +39,15 @@
       "lastPage": "Ultima pagina",
       "previousPage": "Pagina precedente",
       "nextPage": "Pagina successiva"
+    },
+    "fileUpload": {
+      "dropOrBrowse": "Trascina qui o sfoglia",
+      "browse": "sfoglia",
+      "accepted": "Accettati",
+      "maxSize": "Dimensione massima",
+      "uploading": "Caricamento in corso...",
+      "currentImage": "Immagine attuale",
+      "noFileChosen": "Nessun file selezionato"
     }
   },
   "landing": {
@@ -72,6 +82,7 @@
     "signIn": "Accedi",
     "noAccount": "Non hai un account?",
     "contactUs": "Contattaci per diventare partner",
+    "requestAccess": "Richiedi Accesso",
     "sendResetLink": "Invia Link",
     "checkYourEmail": "Controlla la tua email",
     "resetLinkSent": "Abbiamo inviato un link di reimpostazione al tuo indirizzo email. Controlla la tua casella di posta.",
@@ -82,6 +93,69 @@
     "passwordResetSuccess": "Password reimpostata",
     "redirectingToLogin": "Reindirizzamento al login...",
     "sessionExpired": "La tua sessione e scaduta. Accedi di nuovo."
+  },
+  "requestAccess": {
+    "title": "Qualcosa di speciale sta arrivando per te...",
+    "subtitle": "Rispondi a poche semplici domande e aiutaci a rendere questa sorpresa davvero unica",
+    "steps": {
+      "personal": "Info Personali",
+      "company": "Info Azienda"
+    },
+    "personalInfo": "Informazioni Personali",
+    "companyInfo": "Informazioni Aziendali",
+    "fields": {
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Inserisci il tuo nome",
+      "lastName": "Cognome",
+      "lastNamePlaceholder": "Inserisci il tuo cognome",
+      "phone": "Cellulare",
+      "phonePlaceholder": "+39 333 1234567",
+      "personalEmail": "Email Personale",
+      "personalEmailPlaceholder": "tua.email@esempio.com",
+      "description": "Descrizione",
+      "descriptionPlaceholder": "Ruolo, note, relazioni, ecc.",
+      "professionalPhoto": "Foto Professionale",
+      "uploadPhoto": "Clicca per caricare la tua foto",
+      "photoUploaded": "Foto caricata con successo",
+      "companyName": "Ragione Sociale",
+      "companyNamePlaceholder": "Nome della tua azienda",
+      "legalAddress": "Sede Legale",
+      "legalAddressPlaceholder": "Via Roma 1, 00100 Roma RM",
+      "operationalAddress": "Sede Operativa",
+      "operationalAddressPlaceholder": "Via Milano 10, 20100 Milano MI",
+      "businessPhone": "Telefono Aziendale",
+      "businessPhonePlaceholder": "+39 02 12345678",
+      "genericEmail": "Email Generica",
+      "genericEmailPlaceholder": "info@azienda.com",
+      "pec": "PEC",
+      "pecPlaceholder": "azienda@pec.it",
+      "pecHint": "Posta Elettronica Certificata",
+      "companyDescription": "Descrizione Azienda",
+      "companyDescriptionPlaceholder": "Settore, attivita principali, ecc.",
+      "companyLogo": "Logo Azienda",
+      "uploadLogo": "Clicca per caricare il logo aziendale",
+      "logoUploaded": "Logo caricato con successo",
+      "maxSize": "Max 10 MB",
+      "uploading": "Caricamento..."
+    },
+    "errors": {
+      "required": "Questo campo e obbligatorio",
+      "invalidEmail": "Inserisci un indirizzo email valido",
+      "invalidFileType": "Tipo di file non valido. Carica un'immagine (JPG, PNG, GIF o WebP)",
+      "fileTooLarge": "Il file e troppo grande (max 10 MB)",
+      "uploadFailed": "Caricamento fallito",
+      "submitFailed": "Invio fallito. Riprova."
+    },
+    "next": "Avanti",
+    "back": "Indietro",
+    "submit": "Invia Richiesta",
+    "alreadyHaveAccount": "Hai gia un account?",
+    "signIn": "Accedi",
+    "success": {
+      "title": "Richiesta Inviata!",
+      "message": "Grazie per il tuo interesse! Esamineremo la tua richiesta e ti contatteremo presto.",
+      "backToLogin": "Torna al Login"
+    }
   },
   "nav": {
     "home": "Home",
@@ -448,6 +522,7 @@
     "title": "Pannello Admin",
     "nav": {
       "dashboard": "Dashboard",
+      "accessRequests": "Richieste di Accesso",
       "partners": "Partner",
       "cases": "Pratiche",
       "events": "Eventi",
@@ -508,7 +583,50 @@
       "filter": "Filtra",
       "clearFilters": "Cancella Filtri",
       "export": "Esporta",
-      "import": "Importa"
+      "import": "Importa",
+      "view": "Visualizza"
+    },
+    "accessRequests": {
+      "title": "Richieste di Accesso",
+      "subtitle": "Esamina e gestisci le richieste di accesso dei partner",
+      "noRequests": "Nessuna richiesta di accesso trovata",
+      "confirmDelete": "Elimina Richiesta di Accesso",
+      "deleteWarning": "Sei sicuro di voler eliminare questa richiesta di accesso? Questa azione non puo essere annullata.",
+      "table": {
+        "contact": "Contatto",
+        "company": "Azienda",
+        "status": "Stato",
+        "date": "Data"
+      },
+      "filters": {
+        "all": "Tutte le Richieste",
+        "pending": "In Attesa",
+        "approved": "Approvate",
+        "rejected": "Rifiutate"
+      },
+      "status": {
+        "pending": "In Attesa",
+        "approved": "Approvata",
+        "rejected": "Rifiutata"
+      },
+      "actions": {
+        "approve": "Approva",
+        "reject": "Rifiuta"
+      },
+      "detail": {
+        "title": "Dettagli Richiesta di Accesso",
+        "personalInfo": "Informazioni Personali",
+        "companyInfo": "Informazioni Azienda",
+        "legalAddress": "Sede Legale",
+        "operationalAddress": "Sede Operativa",
+        "submitted": "Inviata il",
+        "reviewed": "Esaminata il",
+        "reviewedBy": "Esaminata da",
+        "notes": "Note",
+        "addNotes": "Aggiungi note (opzionale)",
+        "notesPlaceholder": "Aggiungi note su questa richiesta...",
+        "close": "Chiudi"
+      }
     },
     "partners": {
       "title": "Gestione Partner",
@@ -533,6 +651,24 @@
         "all": "Tutti i Partner",
         "active": "Solo Attivi",
         "inactive": "Solo Inattivi"
+      },
+      "form": {
+        "companyLogo": "Logo Azienda",
+        "logoHint": "Consigliato: 200x200px, formato quadrato",
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "website": "Sito Web",
+        "address": "Indirizzo",
+        "streetAddress": "Via",
+        "city": "Citta",
+        "region": "Regione",
+        "country": "Paese",
+        "postalCode": "CAP",
+        "description": "Descrizione",
+        "addCategory": "+ Aggiungi nuova categoria",
+        "newCategoryPlaceholder": "Nome nuova categoria",
+        "add": "Aggiungi",
+        "activeDescription": "I partner attivi possono accedere alla piattaforma"
       }
     },
     "cases": {

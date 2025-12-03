@@ -113,11 +113,11 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Sign up link */}
+        {/* Request access link */}
         <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
           {t('noAccount')}{' '}
-          <Link href="/register" className="text-[var(--primary)] hover:underline font-medium">
-            {t('contactUs')}
+          <Link href="/request-access" className="text-[var(--primary)] hover:underline font-medium">
+            {t('requestAccess')}
           </Link>
         </p>
       </div>

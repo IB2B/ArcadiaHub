@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/database/server';
+import { createServiceSupabaseClient } from '@/lib/database/server';
 
 type NotificationType =
   | 'event_created'
@@ -12,9 +12,10 @@ type NotificationType =
   | 'academy_content_published'
   | 'blog_post_published'
   | 'partner_registered'
+  | 'access_request_submitted'
   | 'system_announcement';
 
-type UserRole = 'admin' | 'partner' | 'commercial';
+type UserRole = 'ADMIN' | 'PARTNER' | 'COMMERCIAL';
 
 interface NotificationPayload {
   title: string;
@@ -27,7 +28,7 @@ interface NotificationPayload {
  * Get all users by role
  */
 async function getUsersByRole(role: UserRole): Promise<string[]> {
-  const supabase = await createClient();
+  const supabase = await createServiceSupabaseClient();
 
   const { data, error } = await supabase
     .from('profiles')
@@ -46,14 +47,14 @@ async function getUsersByRole(role: UserRole): Promise<string[]> {
  * Get all partner user IDs
  */
 async function getAllPartners(): Promise<string[]> {
-  return getUsersByRole('partner');
+  return getUsersByRole('PARTNER');
 }
 
 /**
  * Get all admin user IDs
  */
 async function getAllAdmins(): Promise<string[]> {
-  return getUsersByRole('admin');
+  return getUsersByRole('ADMIN');
 }
 
 /**
@@ -63,7 +64,7 @@ async function createNotification(
   userId: string,
   payload: NotificationPayload
 ): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createServiceSupabaseClient();
 
   const { error } = await supabase
     .from('notifications')
@@ -93,7 +94,7 @@ async function createNotificationsForUsers(
 ): Promise<void> {
   if (userIds.length === 0) return;
 
-  const supabase = await createClient();
+  const supabase = await createServiceSupabaseClient();
 
   const notifications = userIds.map(userId => ({
     user_id: userId,
@@ -329,7 +330,7 @@ export async function notifyBlogPostPublished(post: {
 export async function sendSystemAnnouncement(
   title: string,
   message: string,
-  roles: UserRole[] = ['admin', 'partner', 'commercial']
+  roles: UserRole[] = ['ADMIN', 'PARTNER', 'COMMERCIAL']
 ): Promise<void> {
   const allUsers: string[] = [];
 
@@ -363,5 +364,29 @@ export async function notifyNewPartnerRegistration(partner: {
     message: `${partner.email} has registered as a new partner.`,
     type: 'partner_registered',
     link: `/admin/partners/${partner.id}`,
+  });
+}
+
+// ============================================
+// ACCESS REQUEST NOTIFICATIONS
+// ============================================
+
+/**
+ * Notify admins when a new access request is submitted
+ */
+export async function notifyAdminsAccessRequestSubmitted(request: {
+  id: string;
+  company_name: string;
+  contact_email: string;
+  contact_first_name: string;
+  contact_last_name: string;
+}): Promise<void> {
+  const admins = await getAllAdmins();
+
+  await createNotificationsForUsers(admins, {
+    title: `New access request: ${request.company_name}`,
+    message: `${request.contact_first_name} ${request.contact_last_name} (${request.contact_email}) has submitted an access request.`,
+    type: 'access_request_submitted',
+    link: `/admin/access-requests`,
   });
 }

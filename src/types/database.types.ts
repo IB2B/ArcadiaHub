@@ -571,6 +571,78 @@ export type Database = {
         }
         Relationships: []
       }
+      access_requests: {
+        Row: {
+          id: string
+          status: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+          review_notes: string | null
+          contact_first_name: string
+          contact_last_name: string
+          contact_phone: string
+          contact_email: string
+          contact_description: string
+          contact_photo_url: string | null
+          company_name: string
+          legal_address: string
+          operational_address: string
+          business_phone: string
+          generic_email: string
+          pec: string
+          company_description: string
+          company_logo_url: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          status?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          review_notes?: string | null
+          contact_first_name: string
+          contact_last_name: string
+          contact_phone: string
+          contact_email: string
+          contact_description: string
+          contact_photo_url?: string | null
+          company_name: string
+          legal_address: string
+          operational_address: string
+          business_phone: string
+          generic_email: string
+          pec: string
+          company_description: string
+          company_logo_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          status?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          review_notes?: string | null
+          contact_first_name?: string
+          contact_last_name?: string
+          contact_phone?: string
+          contact_email?: string
+          contact_description?: string
+          contact_photo_url?: string | null
+          company_name?: string
+          legal_address?: string
+          operational_address?: string
+          business_phone?: string
+          generic_email?: string
+          pec?: string
+          company_description?: string
+          company_logo_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

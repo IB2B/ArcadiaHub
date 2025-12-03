@@ -220,8 +220,114 @@ export default function AcademyClient({ initialData, initialFilters }: AcademyCl
         isLoading={isPending}
       />
 
-      {/* Academy Table */}
-      <div className={`transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+      {/* Mobile Card Layout */}
+      <div className={`md:hidden transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+        {initialData.data.length === 0 ? (
+          <div className="text-center py-12 text-[var(--text-muted)]">
+            {tAcademy('noContent')}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {initialData.data.map((content) => (
+              <div
+                key={content.id}
+                className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3"
+              >
+                {/* Header with icon and title */}
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded bg-[var(--background)] flex items-center justify-center text-[var(--text-muted)] flex-shrink-0">
+                    {getTypeIcon(content.content_type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-[var(--text)] break-words">
+                      {content.title}
+                    </h3>
+                    {content.year && (
+                      <p className="text-sm text-[var(--text-muted)] mt-1">{content.year}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Content details */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[var(--text-muted)]">{tAcademy('contentType')}:</span>
+                    <Badge variant="default" size="sm">
+                      {tAcademy(`types.${content.content_type}`)}
+                    </Badge>
+                  </div>
+
+                  {content.theme && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[var(--text-muted)]">{tAcademy('theme')}:</span>
+                      <span className="text-[var(--text)]">{content.theme}</span>
+                    </div>
+                  )}
+
+                  {content.duration_minutes && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[var(--text-muted)]">{tAcademy('duration')}:</span>
+                      <span className="text-[var(--text)]">{content.duration_minutes} min</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[var(--text-muted)]">{tAcademy('isPublished')}:</span>
+                    <Badge
+                      variant={content.is_published ? 'success' : 'default'}
+                      size="sm"
+                    >
+                      {content.is_published ? t('status.published') : t('status.draft')}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 pt-2 border-t border-[var(--border)]">
+                  <Link href={`/admin/academy/${content.id}`} className="flex-1">
+                    <Button variant="ghost" size="sm" className="w-full justify-start" title={t('actions.edit')}>
+                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                      </svg>
+                      {t('actions.edit')}
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleTogglePublish(content)}
+                    title={content.is_published ? t('actions.unpublish') : t('actions.publish')}
+                  >
+                    {content.is_published ? (
+                      <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteClick(content)}
+                    title={t('actions.delete')}
+                  >
+                    <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className={`hidden md:block transition-opacity ${isPending ? 'opacity-50' : ''}`}>
         <Table>
           <TableHeader>
             <TableRow>
@@ -324,18 +430,18 @@ export default function AcademyClient({ initialData, initialFilters }: AcademyCl
             )}
           </TableBody>
         </Table>
-
-        {/* Pagination */}
-        {initialData.totalPages > 1 && (
-          <Pagination
-            currentPage={initialData.page}
-            totalPages={initialData.totalPages}
-            totalItems={initialData.count}
-            itemsPerPage={initialData.pageSize}
-            onPageChange={handlePageChange}
-          />
-        )}
       </div>
+
+      {/* Pagination */}
+      {initialData.totalPages > 1 && (
+        <Pagination
+          currentPage={initialData.page}
+          totalPages={initialData.totalPages}
+          totalItems={initialData.count}
+          itemsPerPage={initialData.pageSize}
+          onPageChange={handlePageChange}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

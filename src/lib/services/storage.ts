@@ -8,7 +8,8 @@ export type StorageBucket =
   | 'blog-images'
   | 'event-attachments'
   | 'partner-logos'
-  | 'case-documents';
+  | 'case-documents'
+  | 'access-requests';
 
 interface UploadResult {
   success: boolean;

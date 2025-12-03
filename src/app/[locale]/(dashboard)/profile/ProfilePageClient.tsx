@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import FileUpload from '@/components/ui/FileUpload';
 import { Database } from '@/types/database.types';
+import { updateCurrentUserProfile, uploadProfileLogo } from '@/lib/data/profiles';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -56,11 +61,35 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
     </svg>
   ),
+  close: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
 };
 
 export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   const t = useTranslations('profile');
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Form state
+  const [formData, setFormData] = useState({
+    company_name: profile.company_name || '',
+    contact_first_name: profile.contact_first_name || '',
+    contact_last_name: profile.contact_last_name || '',
+    phone: profile.phone || '',
+    website: profile.website || '',
+    address: profile.address || '',
+    city: profile.city || '',
+    region: profile.region || '',
+    postal_code: profile.postal_code || '',
+    country: profile.country || '',
+    description: profile.description || '',
+    logo_url: profile.logo_url || '',
+  });
 
   const displayName = profile.company_name ||
     `${profile.contact_first_name || ''} ${profile.contact_last_name || ''}`.trim() ||
@@ -80,6 +109,57 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
     ADMIN: t('administrator'),
   }[profile.role] || profile.role;
 
+  const updateField = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await updateCurrentUserProfile({
+        company_name: formData.company_name || null,
+        contact_first_name: formData.contact_first_name || null,
+        contact_last_name: formData.contact_last_name || null,
+        phone: formData.phone || null,
+        website: formData.website || null,
+        address: formData.address || null,
+        city: formData.city || null,
+        region: formData.region || null,
+        postal_code: formData.postal_code || null,
+        country: formData.country || null,
+        description: formData.description || null,
+        logo_url: formData.logo_url || null,
+      });
+
+      if (result.success) {
+        setMessage({ type: 'success', text: t('updateSuccess') });
+        setIsEditing(false);
+        router.refresh();
+      } else {
+        setMessage({ type: 'error', text: result.error || t('updateError') });
+      }
+    });
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      company_name: profile.company_name || '',
+      contact_first_name: profile.contact_first_name || '',
+      contact_last_name: profile.contact_last_name || '',
+      phone: profile.phone || '',
+      website: profile.website || '',
+      address: profile.address || '',
+      city: profile.city || '',
+      region: profile.region || '',
+      postal_code: profile.postal_code || '',
+      country: profile.country || '',
+      description: profile.description || '',
+      logo_url: profile.logo_url || '',
+    });
+    setIsEditing(false);
+    setMessage(null);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
@@ -87,64 +167,140 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
         <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
           {t('title')}
         </h1>
-        <Button
-          variant={isEditing ? 'primary' : 'outline'}
-          size="sm"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          {icons.edit}
-          <span className="ml-1.5">{isEditing ? t('save') : t('edit')}</span>
-        </Button>
+        <div className="flex gap-2">
+          {isEditing ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCancel}
+                disabled={isPending}
+              >
+                {icons.close}
+                <span className="ml-1.5">{t('cancel')}</span>
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSave}
+                isLoading={isPending}
+              >
+                {t('save')}
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+            >
+              {icons.edit}
+              <span className="ml-1.5">{t('edit')}</span>
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Message */}
+      {message && (
+        <div
+          className={`p-4 rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       {/* Profile Header Card */}
       <Card>
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-          {/* Avatar */}
+          {/* Avatar / Logo */}
           <div className="flex flex-col items-center gap-2">
-            <Avatar
-              size="xl"
-              name={displayName}
-              src={profile.logo_url || undefined}
-            />
-            {isEditing && (
-              <Button variant="ghost" size="sm">
-                {t('changeLogo')}
-              </Button>
+            {isEditing ? (
+              <FileUpload
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                maxSize={5 * 1024 * 1024}
+                value={formData.logo_url}
+                onChange={(url) => updateField('logo_url', url || '')}
+                uploadAction={uploadProfileLogo}
+                showPreview={true}
+                previewType="image"
+                hint="200x200px recommended"
+                className="w-32"
+              />
+            ) : (
+              <Avatar
+                size="xl"
+                name={displayName}
+                src={profile.logo_url || undefined}
+              />
             )}
           </div>
 
           {/* Info */}
           <div className="flex-1">
-            <div className="flex flex-wrap items-start gap-2 mb-2">
-              <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
-                {displayName}
-              </h2>
-              <Badge variant="primary" size="md">
-                {roleLabel}
-              </Badge>
-              {profile.category && (
-                <Badge variant="default" size="md">
-                  {profile.category}
-                </Badge>
-              )}
-            </div>
-
-            {profile.description && (
-              <p className="text-sm text-[var(--text-secondary)] mb-4">
-                {profile.description}
-              </p>
-            )}
-
-            {/* Tags */}
-            {profile.tags && profile.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {profile.tags.map((tag, index) => (
-                  <Badge key={index} variant="default" size="sm">
-                    {tag}
-                  </Badge>
-                ))}
+            {isEditing ? (
+              <div className="space-y-4">
+                <Input
+                  label={t('companyName')}
+                  value={formData.company_name}
+                  onChange={(e) => updateField('company_name', e.target.value)}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label={t('firstName')}
+                    value={formData.contact_first_name}
+                    onChange={(e) => updateField('contact_first_name', e.target.value)}
+                  />
+                  <Input
+                    label={t('lastName')}
+                    value={formData.contact_last_name}
+                    onChange={(e) => updateField('contact_last_name', e.target.value)}
+                  />
+                </div>
+                <Textarea
+                  label={t('description')}
+                  value={formData.description}
+                  onChange={(e) => updateField('description', e.target.value)}
+                  rows={3}
+                />
               </div>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-start gap-2 mb-2">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
+                    {displayName}
+                  </h2>
+                  <Badge variant="primary" size="md">
+                    {roleLabel}
+                  </Badge>
+                  {profile.category && (
+                    <Badge variant="default" size="md">
+                      {profile.category}
+                    </Badge>
+                  )}
+                </div>
+
+                {profile.description && (
+                  <p className="text-sm text-[var(--text-secondary)] mb-4">
+                    {profile.description}
+                  </p>
+                )}
+
+                {/* Tags */}
+                {profile.tags && profile.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.tags.map((tag, index) => (
+                      <Badge key={index} variant="default" size="sm">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -158,54 +314,72 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             className="p-4 border-b border-[var(--border)]"
           />
           <CardContent className="p-4 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="text-[var(--text-muted)]">{icons.user}</div>
-              <div>
-                <p className="text-xs text-[var(--text-muted)]">{t('contactPerson')}</p>
-                <p className="text-sm font-medium text-[var(--text)]">
-                  {`${profile.contact_first_name || ''} ${profile.contact_last_name || ''}`.trim() || '-'}
-                </p>
-              </div>
-            </div>
+            {isEditing ? (
+              <>
+                <Input
+                  label={t('phone')}
+                  value={formData.phone}
+                  onChange={(e) => updateField('phone', e.target.value)}
+                />
+                <Input
+                  label={t('website')}
+                  value={formData.website}
+                  onChange={(e) => updateField('website', e.target.value)}
+                  placeholder="https://..."
+                />
+              </>
+            ) : (
+              <>
+                <div className="flex items-start gap-3">
+                  <div className="text-[var(--text-muted)]">{icons.user}</div>
+                  <div>
+                    <p className="text-xs text-[var(--text-muted)]">{t('contactPerson')}</p>
+                    <p className="text-sm font-medium text-[var(--text)]">
+                      {`${profile.contact_first_name || ''} ${profile.contact_last_name || ''}`.trim() || '-'}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-start gap-3">
-              <div className="text-[var(--text-muted)]">{icons.email}</div>
-              <div>
-                <p className="text-xs text-[var(--text-muted)]">{t('email')}</p>
-                <p className="text-sm font-medium text-[var(--text)]">
-                  {profile.email}
-                </p>
-              </div>
-            </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-[var(--text-muted)]">{icons.email}</div>
+                  <div>
+                    <p className="text-xs text-[var(--text-muted)]">{t('email')}</p>
+                    <p className="text-sm font-medium text-[var(--text)]">
+                      {profile.email}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-start gap-3">
-              <div className="text-[var(--text-muted)]">{icons.phone}</div>
-              <div>
-                <p className="text-xs text-[var(--text-muted)]">{t('phone')}</p>
-                <p className="text-sm font-medium text-[var(--text)]">
-                  {profile.phone || '-'}
-                </p>
-              </div>
-            </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-[var(--text-muted)]">{icons.phone}</div>
+                  <div>
+                    <p className="text-xs text-[var(--text-muted)]">{t('phone')}</p>
+                    <p className="text-sm font-medium text-[var(--text)]">
+                      {profile.phone || '-'}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-start gap-3">
-              <div className="text-[var(--text-muted)]">{icons.globe}</div>
-              <div>
-                <p className="text-xs text-[var(--text-muted)]">{t('website')}</p>
-                {profile.website ? (
-                  <a
-                    href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-[var(--primary)] hover:underline"
-                  >
-                    {profile.website}
-                  </a>
-                ) : (
-                  <p className="text-sm font-medium text-[var(--text)]">-</p>
-                )}
-              </div>
-            </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-[var(--text-muted)]">{icons.globe}</div>
+                  <div>
+                    <p className="text-xs text-[var(--text-muted)]">{t('website')}</p>
+                    {profile.website ? (
+                      <a
+                        href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-[var(--primary)] hover:underline"
+                      >
+                        {profile.website}
+                      </a>
+                    ) : (
+                      <p className="text-sm font-medium text-[var(--text)]">-</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -216,25 +390,61 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             className="p-4 border-b border-[var(--border)]"
           />
           <CardContent className="p-4 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="text-[var(--text-muted)]">{icons.building}</div>
-              <div>
-                <p className="text-xs text-[var(--text-muted)]">{t('companyName')}</p>
-                <p className="text-sm font-medium text-[var(--text)]">
-                  {profile.company_name || '-'}
-                </p>
-              </div>
-            </div>
+            {isEditing ? (
+              <>
+                <Input
+                  label={t('streetAddress')}
+                  value={formData.address}
+                  onChange={(e) => updateField('address', e.target.value)}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label={t('city')}
+                    value={formData.city}
+                    onChange={(e) => updateField('city', e.target.value)}
+                  />
+                  <Input
+                    label={t('region')}
+                    value={formData.region}
+                    onChange={(e) => updateField('region', e.target.value)}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label={t('postalCode')}
+                    value={formData.postal_code}
+                    onChange={(e) => updateField('postal_code', e.target.value)}
+                  />
+                  <Input
+                    label={t('country')}
+                    value={formData.country}
+                    onChange={(e) => updateField('country', e.target.value)}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-start gap-3">
+                  <div className="text-[var(--text-muted)]">{icons.building}</div>
+                  <div>
+                    <p className="text-xs text-[var(--text-muted)]">{t('companyName')}</p>
+                    <p className="text-sm font-medium text-[var(--text)]">
+                      {profile.company_name || '-'}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-start gap-3">
-              <div className="text-[var(--text-muted)]">{icons.location}</div>
-              <div>
-                <p className="text-xs text-[var(--text-muted)]">{t('fullAddress')}</p>
-                <p className="text-sm font-medium text-[var(--text)]">
-                  {fullAddress || '-'}
-                </p>
-              </div>
-            </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-[var(--text-muted)]">{icons.location}</div>
+                  <div>
+                    <p className="text-xs text-[var(--text-muted)]">{t('fullAddress')}</p>
+                    <p className="text-sm font-medium text-[var(--text)]">
+                      {fullAddress || '-'}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
