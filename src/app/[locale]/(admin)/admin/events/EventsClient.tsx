@@ -221,7 +221,7 @@ export default function EventsClient({ initialData, initialFilters }: EventsClie
                       {event.location}
                     </span>
                   ) : event.meeting_link ? (
-                    <span className="text-blue-600">Online</span>
+                    <span className="text-[var(--primary)]">Online</span>
                   ) : (
                     <span className="text-[var(--text-muted)]">-</span>
                   )}
@@ -329,7 +329,7 @@ export default function EventsClient({ initialData, initialFilters }: EventsClie
                         {event.location}
                       </span>
                     ) : event.meeting_link ? (
-                      <span className="text-blue-600">Online</span>
+                      <span className="text-[var(--primary)]">Online</span>
                     ) : (
                       <span className="text-[var(--text-muted)]">-</span>
                     )}

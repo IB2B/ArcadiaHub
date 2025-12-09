@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   title: 'Arcadia Hub - Harlock Partner Portal',
   description: 'The operational, training, and informational reference point for Harlock partners.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/harlock-favicon.png',
+    shortcut: '/harlock-favicon.png',
+    apple: '/harlock-favicon.png',
   },
 };
 

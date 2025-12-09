@@ -7,11 +7,11 @@
 :root,
 [data-theme="c1"] {
   /* Brand Colors */
-  --primary: #3B82F6;
-  --primary-hover: #2563EB;
-  --primary-light: #DBEAFE;
-  --secondary: #1E40AF;
-  --accent: #0EA5E9;
+  --primary: #244675;
+  --primary-hover: #1a3457;
+  --primary-light: #d0dae8;
+  --secondary: #132640;
+  --accent: #3d6a9e;
 
   /* Status Colors */
   --success: #10B981;
@@ -20,8 +20,8 @@
   --warning-light: #FEF3C7;
   --error: #EF4444;
   --error-light: #FEE2E2;
-  --info: #3B82F6;
-  --info-light: #DBEAFE;
+  --info: #244675;
+  --info-light: #d0dae8;
 
   /* Background & Surface */
   --background: #F8FAFC;
@@ -38,7 +38,7 @@
 
   /* Border */
   --border: #E2E8F0;
-  --border-focus: #3B82F6;
+  --border-focus: #244675;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -47,8 +47,8 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
-  --gradient-accent: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%);
+  --gradient-primary: linear-gradient(135deg, #244675 0%, #132640 100%);
+  --gradient-accent: linear-gradient(135deg, #3d6a9e 0%, #244675 100%);
 }
 
 /* ============================================
@@ -56,11 +56,11 @@
    ============================================ */
 [data-theme="c2"] {
   /* Brand Colors */
-  --primary: #3B82F6;
-  --primary-hover: #60A5FA;
-  --primary-light: #1E3A5F;
-  --secondary: #1E40AF;
-  --accent: #38BDF8;
+  --primary: #244675;
+  --primary-hover: #3d6a9e;
+  --primary-light: #132640;
+  --secondary: #132640;
+  --accent: #4a7db8;
 
   /* Status Colors */
   --success: #34D399;
@@ -69,8 +69,8 @@
   --warning-light: #78350F;
   --error: #F87171;
   --error-light: #7F1D1D;
-  --info: #60A5FA;
-  --info-light: #1E3A5F;
+  --info: #3d6a9e;
+  --info-light: #132640;
 
   /* Background & Surface */
   --background: #F1F5F9;
@@ -89,7 +89,7 @@
 
   /* Border */
   --border: #E2E8F0;
-  --border-focus: #3B82F6;
+  --border-focus: #244675;
   --sidebar-border: #334155;
 
   /* Shadows */
@@ -99,7 +99,7 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+  --gradient-primary: linear-gradient(135deg, #244675 0%, #132640 100%);
   --gradient-accent: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
 }
 
@@ -108,11 +108,11 @@
    ============================================ */
 [data-theme="c3"] {
   /* Brand Colors */
-  --primary: #3B82F6;
-  --primary-hover: #2563EB;
-  --primary-light: #EFF6FF;
-  --secondary: #8B5CF6;
-  --accent: #06B6D4;
+  --primary: #244675;
+  --primary-hover: #1a3457;
+  --primary-light: #e8eef5;
+  --secondary: #6b5b95;
+  --accent: #3d8a9e;
 
   /* Status Colors */
   --success: #10B981;
@@ -121,11 +121,11 @@
   --warning-light: #FFFBEB;
   --error: #EF4444;
   --error-light: #FEF2F2;
-  --info: #3B82F6;
-  --info-light: #EFF6FF;
+  --info: #244675;
+  --info-light: #e8eef5;
 
   /* Background & Surface */
-  --background: #F0F9FF;
+  --background: #f0f4f9;
   --card: rgba(255, 255, 255, 0.9);
   --card-hover: rgba(255, 255, 255, 1);
   --sidebar-bg: rgba(255, 255, 255, 0.8);
@@ -138,19 +138,19 @@
   --text-light: #94A3B8;
 
   /* Border */
-  --border: rgba(59, 130, 246, 0.15);
-  --border-focus: #3B82F6;
+  --border: rgba(36, 70, 117, 0.15);
+  --border-focus: #244675;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(59, 130, 246, 0.1);
-  --shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
-  --shadow-md: 0 4px 12px rgba(59, 130, 246, 0.15);
-  --shadow-lg: 0 8px 25px rgba(59, 130, 246, 0.18);
+  --shadow-sm: 0 1px 3px rgba(36, 70, 117, 0.1);
+  --shadow: 0 2px 8px rgba(36, 70, 117, 0.12);
+  --shadow-md: 0 4px 12px rgba(36, 70, 117, 0.15);
+  --shadow-lg: 0 8px 25px rgba(36, 70, 117, 0.18);
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-  --gradient-accent: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
-  --gradient-bg: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F5F3FF 100%);
+  --gradient-primary: linear-gradient(135deg, #244675 0%, #6b5b95 100%);
+  --gradient-accent: linear-gradient(135deg, #3d8a9e 0%, #244675 100%);
+  --gradient-bg: linear-gradient(135deg, #f0f4f9 0%, #dce5f0 50%, #f0edf5 100%);
 
   /* Glass Effect */
   --glass-bg: rgba(255, 255, 255, 0.7);

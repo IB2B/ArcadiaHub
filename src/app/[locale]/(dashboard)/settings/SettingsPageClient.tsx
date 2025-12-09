@@ -38,7 +38,7 @@ const themes = [
     id: 'c1',
     preview: {
       bg: '#F8FAFC',
-      primary: '#3B82F6',
+      primary: '#244675',
       card: '#FFFFFF',
       sidebar: '#FFFFFF',
     },
@@ -47,7 +47,7 @@ const themes = [
     id: 'c2',
     preview: {
       bg: '#F1F5F9',
-      primary: '#3B82F6',
+      primary: '#244675',
       card: '#FFFFFF',
       sidebar: '#0F172A',
     },
@@ -55,8 +55,8 @@ const themes = [
   {
     id: 'c3',
     preview: {
-      bg: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F5F3FF 100%)',
-      primary: '#3B82F6',
+      bg: 'linear-gradient(135deg, #f0f4f9 0%, #dce5f0 50%, #f0edf5 100%)',
+      primary: '#244675',
       card: 'rgba(255, 255, 255, 0.9)',
       sidebar: 'rgba(255, 255, 255, 0.8)',
     },

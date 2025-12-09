@@ -49,9 +49,9 @@ export default function UIPickerPage() {
   ];
 
   const colorOptions: { key: ColorOption; label: string; description: string; preview: string }[] = [
-    { key: 'c1', label: t('options.c1'), description: 'Clean corporate look, light background', preview: '#3B82F6' },
+    { key: 'c1', label: t('options.c1'), description: 'Clean corporate look, light background', preview: '#244675' },
     { key: 'c2', label: t('options.c2'), description: 'Dark sidebar/header, high contrast', preview: '#0F172A' },
-    { key: 'c3', label: t('options.c3'), description: 'Gradient backgrounds, glassmorphism', preview: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' },
+    { key: 'c3', label: t('options.c3'), description: 'Gradient backgrounds, glassmorphism', preview: 'linear-gradient(135deg, #244675, #6b5b95)' },
   ];
 
   const dataOptions: { key: DataOption; label: string; description: string }[] = [

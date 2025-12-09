@@ -15,7 +15,7 @@ interface CalendarViewProps {
 }
 
 const eventTypeColors: Record<string, string> = {
-  TRAINING: 'bg-blue-500',
+  TRAINING: 'bg-[var(--primary)]',
   WORKSHOP: 'bg-purple-500',
   WEBINAR: 'bg-green-500',
   PHYSICAL: 'bg-orange-500',

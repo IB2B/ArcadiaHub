@@ -77,7 +77,7 @@ interface TimelineFeedProps {
 }
 
 const typeColors: Record<FeedItemType, { bg: string; icon: string; badge: 'primary' | 'success' | 'warning' | 'info' | 'error' }> = {
-  event: { bg: 'bg-blue-100', icon: 'text-blue-600', badge: 'primary' },
+  event: { bg: 'bg-[var(--primary-light)]', icon: 'text-[var(--primary)]', badge: 'primary' },
   case: { bg: 'bg-amber-100', icon: 'text-amber-600', badge: 'warning' },
   content: { bg: 'bg-purple-100', icon: 'text-purple-600', badge: 'info' },
   document: { bg: 'bg-green-100', icon: 'text-green-600', badge: 'success' },

@@ -169,7 +169,7 @@ export default function DocumentsClient({ initialData, initialFilters }: Documen
     }
     if (type.includes('doc') || type.includes('word')) {
       return (
-        <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 text-[var(--primary)]" fill="currentColor" viewBox="0 0 24 24">
           <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M13,9V3.5L18.5,9H13M7,13H9.5L10.5,16.5L11.5,13H14L12,18H10L8.5,14.5L7,18H5L7,13Z" />
         </svg>
       );

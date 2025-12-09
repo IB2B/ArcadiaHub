@@ -104,7 +104,7 @@ export default async function DashboardPage() {
           title={t('activeCases')}
           value={dashboardData.stats.activeCases + dashboardData.stats.pendingCases}
           icon={statsIcons.cases}
-          iconBg="bg-blue-100"
+          iconBg="bg-[var(--primary-light)]"
         />
         <StatsCard
           title={t('upcomingEvents')}

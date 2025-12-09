@@ -1,4 +1,12 @@
 {
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
+    "goHome": "Go Home",
+    "goBack": "Go Back",
+    "needHelp": "Need help?",
+    "contactSupport": "Contact Support"
+  },
   "common": {
     "appName": "Arcadia Hub",
     "loading": "Loading...",
@@ -56,7 +64,193 @@
     "heroHighlight": "Partner Portal",
     "heroSubtitle": "Access training resources, manage cases, connect with the community, and grow your business with Harlock's comprehensive partner platform.",
     "accessPortal": "Access Portal",
-    "allRightsReserved": "All rights reserved."
+    "requestAccess": "Request Access",
+    "allRightsReserved": "All rights reserved.",
+    "trustedBy": "Trusted by leading partners across Italy",
+    "scrollToExplore": "Scroll to explore",
+    "navFeatures": "Features",
+    "navPlatform": "Platform",
+    "navCommunity": "Community",
+    "featuresLabel": "Platform Features",
+    "featuresTitle": "Everything you need to succeed",
+    "featuresSubtitle": "A comprehensive suite of tools designed to streamline your partnership with Harlock and accelerate your business growth.",
+    "features": {
+      "cases": {
+        "title": "Case Management",
+        "description": "Track and manage all your cases in one centralized location. Monitor status, upload documents, and stay updated on every development."
+      },
+      "events": {
+        "title": "Events & Calendar",
+        "description": "Never miss an important training, workshop, or webinar. View upcoming events and add them directly to your calendar."
+      },
+      "academy": {
+        "title": "Academy & Training",
+        "description": "Access a rich library of educational content including videos, presentations, recordings, and resources to enhance your skills."
+      },
+      "community": {
+        "title": "Partner Community",
+        "description": "Connect with other Harlock partners, share experiences, and expand your professional network across the community."
+      },
+      "documents": {
+        "title": "Document Library",
+        "description": "Find all official documents, contracts, brand materials, marketing assets, and guidelines in one organized repository."
+      },
+      "blog": {
+        "title": "News & Blog",
+        "description": "Stay informed with the latest news, insights, and updates from Harlock. Be the first to know about new developments."
+      }
+    },
+    "stats": {
+      "partners": "Active Partners",
+      "events": "Annual Events",
+      "resources": "Learning Resources",
+      "support": "Support Available"
+    },
+    "platformLabel": "Platform Preview",
+    "platformTitle": "Explore the platform",
+    "platformSubtitle": "Click on each module to see what awaits you inside the portal.",
+    "clickToExplore": "Click on the sidebar modules to explore each section",
+    "modules": {
+      "dashboard": "Dashboard",
+      "cases": "Cases",
+      "events": "Events",
+      "academy": "Academy",
+      "documents": "Documents",
+      "community": "Community"
+    },
+    "moduleDescriptions": {
+      "dashboard": "Your personalized overview with stats and recent activity",
+      "cases": "Track and manage all your cases in one place",
+      "events": "Upcoming trainings, workshops, and webinars",
+      "academy": "Videos, courses, and learning resources",
+      "documents": "Official contracts, brand kit, and materials",
+      "community": "Connect with other Harlock partners"
+    },
+    "moduleHighlights": {
+      "dashboard": {
+        "point1": "Real-time stats overview",
+        "point2": "Recent activity feed",
+        "point3": "Quick access to all modules"
+      },
+      "cases": {
+        "point1": "Track case status in real-time",
+        "point2": "Upload and manage documents",
+        "point3": "View complete case history"
+      },
+      "events": {
+        "point1": "View upcoming trainings",
+        "point2": "Add events to your calendar",
+        "point3": "Access event recordings"
+      },
+      "academy": {
+        "point1": "Video tutorials and courses",
+        "point2": "Downloadable materials",
+        "point3": "Progress tracking"
+      },
+      "documents": {
+        "point1": "Official contracts and templates",
+        "point2": "Brand kit and guidelines",
+        "point3": "Marketing materials"
+      },
+      "community": {
+        "point1": "Partner directory",
+        "point2": "Network with other partners",
+        "point3": "Share experiences"
+      }
+    },
+    "preview": {
+      "dashboard": {
+        "activeCases": "Active Cases",
+        "upcomingEvents": "Upcoming Events",
+        "recentActivity": "Recent Activity",
+        "activity1": "Case #1234 updated",
+        "activity2": "New event: Q1 Workshop",
+        "activity3": "Document uploaded"
+      },
+      "cases": {
+        "client1": "Mario Rossi",
+        "client2": "Anna Bianchi",
+        "client3": "Luigi Verdi",
+        "statusInProgress": "In Progress",
+        "statusCompleted": "Completed",
+        "statusPending": "Pending",
+        "moreItems": "+ 9 more cases"
+      },
+      "events": {
+        "event1": "Training Workshop",
+        "event2": "Product Webinar",
+        "event3": "Annual Meeting",
+        "typeWorkshop": "Workshop",
+        "typeWebinar": "Webinar",
+        "typeEvent": "Event"
+      },
+      "academy": {
+        "content1": "Product Introduction",
+        "content2": "Best Practices 2024",
+        "content3": "Case Study: Successes",
+        "typeVideo": "Video",
+        "typePDF": "PDF",
+        "typePodcast": "Podcast"
+      },
+      "documents": {
+        "tabAll": "All",
+        "tabContracts": "Contracts",
+        "tabMarketing": "Marketing",
+        "doc1": "Standard Contract 2024.pdf",
+        "doc2": "Brand Guidelines.pdf",
+        "doc3": "Price List Q1.xlsx"
+      },
+      "community": {
+        "searchPlaceholder": "Search partners...",
+        "partner1": "Rossi Commercial Studio",
+        "partner2": "Blue Real Estate Agency",
+        "partner3": "Verdi Consulting & Assoc.",
+        "location1": "Milan",
+        "location2": "Rome",
+        "location3": "Turin",
+        "category1": "Accountant",
+        "category2": "Real Estate",
+        "category3": "Consulting"
+      }
+    },
+    "communityLabel": "Join the Network",
+    "communityTitle": "Become part of something bigger",
+    "communitySubtitle": "Join a thriving community of professionals who share knowledge, collaborate on projects, and grow together.",
+    "communityBenefits": {
+      "network": {
+        "title": "Expand Your Network",
+        "description": "Connect with fellow partners and build valuable professional relationships."
+      },
+      "training": {
+        "title": "Continuous Learning",
+        "description": "Access exclusive training materials and stay ahead with the latest industry knowledge."
+      },
+      "support": {
+        "title": "Dedicated Support",
+        "description": "Get the help you need with priority support from the Harlock team."
+      },
+      "growth": {
+        "title": "Business Growth",
+        "description": "Leverage partnership benefits to expand your business opportunities."
+      }
+    },
+    "ctaTitle": "Ready to get started?",
+    "ctaSubtitle": "Join the Harlock partner network and unlock access to all the tools and resources you need to grow your business.",
+    "ctaButton": "Get Started Now",
+    "ctaSecondary": "Learn More",
+    "footerDescription": "The official partner portal for Harlock. Access resources, manage cases, and connect with the community.",
+    "footerPlatform": "Platform",
+    "footerCompany": "Company",
+    "footerLinks": {
+      "cases": "Cases",
+      "events": "Events",
+      "academy": "Academy",
+      "documents": "Documents",
+      "about": "About Harlock",
+      "contact": "Contact Us",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
   },
   "auth": {
     "login": "Login",
@@ -828,6 +1022,105 @@
       "deleteSuccess": "Deleted successfully",
       "error": "An error occurred. Please try again.",
       "confirmAction": "Are you sure you want to proceed?"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last Updated",
+    "lastUpdatedDate": "December 2024",
+    "introduction": "At Harlock, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Arcadia Hub partner portal.",
+    "dataCollection": {
+      "title": "Information We Collect",
+      "description": "We collect information that you provide directly to us, including:",
+      "item1": "Personal identification information (name, email address, phone number)",
+      "item2": "Company information (company name, address, business details)",
+      "item3": "Account credentials and authentication data",
+      "item4": "Usage data and interaction with our platform"
+    },
+    "dataUsage": {
+      "title": "How We Use Your Information",
+      "description": "We use the information we collect to:",
+      "item1": "Provide, maintain, and improve our services",
+      "item2": "Process transactions and send related information",
+      "item3": "Send administrative information and updates",
+      "item4": "Respond to your comments, questions, and support requests"
+    },
+    "dataProtection": {
+      "title": "Data Protection",
+      "description": "We implement appropriate technical and organizational security measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction. Your data is stored on secure servers and encrypted during transmission."
+    },
+    "cookies": {
+      "title": "Cookies and Tracking",
+      "description": "We use cookies and similar tracking technologies to track activity on our platform and hold certain information. Cookies are files with small amounts of data which may include an anonymous unique identifier. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent."
+    },
+    "thirdParties": {
+      "title": "Third-Party Services",
+      "description": "We may share your information with third-party service providers who perform services on our behalf, such as hosting, data analysis, and customer service. These third parties are obligated to protect your information and may only use it for the purposes for which it was disclosed."
+    },
+    "userRights": {
+      "title": "Your Rights",
+      "description": "Under applicable data protection laws, you have the following rights:",
+      "item1": "Right to access your personal data",
+      "item2": "Right to rectification of inaccurate data",
+      "item3": "Right to erasure of your data",
+      "item4": "Right to data portability"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "If you have any questions about this Privacy Policy or our data practices, please contact us."
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last Updated",
+    "lastUpdatedDate": "December 2024",
+    "introduction": "Welcome to Arcadia Hub, the partner portal operated by Harlock. These Terms of Service govern your access to and use of our platform. By accessing or using Arcadia Hub, you agree to be bound by these terms.",
+    "acceptance": {
+      "title": "Acceptance of Terms",
+      "description": "By accessing or using Arcadia Hub, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree to these terms, you may not access or use the platform."
+    },
+    "eligibility": {
+      "title": "Eligibility",
+      "description": "Arcadia Hub is intended for authorized Harlock partners only. To use the platform, you must be an authorized representative of a company that has entered into a partnership agreement with Harlock. You must be at least 18 years old to use this service."
+    },
+    "account": {
+      "title": "Account Responsibilities",
+      "description": "When you create an account on Arcadia Hub, you agree to:",
+      "item1": "Provide accurate, current, and complete information",
+      "item2": "Maintain the security of your account credentials",
+      "item3": "Notify us immediately of any unauthorized access to your account"
+    },
+    "acceptableUse": {
+      "title": "Acceptable Use",
+      "description": "You agree not to use Arcadia Hub to:",
+      "item1": "Violate any applicable laws or regulations",
+      "item2": "Infringe upon the rights of others",
+      "item3": "Transmit any harmful or malicious content",
+      "item4": "Attempt to gain unauthorized access to our systems"
+    },
+    "intellectualProperty": {
+      "title": "Intellectual Property",
+      "description": "All content, features, and functionality of Arcadia Hub, including but not limited to text, graphics, logos, and software, are owned by Harlock and are protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission."
+    },
+    "liability": {
+      "title": "Limitation of Liability",
+      "description": "To the maximum extent permitted by law, Harlock shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the platform. Our total liability shall not exceed the amount paid by you, if any, for accessing the platform."
+    },
+    "termination": {
+      "title": "Termination",
+      "description": "We reserve the right to suspend or terminate your access to Arcadia Hub at any time, with or without cause, and with or without notice. Upon termination, your right to use the platform will immediately cease."
+    },
+    "changes": {
+      "title": "Changes to Terms",
+      "description": "We may modify these Terms of Service at any time. We will notify you of any material changes by posting the new terms on this page and updating the \"Last Updated\" date. Your continued use of the platform after such changes constitutes your acceptance of the new terms."
+    },
+    "governingLaw": {
+      "title": "Governing Law",
+      "description": "These Terms of Service shall be governed by and construed in accordance with the laws of Italy. Any disputes arising from these terms or your use of the platform shall be subject to the exclusive jurisdiction of the courts of Italy."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "If you have any questions about these Terms of Service, please contact us."
     }
   }
 }

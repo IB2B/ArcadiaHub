@@ -39,7 +39,7 @@ const statusColors = {
 // Generate a consistent color based on name
 const getColorFromName = (name: string): string => {
   const colors = [
-    'bg-blue-500',
+    'bg-[#244675]',
     'bg-purple-500',
     'bg-green-500',
     'bg-yellow-500',

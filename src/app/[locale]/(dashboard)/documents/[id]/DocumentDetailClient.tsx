@@ -17,7 +17,7 @@ interface DocumentDetailClientProps {
 }
 
 const categoryConfig: Record<string, { key: string; color: string }> = {
-  CONTRACTS: { key: 'contracts', color: 'bg-blue-100 text-blue-600' },
+  CONTRACTS: { key: 'contracts', color: 'bg-[var(--primary-light)] text-[var(--primary)]' },
   PRESENTATIONS: { key: 'presentations', color: 'bg-purple-100 text-purple-600' },
   BRAND_KIT: { key: 'brand_kit', color: 'bg-pink-100 text-pink-600' },
   MARKETING: { key: 'marketing', color: 'bg-green-100 text-green-600' },

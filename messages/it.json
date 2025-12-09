@@ -1,4 +1,12 @@
 {
+  "notFound": {
+    "title": "Pagina Non Trovata",
+    "description": "La pagina che stai cercando non esiste o e stata spostata. Torniamo sulla strada giusta.",
+    "goHome": "Vai alla Home",
+    "goBack": "Torna Indietro",
+    "needHelp": "Hai bisogno di aiuto?",
+    "contactSupport": "Contatta il Supporto"
+  },
   "common": {
     "appName": "Arcadia Hub",
     "loading": "Caricamento...",
@@ -57,7 +65,207 @@
     "heroHighlight": "Partner Completo",
     "heroSubtitle": "Accedi alle risorse formative, gestisci i casi, connettiti con la community e fai crescere il tuo business con la piattaforma partner completa di Harlock.",
     "accessPortal": "Accedi al Portale",
-    "allRightsReserved": "Tutti i diritti riservati."
+    "requestAccess": "Richiedi Accesso",
+    "allRightsReserved": "Tutti i diritti riservati.",
+    "trustedBy": "Scelto dai migliori partner in Italia",
+    "scrollToExplore": "Scorri per esplorare",
+    "navFeatures": "Funzionalità",
+    "navPlatform": "Piattaforma",
+    "navCommunity": "Community",
+    "featuresLabel": "Funzionalità della Piattaforma",
+    "featuresTitle": "Tutto ciò di cui hai bisogno per avere successo",
+    "featuresSubtitle": "Una suite completa di strumenti progettati per semplificare la tua partnership con Harlock e accelerare la crescita del tuo business.",
+    "features": {
+      "cases": {
+        "title": "Gestione Pratiche",
+        "description": "Traccia e gestisci tutte le tue pratiche in un unico posto centralizzato. Monitora lo stato, carica documenti e resta aggiornato su ogni sviluppo."
+      },
+      "events": {
+        "title": "Eventi e Calendario",
+        "description": "Non perdere mai una formazione, workshop o webinar importante. Visualizza gli eventi in programma e aggiungili direttamente al tuo calendario."
+      },
+      "academy": {
+        "title": "Academy e Formazione",
+        "description": "Accedi a una ricca libreria di contenuti formativi tra cui video, presentazioni, registrazioni e risorse per migliorare le tue competenze."
+      },
+      "community": {
+        "title": "Community Partner",
+        "description": "Connettiti con altri partner Harlock, condividi esperienze ed espandi la tua rete professionale all'interno della community."
+      },
+      "documents": {
+        "title": "Libreria Documenti",
+        "description": "Trova tutti i documenti ufficiali, contratti, materiali del brand, asset marketing e linee guida in un repository organizzato."
+      },
+      "blog": {
+        "title": "News e Blog",
+        "description": "Resta informato con le ultime notizie, approfondimenti e aggiornamenti da Harlock. Sii il primo a conoscere le novità."
+      }
+    },
+    "stats": {
+      "partners": "Partner Attivi",
+      "events": "Eventi Annuali",
+      "resources": "Risorse Formative",
+      "support": "Supporto Disponibile"
+    },
+    "platformLabel": "Anteprima Piattaforma",
+    "platformTitle": "Esplora la piattaforma",
+    "platformSubtitle": "Clicca su ogni modulo per scoprire cosa ti aspetta all'interno del portale.",
+    "clickToExplore": "Clicca sui moduli nella barra laterale per esplorare ogni sezione",
+    "modules": {
+      "dashboard": "Dashboard",
+      "cases": "Pratiche",
+      "events": "Eventi",
+      "academy": "Academy",
+      "documents": "Documenti",
+      "community": "Community"
+    },
+    "moduleDescriptions": {
+      "dashboard": "La tua panoramica personalizzata con statistiche e attività recenti",
+      "cases": "Traccia e gestisci tutte le tue pratiche in un unico posto",
+      "events": "Formazioni, workshop e webinar in programma",
+      "academy": "Video, corsi e risorse formative",
+      "documents": "Contratti ufficiali, kit brand e materiali",
+      "community": "Connettiti con altri partner Harlock"
+    },
+    "moduleHighlights": {
+      "dashboard": {
+        "point1": "Panoramica statistiche in tempo reale",
+        "point2": "Feed attività recenti",
+        "point3": "Accesso rapido a tutti i moduli"
+      },
+      "cases": {
+        "point1": "Monitora lo stato delle pratiche in tempo reale",
+        "point2": "Carica e gestisci documenti",
+        "point3": "Visualizza lo storico completo"
+      },
+      "events": {
+        "point1": "Visualizza le formazioni in programma",
+        "point2": "Aggiungi eventi al calendario",
+        "point3": "Accedi alle registrazioni"
+      },
+      "academy": {
+        "point1": "Video tutorial e corsi",
+        "point2": "Materiali scaricabili",
+        "point3": "Tracciamento progressi"
+      },
+      "documents": {
+        "point1": "Contratti e template ufficiali",
+        "point2": "Kit brand e linee guida",
+        "point3": "Materiali marketing"
+      },
+      "community": {
+        "point1": "Elenco partner",
+        "point2": "Fai networking con altri partner",
+        "point3": "Condividi esperienze"
+      }
+    },
+    "preview": {
+      "dashboard": {
+        "activeCases": "Pratiche Attive",
+        "upcomingEvents": "Eventi in Arrivo",
+        "recentActivity": "Attività Recenti",
+        "activity1": "Pratica #1234 aggiornata",
+        "activity2": "Nuovo evento: Workshop Q1",
+        "activity3": "Documento caricato"
+      },
+      "cases": {
+        "client1": "Mario Rossi",
+        "client2": "Anna Bianchi",
+        "client3": "Luigi Verdi",
+        "statusInProgress": "In Corso",
+        "statusCompleted": "Completata",
+        "statusPending": "In Attesa",
+        "moreItems": "+ 9 altre pratiche"
+      },
+      "events": {
+        "event1": "Workshop Formativo",
+        "event2": "Webinar Prodotti",
+        "event3": "Meeting Annuale",
+        "typeWorkshop": "Workshop",
+        "typeWebinar": "Webinar",
+        "typeEvent": "Evento"
+      },
+      "academy": {
+        "content1": "Introduzione ai Prodotti",
+        "content2": "Best Practices 2024",
+        "content3": "Case Study: Successi",
+        "typeVideo": "Video",
+        "typePDF": "PDF",
+        "typePodcast": "Podcast"
+      },
+      "documents": {
+        "tabAll": "Tutti",
+        "tabContracts": "Contratti",
+        "tabMarketing": "Marketing",
+        "doc1": "Contratto Standard 2024.pdf",
+        "doc2": "Brand Guidelines.pdf",
+        "doc3": "Listino Prezzi Q1.xlsx"
+      },
+      "community": {
+        "searchPlaceholder": "Cerca partner...",
+        "partner1": "Studio Commerciale Rossi",
+        "partner2": "Agenzia Immobiliare Blu",
+        "partner3": "Consulenza Verdi & Assoc.",
+        "location1": "Milano",
+        "location2": "Roma",
+        "location3": "Torino",
+        "category1": "Commercialista",
+        "category2": "Immobiliare",
+        "category3": "Consulenza"
+      }
+    },
+    "platformFeatures": {
+      "dashboard": {
+        "title": "Dashboard Personalizzata",
+        "description": "Ottieni una panoramica rapida delle tue pratiche, eventi in programma e notifiche importanti."
+      },
+      "realtime": {
+        "title": "Aggiornamenti in Tempo Reale",
+        "description": "Ricevi notifiche istantanee quando le tue pratiche vengono aggiornate o nuovi contenuti sono disponibili."
+      },
+      "mobile": {
+        "title": "Responsive Mobile",
+        "description": "Accedi alla piattaforma da qualsiasi dispositivo - desktop, tablet o smartphone."
+      }
+    },
+    "communityLabel": "Unisciti alla Rete",
+    "communityTitle": "Diventa parte di qualcosa di più grande",
+    "communitySubtitle": "Unisciti a una community fiorente di professionisti che condividono conoscenze, collaborano su progetti e crescono insieme.",
+    "communityBenefits": {
+      "network": {
+        "title": "Espandi la Tua Rete",
+        "description": "Connettiti con altri partner e costruisci preziose relazioni professionali."
+      },
+      "training": {
+        "title": "Formazione Continua",
+        "description": "Accedi a materiali formativi esclusivi e resta al passo con le ultime conoscenze del settore."
+      },
+      "support": {
+        "title": "Supporto Dedicato",
+        "description": "Ottieni l'aiuto di cui hai bisogno con supporto prioritario dal team Harlock."
+      },
+      "growth": {
+        "title": "Crescita del Business",
+        "description": "Sfrutta i vantaggi della partnership per espandere le tue opportunità di business."
+      }
+    },
+    "ctaTitle": "Pronto per iniziare?",
+    "ctaSubtitle": "Unisciti alla rete di partner Harlock e sblocca l'accesso a tutti gli strumenti e le risorse di cui hai bisogno per far crescere il tuo business.",
+    "ctaButton": "Inizia Ora",
+    "ctaSecondary": "Scopri di Più",
+    "footerDescription": "Il portale partner ufficiale di Harlock. Accedi alle risorse, gestisci le pratiche e connettiti con la community.",
+    "footerPlatform": "Piattaforma",
+    "footerCompany": "Azienda",
+    "footerLinks": {
+      "cases": "Pratiche",
+      "events": "Eventi",
+      "academy": "Academy",
+      "documents": "Documenti",
+      "about": "Chi è Harlock",
+      "contact": "Contattaci",
+      "privacy": "Privacy Policy",
+      "terms": "Termini di Servizio"
+    }
   },
   "auth": {
     "login": "Accedi",
@@ -827,6 +1035,105 @@
       "deleteSuccess": "Eliminato con successo",
       "error": "Si e verificato un errore. Riprova.",
       "confirmAction": "Sei sicuro di voler procedere?"
+    }
+  },
+  "privacy": {
+    "title": "Informativa sulla Privacy",
+    "lastUpdated": "Ultimo Aggiornamento",
+    "lastUpdatedDate": "Dicembre 2024",
+    "introduction": "In Harlock, ci impegniamo a proteggere la tua privacy. Questa Informativa sulla Privacy spiega come raccogliamo, utilizziamo, divulghiamo e proteggiamo le tue informazioni quando utilizzi il portale partner Arcadia Hub.",
+    "dataCollection": {
+      "title": "Informazioni che Raccogliamo",
+      "description": "Raccogliamo le informazioni che ci fornisci direttamente, tra cui:",
+      "item1": "Informazioni di identificazione personale (nome, indirizzo email, numero di telefono)",
+      "item2": "Informazioni aziendali (ragione sociale, indirizzo, dettagli aziendali)",
+      "item3": "Credenziali dell'account e dati di autenticazione",
+      "item4": "Dati di utilizzo e interazione con la nostra piattaforma"
+    },
+    "dataUsage": {
+      "title": "Come Utilizziamo le Tue Informazioni",
+      "description": "Utilizziamo le informazioni raccolte per:",
+      "item1": "Fornire, mantenere e migliorare i nostri servizi",
+      "item2": "Elaborare transazioni e inviare informazioni correlate",
+      "item3": "Inviare informazioni amministrative e aggiornamenti",
+      "item4": "Rispondere ai tuoi commenti, domande e richieste di supporto"
+    },
+    "dataProtection": {
+      "title": "Protezione dei Dati",
+      "description": "Implementiamo misure di sicurezza tecniche e organizzative appropriate per proteggere i tuoi dati personali da accessi non autorizzati, alterazioni, divulgazioni o distruzioni. I tuoi dati sono archiviati su server sicuri e crittografati durante la trasmissione."
+    },
+    "cookies": {
+      "title": "Cookie e Tracciamento",
+      "description": "Utilizziamo cookie e tecnologie di tracciamento simili per monitorare l'attivita sulla nostra piattaforma e conservare determinate informazioni. I cookie sono file con piccole quantita di dati che possono includere un identificatore univoco anonimo. Puoi impostare il tuo browser per rifiutare tutti i cookie o per indicare quando viene inviato un cookie."
+    },
+    "thirdParties": {
+      "title": "Servizi di Terze Parti",
+      "description": "Potremmo condividere le tue informazioni con fornitori di servizi terzi che svolgono servizi per nostro conto, come hosting, analisi dei dati e assistenza clienti. Queste terze parti sono obbligate a proteggere le tue informazioni e possono utilizzarle solo per gli scopi per cui sono state divulgate."
+    },
+    "userRights": {
+      "title": "I Tuoi Diritti",
+      "description": "Ai sensi delle leggi applicabili sulla protezione dei dati, hai i seguenti diritti:",
+      "item1": "Diritto di accesso ai tuoi dati personali",
+      "item2": "Diritto di rettifica dei dati inesatti",
+      "item3": "Diritto alla cancellazione dei tuoi dati",
+      "item4": "Diritto alla portabilita dei dati"
+    },
+    "contact": {
+      "title": "Contattaci",
+      "description": "Per qualsiasi domanda su questa Informativa sulla Privacy o sulle nostre pratiche relative ai dati, contattaci."
+    }
+  },
+  "terms": {
+    "title": "Termini di Servizio",
+    "lastUpdated": "Ultimo Aggiornamento",
+    "lastUpdatedDate": "Dicembre 2024",
+    "introduction": "Benvenuto su Arcadia Hub, il portale partner gestito da Harlock. Questi Termini di Servizio regolano l'accesso e l'utilizzo della nostra piattaforma. Accedendo o utilizzando Arcadia Hub, accetti di essere vincolato da questi termini.",
+    "acceptance": {
+      "title": "Accettazione dei Termini",
+      "description": "Accedendo o utilizzando Arcadia Hub, riconosci di aver letto, compreso e accettato di essere vincolato da questi Termini di Servizio. Se non accetti questi termini, non puoi accedere o utilizzare la piattaforma."
+    },
+    "eligibility": {
+      "title": "Idoneita",
+      "description": "Arcadia Hub e destinato esclusivamente ai partner autorizzati di Harlock. Per utilizzare la piattaforma, devi essere un rappresentante autorizzato di un'azienda che ha stipulato un accordo di partnership con Harlock. Devi avere almeno 18 anni per utilizzare questo servizio."
+    },
+    "account": {
+      "title": "Responsabilita dell'Account",
+      "description": "Quando crei un account su Arcadia Hub, accetti di:",
+      "item1": "Fornire informazioni accurate, attuali e complete",
+      "item2": "Mantenere la sicurezza delle credenziali del tuo account",
+      "item3": "Notificarci immediatamente qualsiasi accesso non autorizzato al tuo account"
+    },
+    "acceptableUse": {
+      "title": "Uso Accettabile",
+      "description": "Accetti di non utilizzare Arcadia Hub per:",
+      "item1": "Violare leggi o regolamenti applicabili",
+      "item2": "Violare i diritti di altri",
+      "item3": "Trasmettere contenuti dannosi o malevoli",
+      "item4": "Tentare di ottenere accesso non autorizzato ai nostri sistemi"
+    },
+    "intellectualProperty": {
+      "title": "Proprieta Intellettuale",
+      "description": "Tutti i contenuti, le funzionalita e le funzioni di Arcadia Hub, inclusi ma non limitati a testi, grafica, loghi e software, sono di proprieta di Harlock e sono protetti dalle leggi sulla proprieta intellettuale. Non puoi riprodurre, distribuire o creare opere derivate senza il nostro esplicito consenso scritto."
+    },
+    "liability": {
+      "title": "Limitazione di Responsabilita",
+      "description": "Nella misura massima consentita dalla legge, Harlock non sara responsabile per danni indiretti, incidentali, speciali, consequenziali o punitivi derivanti dall'uso o dall'impossibilita di utilizzare la piattaforma. La nostra responsabilita totale non superera l'importo da te pagato, se presente, per l'accesso alla piattaforma."
+    },
+    "termination": {
+      "title": "Risoluzione",
+      "description": "Ci riserviamo il diritto di sospendere o terminare il tuo accesso ad Arcadia Hub in qualsiasi momento, con o senza causa, e con o senza preavviso. Alla risoluzione, il tuo diritto di utilizzare la piattaforma cessera immediatamente."
+    },
+    "changes": {
+      "title": "Modifiche ai Termini",
+      "description": "Possiamo modificare questi Termini di Servizio in qualsiasi momento. Ti informeremo di eventuali modifiche sostanziali pubblicando i nuovi termini su questa pagina e aggiornando la data di \"Ultimo Aggiornamento\". L'uso continuato della piattaforma dopo tali modifiche costituisce l'accettazione dei nuovi termini."
+    },
+    "governingLaw": {
+      "title": "Legge Applicabile",
+      "description": "Questi Termini di Servizio saranno regolati e interpretati in conformita con le leggi italiane. Qualsiasi controversia derivante da questi termini o dall'uso della piattaforma sara soggetta alla giurisdizione esclusiva dei tribunali italiani."
+    },
+    "contact": {
+      "title": "Contattaci",
+      "description": "Per qualsiasi domanda su questi Termini di Servizio, contattaci."
     }
   }
 }
