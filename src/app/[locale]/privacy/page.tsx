@@ -119,8 +119,8 @@ export default function PrivacyPage() {
               </p>
               <p className="text-[var(--text-muted)] mt-4">
                 <strong className="text-[var(--text)]">Email:</strong>{' '}
-                <a href="mailto:privacy@harlock.it" className="text-[var(--primary)] hover:underline">
-                  privacy@harlock.it
+                <a href="mailto:info@harlock.it" className="text-[var(--primary)] hover:underline">
+                  info@harlock.it
                 </a>
               </p>
             </section>

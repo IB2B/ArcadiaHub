@@ -142,8 +142,8 @@ export default function TermsPage() {
               </p>
               <p className="text-[var(--text-muted)] mt-4">
                 <strong className="text-[var(--text)]">Email:</strong>{' '}
-                <a href="mailto:legal@harlock.it" className="text-[var(--primary)] hover:underline">
-                  legal@harlock.it
+                <a href="mailto:info@harlock.it" className="text-[var(--primary)] hover:underline">
+                  info@harlock.it
                 </a>
               </p>
             </section>
