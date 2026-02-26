@@ -108,7 +108,7 @@ const navItemsConfig: NavItemConfig[] = [
   { key: 'dashboard', translationKey: 'home', href: '/dashboard', icon: 'dashboard' },
   { key: 'community', translationKey: 'community', href: '/community', icon: 'community' },
   { key: 'events', translationKey: 'calendar', href: '/events', icon: 'events' },
-  { key: 'cases', translationKey: 'myCases', href: '/cases', icon: 'cases', badge: 3 },
+  { key: 'cases', translationKey: 'myCases', href: '/cases', icon: 'cases' },
 ];
 
 const moreMenuItemsConfig: MenuItemConfig[] = [

@@ -90,7 +90,7 @@ const navItemsConfig: NavItemConfig[] = [
   { key: 'events', translationKey: 'calendar', href: '/events', icon: 'events' },
   { key: 'academy', translationKey: 'academy', href: '/academy', icon: 'academy' },
   { key: 'documents', translationKey: 'documents', href: '/documents', icon: 'documents' },
-  { key: 'cases', translationKey: 'myCases', href: '/cases', icon: 'cases', badge: 3 },
+  { key: 'cases', translationKey: 'myCases', href: '/cases', icon: 'cases' },
   { key: 'blog', translationKey: 'blog', href: '/blog', icon: 'blog' },
 ];
 
