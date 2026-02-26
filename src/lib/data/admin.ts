@@ -1014,3 +1014,77 @@ export async function getCategories(): Promise<string[]> {
 
   return Array.from(categories).sort();
 }
+
+// ============================================================================
+// CASE DOCUMENTS
+// ============================================================================
+
+type CaseDocument = Tables<'case_documents'>;
+
+export async function getCaseDocuments(caseId: string): Promise<CaseDocument[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('case_documents')
+    .select('*')
+    .eq('case_id', caseId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching case documents:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function addCaseDocument(
+  caseId: string,
+  doc: { title: string; file_url: string; file_type?: string }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Not authenticated' };
+
+  const insertData: TablesInsert<'case_documents'> = {
+    case_id: caseId,
+    title: doc.title,
+    file_url: doc.file_url,
+    file_type: doc.file_type || null,
+    uploaded_by: user.id,
+  };
+
+  const { error } = await supabase
+    .from('case_documents')
+    .insert(insertData);
+
+  if (error) {
+    console.error('Error adding case document:', error);
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/[locale]/admin/cases');
+  revalidatePath('/[locale]/cases');
+  return { success: true };
+}
+
+export async function deleteCaseDocument(
+  documentId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('case_documents')
+    .delete()
+    .eq('id', documentId);
+
+  if (error) {
+    console.error('Error deleting case document:', error);
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/[locale]/admin/cases');
+  revalidatePath('/[locale]/cases');
+  return { success: true };
+}

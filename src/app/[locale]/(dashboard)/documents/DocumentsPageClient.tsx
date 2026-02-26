@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
 
@@ -27,6 +28,7 @@ interface DocumentsPageClientProps {
     search: string;
     category: string;
   };
+  userRole?: string;
 }
 
 const categoryConfig: Record<string, { key: string; color: string; icon: React.ReactNode }> = {
@@ -126,7 +128,9 @@ export default function DocumentsPageClient({
   stats,
   pagination,
   initialFilters,
+  userRole,
 }: DocumentsPageClientProps) {
+  const isAdmin = userRole === 'ADMIN' || userRole === 'COMMERCIAL';
   const t = useTranslations('documents');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -173,21 +177,12 @@ export default function DocumentsPageClient({
     [updateURL]
   );
 
-  // Group by category for display
-  const documentsByCategory: Record<string, Document[]> = {};
-  documents.forEach((doc) => {
-    if (!documentsByCategory[doc.category]) {
-      documentsByCategory[doc.category] = [];
-    }
-    documentsByCategory[doc.category].push(doc);
-  });
-
   const categories = Object.keys(stats.byCategory);
 
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-2 sm:gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--primary-light)] text-[var(--primary)]">
             {icons.folder}
@@ -201,6 +196,16 @@ export default function DocumentsPageClient({
             </p>
           </div>
         </div>
+        {isAdmin && (
+          <Link href="/admin/documents/new">
+            <Button size="sm">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              {t('newDocument')}
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Search and Filter */}
@@ -261,61 +266,54 @@ export default function DocumentsPageClient({
         {/* Documents List */}
         {documents.length > 0 ? (
           <>
-            <div className="space-y-6">
-              {Object.entries(documentsByCategory).map(([category, docs]) => {
-                const config = categoryConfig[category] || { key: category.toLowerCase(), color: 'bg-gray-100 text-gray-600', icon: icons.document };
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {documents.map((doc) => {
+                const config = categoryConfig[doc.category] || { key: doc.category.toLowerCase(), color: 'bg-gray-100 text-gray-600', icon: icons.document };
                 return (
-                  <div key={category}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className={`p-1.5 rounded ${config.color}`}>
-                        {config.icon}
+                  <Link key={doc.id} href={`/documents/${doc.id}`} className="block">
+                    <Card hover className="group h-full">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition-colors">
+                          {getFileTypeIcon(doc.file_type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--primary)] line-clamp-2 mb-1 transition-colors">
+                            {doc.title}
+                          </h3>
+                          {doc.description && (
+                            <p className="text-xs text-[var(--text-muted)] line-clamp-2 mb-2">
+                              {doc.description}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
+                            <Badge variant="default" size="sm">
+                              {t(`categories.${config.key}`)}
+                            </Badge>
+                            {doc.file_type && (
+                              <span className="uppercase">{doc.file_type}</span>
+                            )}
+                            {doc.file_size && (
+                              <span>{formatFileSize(doc.file_size)}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0 flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              window.open(doc.file_url, '_blank');
+                            }}
+                            className="p-1.5 rounded-lg text-[var(--text-light)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
+                            title={t('download')}
+                          >
+                            {icons.download}
+                          </button>
+                        </div>
                       </div>
-                      <h2 className="font-semibold text-[var(--text)]">{t(`categories.${config.key}`)}</h2>
-                      <Badge variant="default" size="sm">{docs.length}</Badge>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {docs.map((doc) => (
-                        <Link key={doc.id} href={`/documents/${doc.id}`} className="block">
-                          <Card hover className="group h-full">
-                            <div className="flex items-start gap-3">
-                              <div className="flex-shrink-0 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition-colors">
-                                {getFileTypeIcon(doc.file_type)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--primary)] line-clamp-2 mb-1 transition-colors">
-                                  {doc.title}
-                                </h3>
-                                {doc.description && (
-                                  <p className="text-xs text-[var(--text-muted)] line-clamp-2 mb-2">
-                                    {doc.description}
-                                  </p>
-                                )}
-                                <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                                  {doc.file_type && (
-                                    <span className="uppercase">{doc.file_type}</span>
-                                  )}
-                                  {doc.file_size && (
-                                    <span>{formatFileSize(doc.file_size)}</span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex-shrink-0 flex items-center gap-1">
-                                <a
-                                  href={doc.file_url}
-                                  download
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="p-1.5 rounded-lg text-[var(--text-light)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
-                                  title={t('download')}
-                                >
-                                  {icons.download}
-                                </a>
-                              </div>
-                            </div>
-                          </Card>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>

@@ -1,4 +1,4 @@
-import { getPartners } from '@/lib/data/profiles';
+import { getPartners, getCurrentUserProfile } from '@/lib/data/profiles';
 import CommunityPageClient from './CommunityPageClient';
 
 const PAGE_SIZE = 12;
@@ -18,6 +18,8 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
   const category = params.category || '';
 
   const offset = (page - 1) * PAGE_SIZE;
+
+  const profile = await getCurrentUserProfile();
 
   const { data: partners, count } = await getPartners({
     isActive: true,
@@ -43,6 +45,7 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
         search,
         category,
       }}
+      userRole={profile?.role || 'PARTNER'}
     />
   );
 }

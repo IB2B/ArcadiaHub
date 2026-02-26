@@ -3,7 +3,9 @@
 import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import PartnerCard from '@/components/community/PartnerCard';
 import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
@@ -23,6 +25,7 @@ interface CommunityPageClientProps {
     search: string;
     category: string;
   };
+  userRole?: string;
 }
 
 const icons = {
@@ -48,7 +51,9 @@ export default function CommunityPageClient({
   totalCount,
   pagination,
   initialFilters,
+  userRole,
 }: CommunityPageClientProps) {
+  const isAdmin = userRole === 'ADMIN' || userRole === 'COMMERCIAL';
   const t = useTranslations('community');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -105,7 +110,7 @@ export default function CommunityPageClient({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-2 sm:gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--primary-light)] text-[var(--primary)]">
             {icons.users}
@@ -119,6 +124,16 @@ export default function CommunityPageClient({
             </p>
           </div>
         </div>
+        {isAdmin && (
+          <Link href="/admin/partners/new">
+            <Button size="sm">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              {t('addPartner')}
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters */}

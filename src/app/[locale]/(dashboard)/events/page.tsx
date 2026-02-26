@@ -1,4 +1,5 @@
 import { getEvents, getEventStats } from '@/lib/data/events';
+import { getCurrentUserProfile } from '@/lib/data/profiles';
 import EventsPageClient from './EventsPageClient';
 
 const PAGE_SIZE = 9;
@@ -20,6 +21,8 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
   const upcoming = params.upcoming === 'true';
 
   const offset = (page - 1) * PAGE_SIZE;
+
+  const profile = await getCurrentUserProfile();
 
   const { data: events, count } = await getEvents({
     search: search || undefined,
@@ -47,6 +50,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
         eventType,
         upcoming: params.upcoming || '',
       }}
+      userRole={profile?.role || 'PARTNER'}
     />
   );
 }

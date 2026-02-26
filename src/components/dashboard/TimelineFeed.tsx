@@ -110,7 +110,7 @@ function getItemLink(item: FeedItem): string | null {
     case 'event':
       return `/events/${actualId}`;
     case 'blog':
-      return `/blog`; // Blog items should have metadata.link with slug
+      return null;
     case 'content':
       return `/academy/${actualId}`;
     case 'document':

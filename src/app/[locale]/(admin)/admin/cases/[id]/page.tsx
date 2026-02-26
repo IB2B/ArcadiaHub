@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
-import { getAdminCase, getPartnerOptions } from '@/lib/data/admin';
+import { getAdminCase, getPartnerOptions, getCaseDocuments } from '@/lib/data/admin';
 import CaseForm from '../CaseForm';
 
 interface PageProps {
@@ -12,9 +12,10 @@ export default async function EditCasePage({ params }: PageProps) {
   const { id } = await params;
   const t = await getTranslations('admin.cases');
 
-  const [caseData, partnerOptions] = await Promise.all([
+  const [caseData, partnerOptions, caseDocuments] = await Promise.all([
     getAdminCase(id),
     getPartnerOptions(),
+    getCaseDocuments(id),
   ]);
 
   if (!caseData) {
@@ -42,7 +43,7 @@ export default async function EditCasePage({ params }: PageProps) {
       </div>
 
       {/* Form */}
-      <CaseForm caseData={caseData} partnerOptions={partnerOptions} />
+      <CaseForm caseData={caseData} partnerOptions={partnerOptions} caseDocuments={caseDocuments} />
     </div>
   );
 }

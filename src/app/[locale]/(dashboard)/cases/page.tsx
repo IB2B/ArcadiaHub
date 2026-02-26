@@ -44,6 +44,7 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
         search,
         status,
       }}
+      userRole={profile?.role || 'PARTNER'}
     />
   );
 }

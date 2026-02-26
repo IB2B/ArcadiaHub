@@ -3,6 +3,7 @@
 import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EventCard from '@/components/events/EventCard';
@@ -31,6 +32,7 @@ interface EventsPageClientProps {
     eventType: string;
     upcoming: string;
   };
+  userRole?: string;
 }
 
 const eventTypes = [
@@ -84,7 +86,9 @@ export default function EventsPageClient({
   stats,
   pagination,
   initialFilters,
+  userRole,
 }: EventsPageClientProps) {
+  const isAdmin = userRole === 'ADMIN' || userRole === 'COMMERCIAL';
   const t = useTranslations('events');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -164,11 +168,23 @@ export default function EventsPageClient({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-2 sm:gap-3">
-        <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
-          {t('title')}
-        </h1>
-        <p className="text-sm text-[var(--text-muted)]">{t('subtitle')}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+        <div>
+          <h1 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
+            {t('title')}
+          </h1>
+          <p className="text-sm text-[var(--text-muted)]">{t('subtitle')}</p>
+        </div>
+        {isAdmin && (
+          <Link href="/admin/events/new">
+            <Button size="sm">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              {t('newEvent')}
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Stats Cards */}

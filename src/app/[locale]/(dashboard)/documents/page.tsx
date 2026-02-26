@@ -1,4 +1,5 @@
 import { getDocuments, getDocumentStats } from '@/lib/data/documents';
+import { getCurrentUserProfile } from '@/lib/data/profiles';
 import DocumentsPageClient from './DocumentsPageClient';
 
 const PAGE_SIZE = 12;
@@ -18,6 +19,8 @@ export default async function DocumentsPage({ searchParams }: DocumentsPageProps
   const category = params.category || '';
 
   const offset = (page - 1) * PAGE_SIZE;
+
+  const profile = await getCurrentUserProfile();
 
   const { data: documents, count } = await getDocuments({
     search: search || undefined,
@@ -43,6 +46,7 @@ export default async function DocumentsPage({ searchParams }: DocumentsPageProps
         search,
         category,
       }}
+      userRole={profile?.role || 'PARTNER'}
     />
   );
 }
