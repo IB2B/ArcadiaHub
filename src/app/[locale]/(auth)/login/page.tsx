@@ -42,7 +42,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-block">
             <h1 className="text-3xl font-bold gradient-text">{tCommon('appName')}</h1>
           </Link>
-          <p className="mt-2 text-[var(--text-muted)]">
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
             {t('loginSubtitle')}
           </p>
         </div>
