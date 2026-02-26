@@ -98,7 +98,7 @@ function CasesPreview({ t }: { t: (key: string) => string }) {
         { code: 'PRT-2024-002', clientKey: 'preview.cases.client2', statusKey: 'preview.cases.statusCompleted', statusColor: 'bg-green-100 text-green-700' },
         { code: 'PRT-2024-003', clientKey: 'preview.cases.client3', statusKey: 'preview.cases.statusPending', statusColor: 'bg-amber-100 text-amber-700' },
       ].map((item, i) => (
-        <div key={i} className="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors cursor-pointer">
+        <div key={i} className="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-medium text-[var(--primary)]">{item.code}</span>
             <span className={`text-xs px-2 py-0.5 rounded-full ${item.statusColor}`}>{t(item.statusKey)}</span>
@@ -148,7 +148,7 @@ function AcademyPreview({ t }: { t: (key: string) => string }) {
         { titleKey: 'preview.academy.content2', typeKey: 'preview.academy.typePDF', duration: '20 pg', thumbnail: 'bg-gradient-to-br from-purple-500 to-pink-500' },
         { titleKey: 'preview.academy.content3', typeKey: 'preview.academy.typePodcast', duration: '32 min', thumbnail: 'bg-gradient-to-br from-green-500 to-teal-500' },
       ].map((item, i) => (
-        <div key={i} className="flex gap-3 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors cursor-pointer">
+        <div key={i} className="flex gap-3 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors">
           <div className={`w-16 h-12 rounded-lg ${item.thumbnail} flex items-center justify-center`}>
             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
@@ -173,7 +173,7 @@ function DocumentsPreview({ t }: { t: (key: string) => string }) {
           { key: 'preview.documents.tabContracts', active: false },
           { key: 'preview.documents.tabMarketing', active: false },
         ].map((tab, i) => (
-          <span key={i} className={`text-xs px-3 py-1 rounded-full cursor-pointer transition-colors ${tab.active ? 'bg-[var(--primary)] text-white' : 'bg-[var(--background)] text-[var(--text-muted)] hover:bg-[var(--border)]'}`}>
+          <span key={i} className={`text-xs px-3 py-1 rounded-full transition-colors ${tab.active ? 'bg-[var(--primary)] text-white' : 'bg-[var(--background)] text-[var(--text-muted)] hover:bg-[var(--border)]'}`}>
             {t(tab.key)}
           </span>
         ))}
@@ -183,7 +183,7 @@ function DocumentsPreview({ t }: { t: (key: string) => string }) {
         { nameKey: 'preview.documents.doc2', size: '8.1 MB', icon: 'text-[var(--primary)]' },
         { nameKey: 'preview.documents.doc3', size: '1.2 MB', icon: 'text-green-500' },
       ].map((item, i) => (
-        <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors cursor-pointer">
+        <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors">
           <div className={`w-8 h-8 rounded-lg bg-[var(--card)] border border-[var(--border)] flex items-center justify-center ${item.icon}`}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -218,7 +218,7 @@ function CommunityPreview({ t }: { t: (key: string) => string }) {
         { nameKey: 'preview.community.partner2', locationKey: 'preview.community.location2', categoryKey: 'preview.community.category2' },
         { nameKey: 'preview.community.partner3', locationKey: 'preview.community.location3', categoryKey: 'preview.community.category3' },
       ].map((item, i) => (
-        <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors cursor-pointer">
+        <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-[var(--background)] border border-[var(--border)] hover:border-[var(--primary)]/50 transition-colors">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center text-white font-semibold text-sm">
             {t(item.nameKey).charAt(0)}
           </div>

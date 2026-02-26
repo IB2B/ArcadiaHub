@@ -93,12 +93,6 @@ export default function FeaturesSection() {
                 {t(`features.${feature.id}.description`)}
               </p>
 
-              {/* Hover Arrow */}
-              <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg className="w-5 h-5 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                </svg>
-              </div>
             </div>
           ))}
         </div>

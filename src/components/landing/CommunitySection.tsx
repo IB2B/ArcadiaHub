@@ -79,8 +79,8 @@ export default function CommunitySection() {
                 {/* Lines from center to nodes */}
                 {[0, 60, 120, 180, 240, 300].map((angle, i) => {
                   const rad = (angle * Math.PI) / 180;
-                  const x = 200 + Math.cos(rad) * 140;
-                  const y = 200 + Math.sin(rad) * 140;
+                  const x = Math.round(200 + Math.cos(rad) * 140);
+                  const y = Math.round(200 + Math.sin(rad) * 140);
                   return (
                     <line
                       key={i}
@@ -108,14 +108,14 @@ export default function CommunitySection() {
               {/* Partner Nodes - Fewer on mobile */}
               {[0, 60, 120, 180, 240, 300].map((angle, i) => {
                 const rad = (angle * Math.PI) / 180;
-                const x = 50 + Math.cos(rad) * 35;
-                const y = 50 + Math.sin(rad) * 35;
+                const x = Math.round((50 + Math.cos(rad) * 35) * 100) / 100;
+                const y = Math.round((50 + Math.sin(rad) * 35) * 100) / 100;
                 // Hide some nodes on mobile
                 const hiddenOnMobile = i === 1 || i === 4;
                 return (
                   <div
                     key={i}
-                    className={`absolute w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-[var(--background)] border-2 border-[var(--border)] shadow-md flex items-center justify-center hover:border-[var(--primary)] hover:scale-110 transition-all cursor-pointer ${hiddenOnMobile ? 'hidden sm:flex' : 'flex'}`}
+                    className={`absolute w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl bg-[var(--background)] border-2 border-[var(--border)] shadow-md flex items-center justify-center transition-all ${hiddenOnMobile ? 'hidden sm:flex' : 'flex'}`}
                     style={{
                       left: `${x}%`,
                       top: `${y}%`,
