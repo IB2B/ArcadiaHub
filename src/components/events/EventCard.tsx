@@ -105,7 +105,7 @@ function EventCard({ event }: EventCardProps) {
 
   return (
     <Link href={`/events/${event.id}`}>
-      <Card hover className={`group ${isPast ? 'opacity-60' : ''}`}>
+      <Card hover className={`group ${isPast ? 'opacity-60 grayscale' : ''}`}>
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Date Box */}
           <div className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg flex flex-col items-center justify-center ${isPast ? 'bg-[var(--card-hover)]' : 'bg-[var(--primary-light)]'}`}>
@@ -144,11 +144,29 @@ function EventCard({ event }: EventCardProps) {
                 {icons.clock}
                 <span>{formatEventTime(event.start_datetime)}</span>
               </div>
-              {(event.location || event.meeting_link) && (
+              {event.location && (
                 <div className="flex items-center gap-1">
                   {icons.location}
                   <span className="truncate max-w-[150px]">
-                    {event.location || t('online')}
+                    {event.location}
+                  </span>
+                </div>
+              )}
+              {event.meeting_link && !event.location && (
+                <div className="flex items-center gap-1">
+                  {icons.location}
+                  <span className="truncate max-w-[150px]">
+                    {t('online')}
+                  </span>
+                </div>
+              )}
+              {event.meeting_link && event.location && (
+                <div className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                  <span className="truncate max-w-[150px]">
+                    {t('hybrid')}
                   </span>
                 </div>
               )}

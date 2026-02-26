@@ -193,6 +193,7 @@ export type Database = {
           thumbnail_url: string | null
           media_url: string | null
           attachments: Json | null
+          materials_url: string | null
           year: number | null
           theme: string | null
           duration_minutes: number | null
@@ -210,6 +211,7 @@ export type Database = {
           thumbnail_url?: string | null
           media_url?: string | null
           attachments?: Json | null
+          materials_url?: string | null
           year?: number | null
           theme?: string | null
           duration_minutes?: number | null
@@ -227,6 +229,7 @@ export type Database = {
           thumbnail_url?: string | null
           media_url?: string | null
           attachments?: Json | null
+          materials_url?: string | null
           year?: number | null
           theme?: string | null
           duration_minutes?: number | null

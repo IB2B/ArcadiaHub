@@ -250,29 +250,11 @@ export default function DocumentForm({ documentData }: DocumentFormProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label={tDocs('fileType')}
-                value={formData.file_type}
-                onChange={(e) => updateField('file_type', e.target.value)}
-                placeholder="e.g., PDF, DOCX"
-              />
-              <Input
-                label={tDocs('fileSize')}
-                type="number"
-                value={formData.file_size}
-                onChange={(e) => updateField('file_size', e.target.value)}
-                error={errors.file_size}
-                placeholder="Size in bytes"
-                min={0}
-              />
-            </div>
             <Input
-              label="Folder Path"
-              value={formData.folder_path}
-              onChange={(e) => updateField('folder_path', e.target.value)}
-              placeholder="e.g., /contracts/2024"
-              hint="Optional path for organization"
+              label={tDocs('fileType')}
+              value={formData.file_type}
+              onChange={(e) => updateField('file_type', e.target.value)}
+              placeholder="e.g., PDF, DOCX"
             />
           </CardContent>
         </Card>

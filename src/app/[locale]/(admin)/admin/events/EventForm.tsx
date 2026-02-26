@@ -291,7 +291,7 @@ export default function EventForm({ eventData }: EventFormProps) {
               onChange={(e) => updateField('meeting_link', e.target.value)}
               error={errors.meeting_link}
               placeholder="https://..."
-              hint="For online events"
+              hint="For online or hybrid events (e.g., Teams link)"
             />
             <Input
               label={tEvents('recordingUrl')}

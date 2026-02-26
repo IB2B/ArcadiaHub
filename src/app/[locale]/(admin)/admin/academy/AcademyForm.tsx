@@ -43,6 +43,7 @@ export default function AcademyForm({ contentData }: AcademyFormProps) {
     content_type: contentData?.content_type || 'video',
     thumbnail_url: contentData?.thumbnail_url || '',
     media_url: contentData?.media_url || '',
+    materials_url: contentData?.materials_url || '',
     year: contentData?.year?.toString() || new Date().getFullYear().toString(),
     theme: contentData?.theme || '',
     duration_minutes: contentData?.duration_minutes?.toString() || '',
@@ -77,6 +78,10 @@ export default function AcademyForm({ contentData }: AcademyFormProps) {
 
     if (formData.thumbnail_url && !/^https?:\/\/.+/.test(formData.thumbnail_url)) {
       newErrors.thumbnail_url = tForm('invalidUrl');
+    }
+
+    if (formData.materials_url && !/^https?:\/\/.+/.test(formData.materials_url)) {
+      newErrors.materials_url = tForm('invalidUrl');
     }
 
     // Validate year
@@ -115,6 +120,7 @@ export default function AcademyForm({ contentData }: AcademyFormProps) {
             content_type: formData.content_type,
             thumbnail_url: formData.thumbnail_url || null,
             media_url: formData.media_url || null,
+            materials_url: formData.materials_url || null,
             year: formData.year ? parseInt(formData.year, 10) : null,
             theme: formData.theme || null,
             duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes, 10) : null,
@@ -135,6 +141,7 @@ export default function AcademyForm({ contentData }: AcademyFormProps) {
             content_type: formData.content_type,
             thumbnail_url: formData.thumbnail_url || null,
             media_url: formData.media_url || null,
+            materials_url: formData.materials_url || null,
             year: formData.year ? parseInt(formData.year, 10) : null,
             theme: formData.theme || null,
             duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes, 10) : null,
@@ -260,6 +267,15 @@ export default function AcademyForm({ contentData }: AcademyFormProps) {
               value={formData.theme}
               onChange={(e) => updateField('theme', e.target.value)}
               placeholder="e.g., Marketing, Sales, Product"
+            />
+            <Input
+              label={tAcademy('materialsUrl')}
+              type="url"
+              value={formData.materials_url}
+              onChange={(e) => updateField('materials_url', e.target.value)}
+              error={errors.materials_url}
+              placeholder="https://..."
+              hint="Link to supplementary documents (PDF, slides, etc.)"
             />
           </CardContent>
         </Card>
