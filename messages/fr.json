@@ -471,6 +471,8 @@
     "date": "Date",
     "location": "Lieu",
     "online": "En ligne",
+    "hybrid": "Hybride",
+    "newEvent": "Nouvel Evenement",
     "allTypes": "Tous les Types",
     "thisMonth": "Ce Mois",
     "searchPlaceholder": "Rechercher des evenements...",
@@ -550,6 +552,8 @@
     "noPreview": "Apercu non disponible",
     "downloadMaterials": "Telecharger les Materiaux",
     "downloadHint": "Telecharger les slides, documents et ressources supplementaires",
+    "supplementaryMaterials": "Materiaux Supplementaires",
+    "materialsHint": "Documents, slides et ressources supplementaires pour ce contenu",
     "podcast": "Episode de Podcast"
   },
   "documents": {
@@ -560,6 +564,7 @@
     "all": "Tous",
     "adjustFilters": "Essayez d'ajuster votre recherche ou vos filtres pour trouver ce que vous cherchez.",
     "noDocumentsYet": "Il n'y a pas encore de documents disponibles. Revenez bientot!",
+    "newDocument": "Nouveau Document",
     "categories": {
       "contracts": "Contrats",
       "presentations": "Presentations",
@@ -612,6 +617,7 @@
     "all": "Tous",
     "adjustFilters": "Essayez d'ajuster votre recherche ou vos filtres pour trouver ce que vous cherchez.",
     "noPartnersYet": "Il n'y a pas encore de partenaires dans l'annuaire.",
+    "addPartner": "Ajouter Partenaire",
     "showingResults": "Affichage de {count} sur {total} partenaires",
     "filter": "Filtrer par",
     "category": "Categorie",
@@ -873,6 +879,10 @@
       "documents": "Documents",
       "history": "Historique",
       "generate": "Generer",
+      "attachments": "Pieces Jointes",
+      "addAttachment": "Ajouter Piece Jointe",
+      "attachmentFile": "Fichier Joint",
+      "attachmentTitle": "Titre du Document",
       "noCases": "Aucun dossier trouve",
       "confirmDelete": "Supprimer ce dossier?",
       "deleteWarning": "Cette action ne peut pas etre annulee. Tous les documents et l'historique seront supprimes definitivement.",
@@ -887,7 +897,9 @@
       "subtitle": "Gerez tous les evenements et formations",
       "list": "Liste des Evenements",
       "new": "Nouvel Evenement",
+      "newSubtitle": "Creer un nouvel evenement",
       "edit": "Modifier Evenement",
+      "editSubtitle": "Modification de l'evenement",
       "details": "Details de l'Evenement",
       "eventTitle": "Titre de l'Evenement",
       "eventType": "Type d'Evenement",
@@ -913,7 +925,9 @@
       "subtitle": "Gerez les contenus educatifs",
       "list": "Liste des Contenus",
       "new": "Nouveau Contenu",
+      "newSubtitle": "Ajouter du nouveau contenu academy",
       "edit": "Modifier Contenu",
+      "editSubtitle": "Modification du contenu",
       "details": "Details du Contenu",
       "contentTitle": "Titre",
       "contentType": "Type de Contenu",
@@ -922,6 +936,7 @@
       "duration": "Duree (minutes)",
       "mediaUrl": "URL Media",
       "thumbnailUrl": "URL Miniature",
+      "materialsUrl": "URL Materiaux",
       "isDownloadable": "Telechargeable",
       "isPublished": "Publie",
       "noContent": "Aucun contenu trouve",
@@ -935,7 +950,12 @@
         "gallery": "Galerie Photo",
         "slides": "Diapositives",
         "podcast": "Podcast",
-        "recording": "Enregistrement d'Evenement"
+        "recording": "Enregistrement d'Evenement",
+        "VIDEO": "Video",
+        "GALLERY": "Galerie Photo",
+        "SLIDES": "Diapositives",
+        "PODCAST": "Podcast",
+        "RECORDING": "Enregistrement d'Evenement"
       }
     },
     "documents": {
@@ -943,7 +963,9 @@
       "subtitle": "Gerez les documents globaux",
       "list": "Liste des Documents",
       "new": "Nouveau Document",
+      "newSubtitle": "Telecharger un nouveau document",
       "edit": "Modifier Document",
+      "editSubtitle": "Modification du document",
       "details": "Details du Document",
       "documentTitle": "Titre",
       "category": "Categorie",
@@ -1107,5 +1129,17 @@
       "title": "Nous Contacter",
       "description": "Si vous avez des questions concernant ces Conditions d'Utilisation, veuillez nous contacter."
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unreadCount": "{count} non lues",
+    "markAllRead": "Tout marquer comme lu",
+    "markRead": "Marquer comme lu",
+    "all": "Toutes",
+    "unread": "Non lues",
+    "new": "Nouveau",
+    "noNotifications": "Aucune notification",
+    "noUnread": "Vous etes a jour !",
+    "noNotificationsYet": "Les notifications apparaitront ici lorsqu'il y aura des activites sur votre compte."
   }
 }

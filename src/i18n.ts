@@ -1,24 +1,20 @@
 import { getRequestConfig } from 'next-intl/server';
 
 // Supported locales
-export const locales = ['en', 'it', 'fr'] as const;
+export const locales = ['it', 'en'] as const;
 export type Locale = (typeof locales)[number];
 
 // Default locale
-export const defaultLocale: Locale = 'en';
+export const defaultLocale: Locale = 'it';
 
 // Locale labels and RTL configuration
 export const localeConfig = {
-  en: {
-    label: 'English',
-    dir: 'ltr' as const,
-  },
   it: {
     label: 'Italiano',
     dir: 'ltr' as const,
   },
-  fr: {
-    label: 'Français',
+  en: {
+    label: 'English',
     dir: 'ltr' as const,
   },
 } as const;

@@ -5,9 +5,8 @@ import { usePathname, useRouter } from '@/navigation';
 import { useTransition } from 'react';
 
 const languages = [
-  { code: 'en', name: 'EN', flag: 'GB' },
   { code: 'it', name: 'IT', flag: 'IT' },
-  { code: 'fr', name: 'FR', flag: 'FR' },
+  { code: 'en', name: 'EN', flag: 'GB' },
 ];
 
 export default function LanguageSwitcher() {

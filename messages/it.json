@@ -481,6 +481,8 @@
     "date": "Data",
     "location": "Luogo",
     "online": "Online",
+    "hybrid": "Ibrido",
+    "newEvent": "Nuovo Evento",
     "allTypes": "Tutti i Tipi",
     "thisMonth": "Questo Mese",
     "searchPlaceholder": "Cerca eventi...",
@@ -560,6 +562,8 @@
     "noPreview": "Anteprima non disponibile",
     "downloadMaterials": "Scarica Materiali",
     "downloadHint": "Scarica slide, documenti e risorse aggiuntive",
+    "supplementaryMaterials": "Materiali Supplementari",
+    "materialsHint": "Documenti, slide e risorse aggiuntive per questo contenuto",
     "podcast": "Episodio Podcast"
   },
   "documents": {
@@ -570,6 +574,7 @@
     "all": "Tutti",
     "adjustFilters": "Prova a modificare la ricerca o i filtri per trovare quello che cerchi.",
     "noDocumentsYet": "Non ci sono ancora documenti disponibili. Ricontrolla presto!",
+    "newDocument": "Nuovo Documento",
     "categories": {
       "contracts": "Contratti",
       "presentations": "Presentazioni",
@@ -622,6 +627,7 @@
     "all": "Tutti",
     "adjustFilters": "Prova a modificare la ricerca o i filtri per trovare quello che cerchi.",
     "noPartnersYet": "Non ci sono ancora partner nell'elenco.",
+    "addPartner": "Aggiungi Partner",
     "showingResults": "Mostrando {count} di {total} partner",
     "filter": "Filtra per",
     "category": "Categoria",
@@ -901,6 +907,10 @@
       "documents": "Documenti",
       "history": "Storico",
       "generate": "Genera",
+      "attachments": "Allegati",
+      "addAttachment": "Aggiungi Allegato",
+      "attachmentFile": "File Allegato",
+      "attachmentTitle": "Titolo Documento",
       "noCases": "Nessuna pratica trovata",
       "confirmDelete": "Eliminare questa pratica?",
       "deleteWarning": "Questa azione non puo essere annullata. Tutti i documenti e lo storico verranno rimossi permanentemente.",
@@ -915,7 +925,9 @@
       "subtitle": "Gestisci tutti gli eventi e le formazioni",
       "list": "Lista Eventi",
       "new": "Nuovo Evento",
+      "newSubtitle": "Crea un nuovo evento",
       "edit": "Modifica Evento",
+      "editSubtitle": "Modifica evento",
       "details": "Dettagli Evento",
       "eventTitle": "Titolo Evento",
       "eventType": "Tipo Evento",
@@ -929,6 +941,10 @@
       "isPublished": "Pubblicato",
       "noEvents": "Nessun evento trovato",
       "confirmDelete": "Sei sicuro di voler eliminare questo evento?",
+      "upcoming": "Solo futuri",
+      "filters": {
+        "allTypes": "Tutti i Tipi"
+      },
       "types": {
         "training": "Formazione",
         "workshop": "Workshop",
@@ -941,7 +957,9 @@
       "subtitle": "Gestisci i contenuti formativi",
       "list": "Lista Contenuti",
       "new": "Nuovo Contenuto",
+      "newSubtitle": "Aggiungi nuovo contenuto academy",
       "edit": "Modifica Contenuto",
+      "editSubtitle": "Modifica contenuto",
       "details": "Dettagli Contenuto",
       "contentTitle": "Titolo",
       "contentType": "Tipo Contenuto",
@@ -950,6 +968,7 @@
       "duration": "Durata (minuti)",
       "mediaUrl": "URL Media",
       "thumbnailUrl": "URL Miniatura",
+      "materialsUrl": "URL Materiali",
       "isDownloadable": "Scaricabile",
       "isPublished": "Pubblicato",
       "noContent": "Nessun contenuto trovato",
@@ -963,7 +982,12 @@
         "gallery": "Galleria Foto",
         "slides": "Slide",
         "podcast": "Podcast",
-        "recording": "Registrazione Evento"
+        "recording": "Registrazione Evento",
+        "VIDEO": "Video",
+        "GALLERY": "Galleria Foto",
+        "SLIDES": "Slide",
+        "PODCAST": "Podcast",
+        "RECORDING": "Registrazione Evento"
       }
     },
     "documents": {
@@ -971,7 +995,9 @@
       "subtitle": "Gestisci i documenti globali",
       "list": "Lista Documenti",
       "new": "Nuovo Documento",
+      "newSubtitle": "Carica un nuovo documento",
       "edit": "Modifica Documento",
+      "editSubtitle": "Modifica documento",
       "details": "Dettagli Documento",
       "documentTitle": "Titolo",
       "category": "Categoria",
@@ -1012,7 +1038,11 @@
       "isPublished": "Pubblicato",
       "publishedAt": "Data Pubblicazione",
       "noPosts": "Nessun articolo trovato",
-      "confirmDelete": "Sei sicuro di voler eliminare questo articolo?"
+      "confirmDelete": "Sei sicuro di voler eliminare questo articolo?",
+      "filters": {
+        "allCategories": "Tutte le Categorie",
+        "all": "Tutti"
+      }
     },
     "table": {
       "actions": "Azioni",
@@ -1135,5 +1165,17 @@
       "title": "Contattaci",
       "description": "Per qualsiasi domanda su questi Termini di Servizio, contattaci."
     }
+  },
+  "notifications": {
+    "title": "Notifiche",
+    "unreadCount": "{count} non lette",
+    "markAllRead": "Segna tutte come lette",
+    "markRead": "Segna come letta",
+    "all": "Tutte",
+    "unread": "Non lette",
+    "new": "Nuova",
+    "noNotifications": "Nessuna notifica",
+    "noUnread": "Sei aggiornato!",
+    "noNotificationsYet": "Le notifiche appariranno qui quando ci saranno attivita sul tuo account."
   }
 }

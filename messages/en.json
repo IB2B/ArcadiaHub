@@ -466,6 +466,8 @@
     "date": "Date",
     "location": "Location",
     "online": "Online",
+    "hybrid": "Hybrid",
+    "newEvent": "New Event",
     "allTypes": "All Types",
     "thisMonth": "This Month",
     "searchPlaceholder": "Search events...",
@@ -546,6 +548,8 @@
     "noPreview": "No preview available",
     "downloadMaterials": "Download Materials",
     "downloadHint": "Download slides, documents, and additional resources",
+    "supplementaryMaterials": "Supplementary Materials",
+    "materialsHint": "Documents, slides, and additional resources for this content",
     "podcast": "Podcast Episode"
   },
   "documents": {
@@ -556,6 +560,7 @@
     "all": "All",
     "adjustFilters": "Try adjusting your search or filters to find what you're looking for.",
     "noDocumentsYet": "There are no documents available yet. Check back soon!",
+    "newDocument": "New Document",
     "categories": {
       "contracts": "Contracts",
       "presentations": "Presentations",
@@ -609,6 +614,7 @@
     "all": "All",
     "adjustFilters": "Try adjusting your search or filters to find what you're looking for.",
     "noPartnersYet": "There are no partners in the directory yet.",
+    "addPartner": "Add Partner",
     "showingResults": "Showing {count} of {total} partners",
     "filter": "Filter by",
     "category": "Category",
@@ -888,6 +894,10 @@
       "documents": "Documents",
       "history": "History",
       "generate": "Generate",
+      "attachments": "Attachments",
+      "addAttachment": "Add Attachment",
+      "attachmentFile": "Attachment File",
+      "attachmentTitle": "Document Title",
       "noCases": "No cases found",
       "confirmDelete": "Delete this case?",
       "deleteWarning": "This action cannot be undone. All associated documents and history will be permanently removed.",
@@ -902,7 +912,9 @@
       "subtitle": "Manage all events and trainings",
       "list": "Events List",
       "new": "New Event",
+      "newSubtitle": "Create a new event",
       "edit": "Edit Event",
+      "editSubtitle": "Editing event",
       "details": "Event Details",
       "eventTitle": "Event Title",
       "eventType": "Event Type",
@@ -916,6 +928,10 @@
       "isPublished": "Published",
       "noEvents": "No events found",
       "confirmDelete": "Are you sure you want to delete this event?",
+      "upcoming": "Upcoming only",
+      "filters": {
+        "allTypes": "All Types"
+      },
       "types": {
         "training": "Training",
         "workshop": "Workshop",
@@ -928,7 +944,9 @@
       "subtitle": "Manage educational content",
       "list": "Content List",
       "new": "New Content",
+      "newSubtitle": "Add new academy content",
       "edit": "Edit Content",
+      "editSubtitle": "Editing content",
       "details": "Content Details",
       "contentTitle": "Title",
       "contentType": "Content Type",
@@ -937,6 +955,7 @@
       "duration": "Duration (minutes)",
       "mediaUrl": "Media URL",
       "thumbnailUrl": "Thumbnail URL",
+      "materialsUrl": "Materials URL",
       "isDownloadable": "Downloadable",
       "isPublished": "Published",
       "noContent": "No content found",
@@ -950,7 +969,12 @@
         "gallery": "Photo Gallery",
         "slides": "Slides",
         "podcast": "Podcast",
-        "recording": "Event Recording"
+        "recording": "Event Recording",
+        "VIDEO": "Video",
+        "GALLERY": "Photo Gallery",
+        "SLIDES": "Slides",
+        "PODCAST": "Podcast",
+        "RECORDING": "Event Recording"
       }
     },
     "documents": {
@@ -958,7 +982,9 @@
       "subtitle": "Manage global documents",
       "list": "Documents List",
       "new": "New Document",
+      "newSubtitle": "Upload a new document",
       "edit": "Edit Document",
+      "editSubtitle": "Editing document",
       "details": "Document Details",
       "documentTitle": "Title",
       "category": "Category",
@@ -999,7 +1025,11 @@
       "isPublished": "Published",
       "publishedAt": "Published At",
       "noPosts": "No posts found",
-      "confirmDelete": "Are you sure you want to delete this post?"
+      "confirmDelete": "Are you sure you want to delete this post?",
+      "filters": {
+        "allCategories": "All Categories",
+        "all": "All"
+      }
     },
     "table": {
       "actions": "Actions",
@@ -1122,5 +1152,17 @@
       "title": "Contact Us",
       "description": "If you have any questions about these Terms of Service, please contact us."
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unreadCount": "{count} unread",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read",
+    "all": "All",
+    "unread": "Unread",
+    "new": "New",
+    "noNotifications": "No notifications",
+    "noUnread": "You're all caught up!",
+    "noNotificationsYet": "Notifications will appear here when there's activity on your account."
   }
 }
