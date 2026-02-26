@@ -19,7 +19,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
     return { success: false, error: 'Email and password are required' };
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: signInData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -28,8 +28,23 @@ export async function login(formData: FormData): Promise<AuthResult> {
     return { success: false, error: error.message };
   }
 
+  // Check user role to determine redirect destination
+  let redirectPath = '/dashboard';
+
+  if (signInData.user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', signInData.user.id)
+      .single();
+
+    if (profile?.role === 'ADMIN' || profile?.role === 'COMMERCIAL') {
+      redirectPath = '/admin';
+    }
+  }
+
   revalidatePath('/', 'layout');
-  redirect('/dashboard');
+  redirect(redirectPath);
 }
 
 export async function signup(formData: FormData): Promise<AuthResult> {

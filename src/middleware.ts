@@ -75,7 +75,17 @@ export async function middleware(request: NextRequest) {
 
   // Redirect authenticated users away from auth pages
   if ((pathname.includes('/login') || pathname.includes('/register')) && user) {
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    // Check role to redirect admin users to admin panel
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const dest = (profile?.role === 'ADMIN' || profile?.role === 'COMMERCIAL')
+      ? `/${locale}/admin`
+      : `/${locale}/dashboard`;
+    return NextResponse.redirect(new URL(dest, request.url));
   }
 
   // Add full URL to headers for server components to access
