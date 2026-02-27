@@ -40,7 +40,14 @@ export default async function LocaleLayout({
   const dir = localeConfig[locale as keyof typeof localeConfig].dir;
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){t='light';localStorage.setItem('theme',t)}document.documentElement.setAttribute('data-theme',t)}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}

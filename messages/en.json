@@ -683,12 +683,10 @@
     "notificationSettings": "Notifications",
     "notificationSettingsDesc": "Configure notification preferences",
     "themes": {
-      "c1": "Professional Blue",
-      "c1Desc": "Clean corporate look with light background",
-      "c2": "Modern Dark Accent",
-      "c2Desc": "Dark sidebar with white content area",
-      "c3": "Soft Gradient",
-      "c3Desc": "Soft blue gradient with glassmorphism"
+      "light": "Light",
+      "lightDesc": "Clean white theme with blue accents",
+      "dark": "Dark",
+      "darkDesc": "Dark theme, easy on the eyes"
     }
   },
   "uiPicker": {

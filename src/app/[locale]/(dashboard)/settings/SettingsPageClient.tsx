@@ -35,7 +35,7 @@ const icons = {
 
 const themes = [
   {
-    id: 'c1',
+    id: 'light',
     preview: {
       bg: '#F8FAFC',
       primary: '#244675',
@@ -44,34 +44,27 @@ const themes = [
     },
   },
   {
-    id: 'c2',
+    id: 'dark',
     preview: {
-      bg: '#F1F5F9',
-      primary: '#244675',
-      card: '#FFFFFF',
-      sidebar: '#0F172A',
-    },
-  },
-  {
-    id: 'c3',
-    preview: {
-      bg: 'linear-gradient(135deg, #f0f4f9 0%, #dce5f0 50%, #f0edf5 100%)',
-      primary: '#244675',
-      card: 'rgba(255, 255, 255, 0.9)',
-      sidebar: 'rgba(255, 255, 255, 0.8)',
+      bg: '#0F172A',
+      primary: '#5B8AC5',
+      card: '#1E293B',
+      sidebar: '#1E293B',
     },
   },
 ];
 
 export default function SettingsPageClient() {
   const t = useTranslations('settings');
-  const [currentTheme, setCurrentTheme] = useState('c1');
+  const [currentTheme, setCurrentTheme] = useState('light');
 
-  // Load theme from localStorage on mount
+  // Load theme from localStorage on mount, migrating old c1/c2/c3 values
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'c1';
-    setCurrentTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    const saved = localStorage.getItem('theme') || 'light';
+    const theme = saved === 'light' || saved === 'dark' ? saved : 'light';
+    if (saved !== theme) localStorage.setItem('theme', theme);
+    setCurrentTheme(theme);
+    document.documentElement.setAttribute('data-theme', theme);
   }, []);
 
   const handleThemeChange = (themeId: string) => {
@@ -101,7 +94,7 @@ export default function SettingsPageClient() {
           action={<div className="text-[var(--primary)]">{icons.palette}</div>}
         />
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {themes.map((theme) => (
               <button
                 key={theme.id}
@@ -137,10 +130,10 @@ export default function SettingsPageClient() {
 
                 {/* Info */}
                 <h3 className="font-medium text-[var(--text)]">
-                  {t(`themes.${theme.id}` as 'themes.c1' | 'themes.c2' | 'themes.c3')}
+                  {t(`themes.${theme.id}` as 'themes.light' | 'themes.dark')}
                 </h3>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  {t(`themes.${theme.id}Desc` as 'themes.c1Desc' | 'themes.c2Desc' | 'themes.c3Desc')}
+                  {t(`themes.${theme.id}Desc` as 'themes.lightDesc' | 'themes.darkDesc')}
                 </p>
 
                 {/* Selected indicator */}

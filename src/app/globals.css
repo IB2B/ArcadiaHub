@@ -2,11 +2,11 @@
 @import "tailwindcss";
 
 /* ============================================
-   THEME C1 - Professional Blue (Default)
+   THEME: Light (Default)
    ============================================ */
 
 :root,
-[data-theme="c1"] {
+[data-theme="light"] {
   /* Brand Colors */
   --primary: #244675;
   --primary-hover: #1a3457;
@@ -53,110 +53,52 @@
 }
 
 /* ============================================
-   THEME C2 - Modern Blue with Dark Accents
+   THEME: Dark
    ============================================ */
-[data-theme="c2"] {
+[data-theme="dark"] {
   /* Brand Colors */
-  --primary: #244675;
-  --primary-hover: #3d6a9e;
-  --primary-light: #132640;
-  --secondary: #132640;
-  --accent: #4a7db8;
+  --primary: #5B8AC5;
+  --primary-hover: #7BA3D4;
+  --primary-light: #1E3A5F;
+  --secondary: #93C5FD;
+  --accent: #7BA3D4;
 
   /* Status Colors */
   --success: #34D399;
-  --success-light: #064E3B;
+  --success-light: rgba(52, 211, 153, 0.15);
   --warning: #FBBF24;
-  --warning-light: #78350F;
+  --warning-light: rgba(251, 191, 36, 0.15);
   --error: #F87171;
-  --error-light: #7F1D1D;
-  --info: #3d6a9e;
-  --info-light: #132640;
+  --error-light: rgba(248, 113, 113, 0.15);
+  --info: #5B8AC5;
+  --info-light: rgba(91, 138, 197, 0.15);
 
   /* Background & Surface */
-  --background: #F1F5F9;
-  --card: #FFFFFF;
-  --card-hover: #F8FAFC;
-  --sidebar-bg: #0F172A;
+  --background: #0F172A;
+  --card: #1E293B;
+  --card-hover: #334155;
+  --sidebar-bg: #1E293B;
   --header-bg: #1E293B;
 
   /* Text Colors */
-  --text: #1E293B;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --text-light: #94A3B8;
-  --sidebar-text: #E2E8F0;
-  --sidebar-text-muted: #94A3B8;
+  --text: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
 
   /* Border */
-  --border: #E2E8F0;
-  --border-focus: #244675;
-  --sidebar-border: #334155;
+  --border: #334155;
+  --border-focus: #5B8AC5;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #244675 0%, #132640 100%);
-  --gradient-accent: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-}
-
-/* ============================================
-   THEME C3 - Soft Blue Gradient
-   ============================================ */
-[data-theme="c3"] {
-  /* Brand Colors */
-  --primary: #244675;
-  --primary-hover: #1a3457;
-  --primary-light: #e8eef5;
-  --secondary: #6b5b95;
-  --accent: #3d8a9e;
-
-  /* Status Colors */
-  --success: #10B981;
-  --success-light: #ECFDF5;
-  --warning: #F59E0B;
-  --warning-light: #FFFBEB;
-  --error: #EF4444;
-  --error-light: #FEF2F2;
-  --info: #244675;
-  --info-light: #e8eef5;
-
-  /* Background & Surface */
-  --background: #f0f4f9;
-  --card: rgba(255, 255, 255, 0.9);
-  --card-hover: rgba(255, 255, 255, 1);
-  --sidebar-bg: rgba(255, 255, 255, 0.8);
-  --header-bg: rgba(255, 255, 255, 0.9);
-
-  /* Text Colors */
-  --text: #1E293B;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --text-light: #94A3B8;
-
-  /* Border */
-  --border: rgba(36, 70, 117, 0.15);
-  --border-focus: #244675;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(36, 70, 117, 0.1);
-  --shadow: 0 2px 8px rgba(36, 70, 117, 0.12);
-  --shadow-md: 0 4px 12px rgba(36, 70, 117, 0.15);
-  --shadow-lg: 0 8px 25px rgba(36, 70, 117, 0.18);
-
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #244675 0%, #6b5b95 100%);
-  --gradient-accent: linear-gradient(135deg, #3d8a9e 0%, #244675 100%);
-  --gradient-bg: linear-gradient(135deg, #f0f4f9 0%, #dce5f0 50%, #f0edf5 100%);
-
-  /* Glass Effect */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --backdrop-blur: blur(12px);
+  --gradient-primary: linear-gradient(135deg, #5B8AC5 0%, #1E3A5F 100%);
+  --gradient-accent: linear-gradient(135deg, #7BA3D4 0%, #5B8AC5 100%);
 }
 
 /* ============================================
@@ -187,11 +129,6 @@ body {
   font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Theme C3 gradient background */
-[data-theme="c3"] body {
-  background: var(--gradient-bg);
 }
 
 /* ============================================

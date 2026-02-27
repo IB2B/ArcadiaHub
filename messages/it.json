@@ -696,12 +696,10 @@
     "notificationSettings": "Notifiche",
     "notificationSettingsDesc": "Configura le preferenze di notifica",
     "themes": {
-      "c1": "Blu Professionale",
-      "c1Desc": "Look aziendale pulito con sfondo chiaro",
-      "c2": "Accenti Scuri Moderni",
-      "c2Desc": "Sidebar scura con area contenuto bianca",
-      "c3": "Gradiente Morbido",
-      "c3Desc": "Gradiente blu morbido con glassmorphism"
+      "light": "Chiaro",
+      "lightDesc": "Tema bianco pulito con accenti blu",
+      "dark": "Scuro",
+      "darkDesc": "Tema scuro, piacevole per gli occhi"
     }
   },
   "uiPicker": {
