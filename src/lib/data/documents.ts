@@ -1,7 +1,9 @@
 'use server';
 
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/database/server';
 import { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
 
 type Document = Database['public']['Tables']['documents']['Row'];
 
@@ -16,7 +18,7 @@ export async function getDocuments(options?: {
 
   let query = supabase
     .from('documents')
-    .select('*', { count: 'exact' })
+    .select('id, title, description, category, file_url, file_type, file_size, folder_path, is_published, created_at, updated_at', { count: 'exact' })
     .eq('is_published', true);
 
   if (options?.category) {
@@ -40,29 +42,37 @@ export async function getDocuments(options?: {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching documents:', error);
+    logger.error('Error fetching documents:', { error });
     return { data: [], count: 0 };
   }
 
   return { data: data || [], count: count || 0 };
 }
 
+const _getLatestDocuments = unstable_cache(
+  async (limit: number): Promise<Document[]> => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      logger.error('Error fetching latest documents:', { error });
+      return [];
+    }
+
+    return data || [];
+  },
+  ['latest-documents'],
+  { revalidate: 300, tags: ['documents'] }
+);
+
 export async function getLatestDocuments(limit: number = 5): Promise<Document[]> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error('Error fetching latest documents:', error);
-    return [];
-  }
-
-  return data || [];
+  return _getLatestDocuments(limit);
 }
 
 export async function getDocumentsByCategory(): Promise<Record<string, number>> {
@@ -93,7 +103,7 @@ export async function getDocument(documentId: string): Promise<Document | null> 
     .single();
 
   if (error) {
-    console.error('Error fetching document:', error);
+    logger.error('Error fetching document:', { error });
     return null;
   }
 

@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
-import { createPartner, updatePartner, uploadPartnerLogo } from '@/lib/data/admin';
+import { useRouter } from '@/navigation';
+import { Tables, TablesUpdate } from '@/types/database.types';
+import { updatePartner, uploadPartnerLogo } from '@/lib/data/admin';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';

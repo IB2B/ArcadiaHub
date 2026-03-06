@@ -14,9 +14,6 @@ type Profile = Database['public']['Tables']['profiles']['Row'];
 type Case = Database['public']['Tables']['cases']['Row'];
 type Event = Database['public']['Tables']['events']['Row'];
 type Notification = Database['public']['Tables']['notifications']['Row'];
-type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
-type Document = Database['public']['Tables']['documents']['Row'];
-type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
 
 export type ActivityFeedItem = {
   id: string;
@@ -206,17 +203,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 
   // Fetch all data in parallel
-  const [
-    profile,
-    caseStats,
-    upcomingEvents,
-    recentCases,
-    notifications,
-    unreadCount,
-    latestContent,
-    latestDocuments,
-    latestBlogPosts,
-  ] = await Promise.all([
+  const results = await Promise.allSettled([
     getCurrentUserProfile(),
     getCaseStats(user.id),
     getUpcomingEvents(5),
@@ -227,6 +214,19 @@ export async function getDashboardData(): Promise<DashboardData> {
     getLatestDocuments(3),
     getLatestBlogPosts(3),
   ]);
+
+  const getValue = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+    result.status === 'fulfilled' ? result.value : fallback;
+
+  const profile = getValue(results[0] as PromiseSettledResult<Profile | null>, null);
+  const caseStats = getValue(results[1] as PromiseSettledResult<{ total: number; pending: number; inProgress: number; completed: number }>, { total: 0, pending: 0, inProgress: 0, completed: 0 });
+  const upcomingEvents = getValue(results[2] as PromiseSettledResult<Event[]>, []);
+  const recentCases = getValue(results[3] as PromiseSettledResult<{ data: Case[]; count: number }>, { data: [], count: 0 });
+  const notifications = getValue(results[4] as PromiseSettledResult<Notification[]>, []);
+  const unreadCount = getValue(results[5] as PromiseSettledResult<number>, 0);
+  const latestContent = getValue(results[6] as PromiseSettledResult<Awaited<ReturnType<typeof getLatestAcademyContent>>>, []);
+  const latestDocuments = getValue(results[7] as PromiseSettledResult<Awaited<ReturnType<typeof getLatestDocuments>>>, []);
+  const latestBlogPosts = getValue(results[8] as PromiseSettledResult<Awaited<ReturnType<typeof getLatestBlogPosts>>>, []);
 
   // Build activity feed from various sources
   const activityFeed: ActivityFeedItem[] = [];

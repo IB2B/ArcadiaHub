@@ -1,11 +1,13 @@
 'use server';
 
 import { createClient } from '@/lib/database/server';
+import { requireAuth, requireRole, authErrorToResult } from '@/lib/auth/guards';
+import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
+import { CreateCaseSchema, UpdateCaseStatusSchema } from '@/lib/validators';
 
 type Case = Database['public']['Tables']['cases']['Row'];
-type CaseInsert = Database['public']['Tables']['cases']['Insert'];
-type CaseUpdate = Database['public']['Tables']['cases']['Update'];
 type CaseDocument = Database['public']['Tables']['case_documents']['Row'];
 type CaseHistory = Database['public']['Tables']['case_history']['Row'];
 
@@ -13,13 +15,6 @@ export type CaseWithDetails = Case & {
   documents?: CaseDocument[];
   history?: CaseHistory[];
 };
-
-// Generate unique case code
-function generateCaseCode(): string {
-  const year = new Date().getFullYear();
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `${year}-${random}`;
-}
 
 export async function getCases(options?: {
   status?: string;
@@ -31,7 +26,7 @@ export async function getCases(options?: {
 
   let query = supabase
     .from('cases')
-    .select('*', { count: 'exact' });
+    .select('id, case_code, partner_id, client_name, status, notes, opened_at, closed_at, created_at, updated_at', { count: 'exact' });
 
   if (options?.status) {
     query = query.eq('status', options.status);
@@ -51,7 +46,7 @@ export async function getCases(options?: {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching cases:', error);
+    logger.error('Error fetching cases:', { error });
     return { data: [], count: 0 };
   }
 
@@ -72,7 +67,7 @@ export async function getMyCase(caseId: string): Promise<CaseWithDetails | null>
     .single();
 
   if (error) {
-    console.error('Error fetching case:', error);
+    logger.error('Error fetching case:', { error });
     return null;
   }
 
@@ -92,7 +87,7 @@ export async function getMyCases(options?: {
 
   let query = supabase
     .from('cases')
-    .select('*', { count: 'exact' })
+    .select('id, case_code, partner_id, client_name, status, notes, opened_at, closed_at, created_at, updated_at', { count: 'exact' })
     .eq('partner_id', user.id);
 
   if (options?.search) {
@@ -113,7 +108,7 @@ export async function getMyCases(options?: {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching my cases:', error);
+    logger.error('Error fetching my cases:', { error });
     return { data: [], count: 0 };
   }
 
@@ -124,22 +119,33 @@ export async function createCase(
   clientName: string,
   notes?: string
 ): Promise<{ success: boolean; data?: Case; error?: string }> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: 'Not authenticated' };
+  const parsed = CreateCaseSchema.safeParse({ clientName, notes });
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' };
   }
 
-  const caseCode = generateCaseCode();
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
+  const supabase = await createClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: codeData, error: codeError } = await (supabase as any).rpc('next_case_code');
+  if (codeError || !codeData) throw new Error('Failed to generate case code');
+  const caseCode = codeData as string;
 
   const { data, error } = await supabase
     .from('cases')
     .insert({
       case_code: caseCode,
-      partner_id: user.id,
-      client_name: clientName,
-      notes,
+      partner_id: userId,
+      client_name: parsed.data.clientName,
+      notes: parsed.data.notes,
       status: 'PENDING',
     })
     .select()
@@ -149,6 +155,7 @@ export async function createCase(
     return { success: false, error: error.message };
   }
 
+  revalidatePath('/[locale]/cases');
   return { success: true, data };
 }
 
@@ -156,17 +163,46 @@ export async function updateCaseStatus(
   caseId: string,
   status: 'PENDING' | 'IN_PROGRESS' | 'SUSPENDED' | 'COMPLETED' | 'CANCELLED'
 ): Promise<{ success: boolean; error?: string }> {
+  const parsed = UpdateCaseStatusSchema.safeParse({ caseId, status });
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' };
+  }
+
+  let userId: string;
+  let role: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+    role = ctx.profile.role;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
   const supabase = await createClient();
+
+  // Non-admin users may only update cases they own
+  if (role !== 'ADMIN' && role !== 'COMMERCIAL') {
+    const { data: caseData } = await supabase
+      .from('cases')
+      .select('partner_id')
+      .eq('id', parsed.data.caseId)
+      .single();
+    if (caseData?.partner_id !== userId) {
+      return { success: false, error: 'Unauthorized' };
+    }
+  }
 
   const { error } = await supabase
     .from('cases')
-    .update({ status })
-    .eq('id', caseId);
+    .update({ status: parsed.data.status })
+    .eq('id', parsed.data.caseId);
 
   if (error) {
     return { success: false, error: error.message };
   }
 
+  revalidatePath('/[locale]/cases');
+  revalidatePath('/[locale]/cases/[id]');
   return { success: true };
 }
 
@@ -178,22 +214,23 @@ export async function getCaseStats(partnerId?: string): Promise<{
 }> {
   const supabase = await createClient();
 
-  let query = supabase.from('cases').select('status');
+  // Use parallel COUNT queries with server-side filtering — avoids fetching all rows
+  const baseQuery = () => {
+    const q = supabase.from('cases').select('*', { count: 'exact', head: true });
+    return partnerId ? q.eq('partner_id', partnerId) : q;
+  };
 
-  if (partnerId) {
-    query = query.eq('partner_id', partnerId);
-  }
-
-  const { data, error } = await query;
-
-  if (error || !data) {
-    return { total: 0, pending: 0, inProgress: 0, completed: 0 };
-  }
+  const [totalRes, pendingRes, inProgressRes, completedRes] = await Promise.all([
+    baseQuery(),
+    baseQuery().eq('status', 'PENDING'),
+    baseQuery().eq('status', 'IN_PROGRESS'),
+    baseQuery().eq('status', 'COMPLETED'),
+  ]);
 
   return {
-    total: data.length,
-    pending: data.filter((c: { status: string | null }) => c.status === 'PENDING').length,
-    inProgress: data.filter((c: { status: string | null }) => c.status === 'IN_PROGRESS').length,
-    completed: data.filter((c: { status: string | null }) => c.status === 'COMPLETED').length,
+    total: totalRes.count ?? 0,
+    pending: pendingRes.count ?? 0,
+    inProgress: inProgressRes.count ?? 0,
+    completed: completedRes.count ?? 0,
   };
 }

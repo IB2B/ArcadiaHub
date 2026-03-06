@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useCallback, useId } from 'react';
-import { useTranslations } from 'next-intl';
 
 interface FileUploadProps {
   accept?: string;
@@ -70,7 +69,6 @@ export default function FileUpload({
   previewType = 'file',
   className = '',
 }: FileUploadProps) {
-  const t = useTranslations('common');
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);

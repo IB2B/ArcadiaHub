@@ -61,10 +61,15 @@ export async function middleware(request: NextRequest) {
     '/profile',
     '/settings',
     '/notifications',
+    '/activity',
+    '/admin',
   ];
 
   // Check if current path is protected
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.includes(route));
+  const isProtectedRoute = protectedRoutes.some(
+    (route) =>
+      pathname === `/${locale}${route}` || pathname.startsWith(`/${locale}${route}/`)
+  );
 
   // Redirect unauthenticated users to login
   if (isProtectedRoute && !user) {

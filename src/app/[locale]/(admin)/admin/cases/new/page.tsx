@@ -5,7 +5,6 @@ import CaseForm from '../CaseForm';
 
 export default async function NewCasePage() {
   const t = await getTranslations('admin.cases');
-  const tNav = await getTranslations('admin.nav');
   const partnerOptions = await getPartnerOptions();
 
   return (

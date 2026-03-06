@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useState, useCallback, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/navigation';
 import { Link } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import Avatar from '@/components/ui/Avatar';
@@ -120,42 +120,42 @@ function Sidebar({ user }: SidebarProps) {
     [pathname]
   );
 
-  const NavLink = useMemo(
-    () =>
-      memo(({ item }: { item: NavItemConfig }) => {
-        const active = isActive(item.href);
-        const label = t(item.translationKey);
-        return (
-          <Link
-            href={item.href}
-            className={`
-              group flex items-center gap-3 px-3 py-2.5 rounded-lg
-              transition-all duration-200
-              ${
-                active
-                  ? 'bg-[var(--primary)] text-white shadow-md'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--card-hover)] hover:text-[var(--text)]'
-              }
-            `}
-          >
-            <span className={`flex-shrink-0 ${active ? 'text-white' : 'text-[var(--text-muted)] group-hover:text-[var(--primary)]'}`}>
-              {icons[item.icon]}
-            </span>
-            {!isCollapsed && (
-              <>
-                <span className="flex-1 font-medium truncate">{label}</span>
-                {item.badge && (
-                  <span className="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error)] text-white">
-                    {item.badge}
-                  </span>
-                )}
-              </>
-            )}
-          </Link>
-        );
-      }),
-    [isActive, isCollapsed, t]
-  );
+  const NavLink = useMemo(() => {
+    const Component = memo(({ item }: { item: NavItemConfig }) => {
+      const active = isActive(item.href);
+      const label = t(item.translationKey);
+      return (
+        <Link
+          href={item.href}
+          className={`
+            group flex items-center gap-3 px-3 py-2.5 rounded-lg
+            transition-all duration-200
+            ${
+              active
+                ? 'bg-[var(--primary)] text-white shadow-md'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--card-hover)] hover:text-[var(--text)]'
+            }
+          `}
+        >
+          <span className={`flex-shrink-0 ${active ? 'text-white' : 'text-[var(--text-muted)] group-hover:text-[var(--primary)]'}`}>
+            {icons[item.icon]}
+          </span>
+          {!isCollapsed && (
+            <>
+              <span className="flex-1 font-medium truncate">{label}</span>
+              {item.badge && (
+                <span className="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error)] text-white">
+                  {item.badge}
+                </span>
+              )}
+            </>
+          )}
+        </Link>
+      );
+    });
+    Component.displayName = 'NavLink';
+    return Component;
+  }, [isActive, isCollapsed, t]);
 
   return (
     <aside

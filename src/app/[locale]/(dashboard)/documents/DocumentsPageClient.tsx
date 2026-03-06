@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';

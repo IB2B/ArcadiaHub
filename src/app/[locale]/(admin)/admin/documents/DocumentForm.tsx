@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { createDocument, updateDocument } from '@/lib/data/admin';
 import { uploadFileFromFormData } from '@/lib/services/storage';

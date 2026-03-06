@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useCallback, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { logout } from '@/lib/auth';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -14,7 +13,6 @@ interface SessionTimeoutProps {
 }
 
 export default function SessionTimeout({ children }: SessionTimeoutProps) {
-  const router = useRouter();
   const [showWarning, setShowWarning] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -31,8 +29,6 @@ export default function SessionTimeout({ children }: SessionTimeoutProps) {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (warningRef.current) clearTimeout(warningRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
-
-    setShowWarning(false);
 
     // Set warning timer (25 minutes)
     warningRef.current = setTimeout(() => {
@@ -58,7 +54,7 @@ export default function SessionTimeout({ children }: SessionTimeoutProps) {
   }, [handleLogout]);
 
   const handleContinue = useCallback(() => {
-    setShowWarning(false);
+    setShowWarning(false); // resetTimer no longer calls setShowWarning, so we do it here
     resetTimer();
   }, [resetTimer]);
 

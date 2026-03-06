@@ -2,7 +2,6 @@ export {
   login,
   signup,
   logout,
-  getSession,
   getUser,
   getCurrentProfile,
   forgotPassword,
@@ -10,3 +9,4 @@ export {
   updatePassword,
   type AuthResult,
 } from './actions';
+

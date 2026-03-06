@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useTransition, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
 import { Tables } from '@/types/database.types';
 import { updateAcademyContent, deleteAcademyContent, type PaginatedResult } from '@/lib/data/admin';

@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 import { Database } from '@/types/database.types';
 
 // Service client for server-side operations without user context
@@ -18,8 +19,11 @@ export async function createServiceSupabaseClient() {
   );
 }
 
-// Server client for server components and API routes
-export async function createServerSupabaseClient() {
+// Server client for server components and API routes.
+// Wrapped in React.cache() so that within a single request/render pass,
+// all callers share the same client instance — no duplicate cookie reads
+// or multiple client constructions per page load.
+export const createServerSupabaseClient = cache(async () => {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -44,34 +48,19 @@ export async function createServerSupabaseClient() {
       },
     }
   );
-}
+});
 
 // Alias for createServerSupabaseClient for simpler imports
 export async function createClient() {
   return createServerSupabaseClient();
 }
 
-// Helper to get current user
-export async function getCurrentUser() {
+// Helper to get current user — also cached per-request so multiple
+// server components calling this only hit auth.getUser() once.
+export const getCurrentUser = cache(async () => {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
-
-// Helper to get current user profile
-export async function getCurrentProfile(): Promise<Database['public']['Tables']['profiles']['Row'] | null> {
-  const supabase = await createServerSupabaseClient();
-  const user = await getCurrentUser();
-
-  if (!user) return null;
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-
-  return profile;
-}
+});

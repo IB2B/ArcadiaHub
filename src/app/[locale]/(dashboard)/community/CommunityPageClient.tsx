@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import PartnerCard from '@/components/community/PartnerCard';
 import Pagination from '@/components/ui/Pagination';

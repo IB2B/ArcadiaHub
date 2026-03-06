@@ -1,7 +1,10 @@
 'use server';
 
 import { createClient } from '@/lib/database/server';
+import { requireAuth, authErrorToResult } from '@/lib/auth/guards';
+import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
@@ -11,12 +14,12 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_at, updated_at')
     .eq('id', userId)
     .single();
 
   if (error) {
-    console.error('Error fetching profile:', error);
+    logger.error('Error fetching profile:', { error });
     return null;
   }
 
@@ -47,6 +50,7 @@ export async function updateProfile(
     return { success: false, error: error.message };
   }
 
+  revalidatePath('/[locale]/profile');
   return { success: true };
 }
 
@@ -61,7 +65,7 @@ export async function getPartners(options?: {
 
   let query = supabase
     .from('profiles')
-    .select('*', { count: 'exact' })
+    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_at, updated_at', { count: 'exact' })
     .eq('role', 'PARTNER');
 
   if (options?.category) {
@@ -85,7 +89,7 @@ export async function getPartners(options?: {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching partners:', error);
+    logger.error('Error fetching partners:', { error });
     return { data: [], count: 0 };
   }
 
@@ -97,14 +101,14 @@ export async function searchPartners(searchTerm: string): Promise<Profile[]> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_at, updated_at')
     .eq('role', 'PARTNER')
     .eq('is_active', true)
     .or(`company_name.ilike.%${searchTerm}%,contact_first_name.ilike.%${searchTerm}%,contact_last_name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
     .limit(20);
 
   if (error) {
-    console.error('Error searching partners:', error);
+    logger.error('Error searching partners:', { error });
     return [];
   }
 
@@ -117,22 +121,26 @@ export async function searchPartners(searchTerm: string): Promise<Profile[]> {
 export async function updateCurrentUserProfile(
   updates: ProfileUpdate
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: 'Not authenticated' };
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
   }
+
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from('profiles')
     .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', user.id);
+    .eq('id', userId);
 
   if (error) {
     return { success: false, error: error.message };
   }
 
+  revalidatePath('/[locale]/profile');
   return { success: true };
 }
 
@@ -142,13 +150,15 @@ export async function updateCurrentUserProfile(
 export async function uploadProfileLogo(
   formData: FormData
 ): Promise<{ success: boolean; url?: string; error?: string }> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: 'Not authenticated' };
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
   }
 
+  const supabase = await createClient();
   const file = formData.get('file') as File;
 
   if (!file || file.size === 0) {
@@ -168,7 +178,7 @@ export async function uploadProfileLogo(
 
   const timestamp = Date.now();
   const ext = file.name.split('.').pop();
-  const path = `${user.id}-${timestamp}.${ext}`;
+  const path = `${userId}-${timestamp}.${ext}`;
 
   const { data, error } = await supabase.storage
     .from('partner-logos')
@@ -178,7 +188,7 @@ export async function uploadProfileLogo(
     });
 
   if (error) {
-    console.error('Error uploading profile logo:', error);
+    logger.error('Error uploading profile logo:', { error });
     return { success: false, error: error.message };
   }
 
@@ -191,12 +201,13 @@ export async function uploadProfileLogo(
   const { error: updateError } = await supabase
     .from('profiles')
     .update({ logo_url: urlData.publicUrl, updated_at: new Date().toISOString() })
-    .eq('id', user.id);
+    .eq('id', userId);
 
   if (updateError) {
-    console.error('Error updating profile with logo:', updateError);
+    logger.error('Error updating profile with logo:', { error: updateError });
     return { success: false, error: updateError.message };
   }
 
+  revalidatePath('/[locale]/profile');
   return { success: true, url: urlData.publicUrl };
 }

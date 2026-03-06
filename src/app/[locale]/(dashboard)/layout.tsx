@@ -1,17 +1,20 @@
-import { redirect } from 'next/navigation';
+import { redirect } from '@/navigation';
 import { DashboardLayout } from '@/components/layout';
 import { getCurrentUserProfile } from '@/lib/data/profiles';
 import { getUser } from '@/lib/auth';
 
 export default async function DashboardRootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const user = await getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect({ href: '/login', locale });
   }
 
   const profile = await getCurrentUserProfile();
@@ -22,8 +25,8 @@ export default async function DashboardRootLayout({
     avatar: profile.logo_url || undefined,
     role: profile.role,
   } : {
-    name: user.email?.split('@')[0] || 'User',
-    email: user.email || '',
+    name: user!.email?.split('@')[0] || 'User',
+    email: user!.email || '',
     avatar: undefined,
     role: 'PARTNER',
   };

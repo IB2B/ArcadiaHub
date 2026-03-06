@@ -1,8 +1,15 @@
 'use server';
 
 import { createClient } from '@/lib/database/server';
-import { redirect } from 'next/navigation';
+import { redirect } from '@/navigation';
 import { revalidatePath } from 'next/cache';
+import {
+  LoginSchema,
+  SignupSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
+  parseFormData,
+} from '@/lib/validators';
 
 export type AuthResult = {
   success: boolean;
@@ -12,12 +19,9 @@ export type AuthResult = {
 export async function login(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
 
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
-  if (!email || !password) {
-    return { success: false, error: 'Email and password are required' };
-  }
+  const parsed = parseFormData(LoginSchema, formData);
+  if (!parsed.success) return { success: false, error: parsed.error };
+  const { email, password } = parsed.data;
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -29,21 +33,16 @@ export async function login(formData: FormData): Promise<AuthResult> {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/dashboard');
+  redirect('/dashboard' as never);
+  return { success: true };
 }
 
 export async function signup(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
 
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const companyName = formData.get('companyName') as string;
-  const contactFirstName = formData.get('firstName') as string;
-  const contactLastName = formData.get('lastName') as string;
-
-  if (!email || !password) {
-    return { success: false, error: 'Email and password are required' };
-  }
+  const parsed = parseFormData(SignupSchema, formData);
+  if (!parsed.success) return { success: false, error: parsed.error };
+  const { email, password, companyName, firstName: contactFirstName, lastName: contactLastName } = parsed.data;
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -74,20 +73,15 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/dashboard');
+  redirect('/dashboard' as never);
+  return { success: true };
 }
 
 export async function logout(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
-  redirect('/login');
-}
-
-export async function getSession() {
-  const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  return session;
+  redirect('/login' as never);
 }
 
 export async function getUser() {
@@ -113,11 +107,10 @@ export async function getCurrentProfile() {
 
 export async function forgotPassword(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
-  const email = formData.get('email') as string;
 
-  if (!email) {
-    return { success: false, error: 'Email is required' };
-  }
+  const parsed = parseFormData(ForgotPasswordSchema, formData);
+  if (!parsed.success) return { success: false, error: parsed.error };
+  const { email } = parsed.data;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password`,
@@ -132,20 +125,10 @@ export async function forgotPassword(formData: FormData): Promise<AuthResult> {
 
 export async function resetPassword(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
 
-  if (!password || !confirmPassword) {
-    return { success: false, error: 'Password is required' };
-  }
-
-  if (password !== confirmPassword) {
-    return { success: false, error: 'Passwords do not match' };
-  }
-
-  if (password.length < 8) {
-    return { success: false, error: 'Password must be at least 8 characters' };
-  }
+  const parsed = parseFormData(ResetPasswordSchema, formData);
+  if (!parsed.success) return { success: false, error: parsed.error };
+  const { password } = parsed.data;
 
   const { error } = await supabase.auth.updateUser({
     password,

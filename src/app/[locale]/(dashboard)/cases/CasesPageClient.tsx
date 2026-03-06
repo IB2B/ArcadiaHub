@@ -2,7 +2,8 @@
 
 import { useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import CaseCard from '@/components/cases/CaseCard';
 import CaseFilters from '@/components/cases/CaseFilters';
