@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
 import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
@@ -65,14 +66,14 @@ const themes = [
 
 export default function SettingsPageClient() {
   const t = useTranslations('settings');
-  const [currentTheme, setCurrentTheme] = useState('c1');
+  const [currentTheme, setCurrentTheme] = useState(() =>
+    typeof window !== 'undefined' ? localStorage.getItem('theme') || 'c1' : 'c1'
+  );
 
-  // Load theme from localStorage on mount
+  // Sync DOM attribute when theme changes (no setState inside)
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'c1';
-    setCurrentTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
+    document.documentElement.setAttribute('data-theme', currentTheme);
+  }, [currentTheme]);
 
   const handleThemeChange = (themeId: string) => {
     setCurrentTheme(themeId);

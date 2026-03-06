@@ -2,7 +2,8 @@
 
 import { useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import Card, { CardContent } from '@/components/ui/Card';
 import { TimelineFeed, type FeedItem } from '@/components/dashboard';
 import Pagination from '@/components/ui/Pagination';

@@ -1,7 +1,9 @@
 'use server';
 
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/database/server';
 import { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
 
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 
@@ -17,7 +19,7 @@ export async function getAcademyContent(options?: {
 
   let query = supabase
     .from('academy_content')
-    .select('*', { count: 'exact' })
+    .select('id, title, description, content_type, thumbnail_url, media_url, attachments, year, theme, duration_minutes, is_downloadable, is_published, view_count, created_at, updated_at', { count: 'exact' })
     .eq('is_published', true);
 
   if (options?.contentType) {
@@ -44,29 +46,37 @@ export async function getAcademyContent(options?: {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching academy content:', error);
+    logger.error('Error fetching academy content:', { error });
     return { data: [], count: 0 };
   }
 
   return { data: data || [], count: count || 0 };
 }
 
+const _getLatestAcademyContent = unstable_cache(
+  async (limit: number): Promise<AcademyContent[]> => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('academy_content')
+      .select('*')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      logger.error('Error fetching latest academy content:', { error });
+      return [];
+    }
+
+    return data || [];
+  },
+  ['latest-academy-content'],
+  { revalidate: 300, tags: ['academy'] }
+);
+
 export async function getLatestAcademyContent(limit: number = 5): Promise<AcademyContent[]> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('academy_content')
-    .select('*')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error('Error fetching latest academy content:', error);
-    return [];
-  }
-
-  return data || [];
+  return _getLatestAcademyContent(limit);
 }
 
 export async function getAcademyItem(itemId: string): Promise<AcademyContent | null> {
@@ -74,12 +84,12 @@ export async function getAcademyItem(itemId: string): Promise<AcademyContent | n
 
   const { data, error } = await supabase
     .from('academy_content')
-    .select('*')
+    .select('id, title, description, content_type, thumbnail_url, media_url, attachments, year, theme, duration_minutes, is_downloadable, is_published, view_count, created_at, updated_at')
     .eq('id', itemId)
     .single();
 
   if (error) {
-    console.error('Error fetching academy item:', error);
+    logger.error('Error fetching academy item:', { error });
     return null;
   }
 

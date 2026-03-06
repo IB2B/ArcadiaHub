@@ -69,11 +69,11 @@
     "allRightsReserved": "Tutti i diritti riservati.",
     "trustedBy": "Scelto dai migliori partner in Italia",
     "scrollToExplore": "Scorri per esplorare",
-    "navFeatures": "Funzionalità",
+    "navFeatures": "Funzionalit\u00c3\u00a0",
     "navPlatform": "Piattaforma",
     "navCommunity": "Community",
-    "featuresLabel": "Funzionalità della Piattaforma",
-    "featuresTitle": "Tutto ciò di cui hai bisogno per avere successo",
+    "featuresLabel": "Funzionalit\u00c3\u00a0 della Piattaforma",
+    "featuresTitle": "Tutto ci\u00c3\u00b2 di cui hai bisogno per avere successo",
     "featuresSubtitle": "Una suite completa di strumenti progettati per semplificare la tua partnership con Harlock e accelerare la crescita del tuo business.",
     "features": {
       "cases": {
@@ -98,7 +98,7 @@
       },
       "blog": {
         "title": "News e Blog",
-        "description": "Resta informato con le ultime notizie, approfondimenti e aggiornamenti da Harlock. Sii il primo a conoscere le novità."
+        "description": "Resta informato con le ultime notizie, approfondimenti e aggiornamenti da Harlock. Sii il primo a conoscere le novit\u00c3\u00a0."
       }
     },
     "stats": {
@@ -120,7 +120,7 @@
       "community": "Community"
     },
     "moduleDescriptions": {
-      "dashboard": "La tua panoramica personalizzata con statistiche e attività recenti",
+      "dashboard": "La tua panoramica personalizzata con statistiche e attivit\u00c3\u00a0 recenti",
       "cases": "Traccia e gestisci tutte le tue pratiche in un unico posto",
       "events": "Formazioni, workshop e webinar in programma",
       "academy": "Video, corsi e risorse formative",
@@ -130,7 +130,7 @@
     "moduleHighlights": {
       "dashboard": {
         "point1": "Panoramica statistiche in tempo reale",
-        "point2": "Feed attività recenti",
+        "point2": "Feed attivit\u00c3\u00a0 recenti",
         "point3": "Accesso rapido a tutti i moduli"
       },
       "cases": {
@@ -163,7 +163,7 @@
       "dashboard": {
         "activeCases": "Pratiche Attive",
         "upcomingEvents": "Eventi in Arrivo",
-        "recentActivity": "Attività Recenti",
+        "recentActivity": "Attivit\u00c3\u00a0 Recenti",
         "activity1": "Pratica #1234 aggiornata",
         "activity2": "Nuovo evento: Workshop Q1",
         "activity3": "Documento caricato"
@@ -229,7 +229,7 @@
       }
     },
     "communityLabel": "Unisciti alla Rete",
-    "communityTitle": "Diventa parte di qualcosa di più grande",
+    "communityTitle": "Diventa parte di qualcosa di pi\u00c3\u00b9 grande",
     "communitySubtitle": "Unisciti a una community fiorente di professionisti che condividono conoscenze, collaborano su progetti e crescono insieme.",
     "communityBenefits": {
       "network": {
@@ -246,13 +246,13 @@
       },
       "growth": {
         "title": "Crescita del Business",
-        "description": "Sfrutta i vantaggi della partnership per espandere le tue opportunità di business."
+        "description": "Sfrutta i vantaggi della partnership per espandere le tue opportunit\u00c3\u00a0 di business."
       }
     },
     "ctaTitle": "Pronto per iniziare?",
     "ctaSubtitle": "Unisciti alla rete di partner Harlock e sblocca l'accesso a tutti gli strumenti e le risorse di cui hai bisogno per far crescere il tuo business.",
     "ctaButton": "Inizia Ora",
-    "ctaSecondary": "Scopri di Più",
+    "ctaSecondary": "Scopri di Pi\u00c3\u00b9",
     "footerDescription": "Il portale partner ufficiale di Harlock. Accedi alle risorse, gestisci le pratiche e connettiti con la community.",
     "footerPlatform": "Piattaforma",
     "footerCompany": "Azienda",
@@ -261,7 +261,7 @@
       "events": "Eventi",
       "academy": "Academy",
       "documents": "Documenti",
-      "about": "Chi è Harlock",
+      "about": "Chi \u00c3\u00a8 Harlock",
       "contact": "Contattaci",
       "privacy": "Privacy Policy",
       "terms": "Termini di Servizio"
@@ -398,8 +398,8 @@
     "activeCases": "Pratiche Attive",
     "unreadNotifications": "Notifiche Non Lette",
     "newDocuments": "Nuovi Documenti",
-    "activityFeed": "Attività Recente",
-    "noActivity": "Nessuna attività recente. Il tuo feed mostrerà eventi, aggiornamenti pratiche e nuovi contenuti.",
+    "activityFeed": "Attivit\u00c3\u00a0 Recente",
+    "noActivity": "Nessuna attivit\u00c3\u00a0 recente. Il tuo feed mostrer\u00c3\u00a0 eventi, aggiornamenti pratiche e nuovi contenuti.",
     "seeAll": "Vedi tutti",
     "noUpcomingEvents": "Nessun evento in programma",
     "myCases": "Le Mie Pratiche",
@@ -1135,5 +1135,17 @@
       "title": "Contattaci",
       "description": "Per qualsiasi domanda su questi Termini di Servizio, contattaci."
     }
+  },
+  "notifications": {
+    "title": "Notifiche",
+    "markAllRead": "Segna tutto come letto",
+    "noNotifications": "Nessuna notifica",
+    "noNotificationsDesc": "Vedrai le notifiche qui.",
+    "unread": "non letto",
+    "markRead": "Segna come letto",
+    "justNow": "Adesso",
+    "minutesAgo": "{count} min fa",
+    "hoursAgo": "{count}h fa",
+    "daysAgo": "{count}g fa"
   }
 }

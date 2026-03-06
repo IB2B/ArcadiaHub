@@ -1,6 +1,9 @@
 'use server';
 
-import { createServiceSupabaseClient, getCurrentProfile } from '@/lib/database/server';
+import { createServiceSupabaseClient, createServerSupabaseClient } from '@/lib/database/server';
+import { requireRole } from '@/lib/auth/guards';
+import { revalidatePath } from 'next/cache';
+import { logger } from '@/lib/logger';
 import { notifyAdminsAccessRequestSubmitted } from '@/lib/services/notificationService';
 import { sendPartnerWelcomeEmail } from '@/lib/email';
 
@@ -92,7 +95,7 @@ export async function submitAccessRequest(
       .single();
 
     if (error) {
-      console.error('Error submitting access request:', error);
+      logger.error('Error submitting access request:', { error });
       return { success: false, error: error.message };
     }
 
@@ -107,12 +110,12 @@ export async function submitAccessRequest(
       });
     } catch (notifyError) {
       // Don't fail the request if notification fails
-      console.error('Error sending notification:', notifyError);
+      logger.error('Error sending notification:', { error: notifyError });
     }
 
     return { success: true, requestId: result.id };
   } catch (error) {
-    console.error('Error submitting access request:', error);
+    logger.error('Error submitting access request:', { error });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to submit request',
@@ -152,7 +155,7 @@ export async function uploadAccessRequestFile(
       });
 
     if (error) {
-      console.error('Error uploading file:', error);
+      logger.error('Error uploading file:', { error });
       return { success: false, error: error.message };
     }
 
@@ -163,7 +166,7 @@ export async function uploadAccessRequestFile(
 
     return { success: true, url: urlData.publicUrl };
   } catch (error) {
-    console.error('Error uploading file:', error);
+    logger.error('Error uploading file:', { error });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to upload file',
@@ -197,12 +200,13 @@ export async function getAccessRequests(
 ): Promise<GetAccessRequestsResult> {
   const { status = 'ALL', page = 1, limit = 10, search = '' } = params;
 
-  const profile = await getCurrentProfile();
-  if (!profile || !['ADMIN', 'COMMERCIAL'].includes(profile.role)) {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
     return { requests: [], total: 0, page: 1, totalPages: 0 };
   }
 
-  const supabase = await createServiceSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const offset = (page - 1) * limit;
 
   let query = supabase
@@ -216,8 +220,9 @@ export async function getAccessRequests(
 
   // Search by name, email, or company
   if (search) {
+    const safeSearch = search.replace(/[.,()\[\]]/g, '');
     query = query.or(
-      `contact_first_name.ilike.%${search}%,contact_last_name.ilike.%${search}%,contact_email.ilike.%${search}%,company_name.ilike.%${search}%`
+      `contact_first_name.ilike.%${safeSearch}%,contact_last_name.ilike.%${safeSearch}%,contact_email.ilike.%${safeSearch}%,company_name.ilike.%${safeSearch}%`
     );
   }
 
@@ -226,7 +231,7 @@ export async function getAccessRequests(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error('Error fetching access requests:', error);
+    logger.error('Error fetching access requests:', { error });
     return { requests: [], total: 0, page: 1, totalPages: 0 };
   }
 
@@ -242,12 +247,13 @@ export async function getAccessRequests(
  * Get a single access request by ID (admin only)
  */
 export async function getAccessRequest(id: string): Promise<AccessRequest | null> {
-  const profile = await getCurrentProfile();
-  if (!profile || !['ADMIN', 'COMMERCIAL'].includes(profile.role)) {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
     return null;
   }
 
-  const supabase = await createServiceSupabaseClient();
+  const supabase = await createServerSupabaseClient();
 
   const { data, error } = await supabase
     .from('access_requests')
@@ -256,7 +262,7 @@ export async function getAccessRequest(id: string): Promise<AccessRequest | null
     .single();
 
   if (error) {
-    console.error('Error fetching access request:', error);
+    logger.error('Error fetching access request:', { error });
     return null;
   }
 
@@ -282,12 +288,13 @@ export async function getAccessRequest(id: string): Promise<AccessRequest | null
  * Get count of pending access requests (for admin dashboard)
  */
 export async function getPendingAccessRequestsCount(): Promise<number> {
-  const profile = await getCurrentProfile();
-  if (!profile || !['ADMIN', 'COMMERCIAL'].includes(profile.role)) {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
     return 0;
   }
 
-  const supabase = await createServiceSupabaseClient();
+  const supabase = await createServerSupabaseClient();
 
   const { count, error } = await supabase
     .from('access_requests')
@@ -295,7 +302,7 @@ export async function getPendingAccessRequestsCount(): Promise<number> {
     .eq('status', 'PENDING');
 
   if (error) {
-    console.error('Error counting pending requests:', error);
+    logger.error('Error counting pending requests:', { error });
     return 0;
   }
 
@@ -314,8 +321,11 @@ export async function approveAccessRequest(
   id: string,
   notes?: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> {
-  const adminProfile = await getCurrentProfile();
-  if (!adminProfile || adminProfile.role !== 'ADMIN') {
+  let adminProfileId: string;
+  try {
+    const ctx = await requireRole(['ADMIN']);
+    adminProfileId = ctx.profile.id;
+  } catch {
     return { success: false, error: 'Unauthorized' };
   }
 
@@ -329,7 +339,7 @@ export async function approveAccessRequest(
     .single();
 
   if (fetchError || !request) {
-    console.error('Error fetching access request:', fetchError);
+    logger.error('Error fetching access request:', { error: fetchError });
     return { success: false, error: 'Access request not found' };
   }
 
@@ -360,7 +370,7 @@ export async function approveAccessRequest(
   });
 
   if (authError || !authData.user) {
-    console.error('Error creating auth user:', authError);
+    logger.error('Error creating auth user:', { error: authError });
     return { success: false, error: authError?.message || 'Failed to create user account' };
   }
 
@@ -383,7 +393,7 @@ export async function approveAccessRequest(
   }, { onConflict: 'id' });
 
   if (profileError) {
-    console.error('Error creating profile:', profileError);
+    logger.error('Error creating profile:', { error: profileError });
     // Rollback: delete the auth user if profile creation fails
     await supabase.auth.admin.deleteUser(userId);
     return { success: false, error: 'Failed to create partner profile' };
@@ -394,14 +404,14 @@ export async function approveAccessRequest(
     .from('access_requests')
     .update({
       status: 'APPROVED',
-      reviewed_by: adminProfile.id,
+      reviewed_by: adminProfileId,
       reviewed_at: new Date().toISOString(),
       review_notes: notes || null,
     })
     .eq('id', id);
 
   if (updateError) {
-    console.error('Error updating access request:', updateError);
+    logger.error('Error updating access request:', { error: updateError });
     // Don't rollback user creation, just log the error
   }
 
@@ -416,7 +426,7 @@ export async function approveAccessRequest(
   });
 
   if (linkError) {
-    console.error('Error generating recovery link:', linkError);
+    logger.error('Error generating recovery link:', { error: linkError });
     // Don't fail - user can use "forgot password" later
   }
 
@@ -430,11 +440,12 @@ export async function approveAccessRequest(
     });
 
     if (!emailResult.success) {
-      console.error('Error sending welcome email:', emailResult.error);
+      logger.error('Error sending welcome email:', { error: emailResult.error });
       // Don't fail - user can use "forgot password" later
     }
   }
 
+  revalidatePath('/[locale]/admin/access-requests');
   return { success: true, userId };
 }
 
@@ -448,12 +459,15 @@ export async function rejectAccessRequest(
   id: string,
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
-  const adminProfile = await getCurrentProfile();
-  if (!adminProfile || adminProfile.role !== 'ADMIN') {
+  let adminProfileId: string;
+  try {
+    const ctx = await requireRole(['ADMIN']);
+    adminProfileId = ctx.profile.id;
+  } catch {
     return { success: false, error: 'Unauthorized' };
   }
 
-  const supabase = await createServiceSupabaseClient();
+  const supabase = await createServerSupabaseClient();
 
   // 1. Fetch the access request
   const { data: request, error: fetchError } = await supabase
@@ -463,7 +477,7 @@ export async function rejectAccessRequest(
     .single();
 
   if (fetchError || !request) {
-    console.error('Error fetching access request:', fetchError);
+    logger.error('Error fetching access request:', { error: fetchError });
     return { success: false, error: 'Access request not found' };
   }
 
@@ -477,17 +491,18 @@ export async function rejectAccessRequest(
     .from('access_requests')
     .update({
       status: 'REJECTED',
-      reviewed_by: adminProfile.id,
+      reviewed_by: adminProfileId,
       reviewed_at: new Date().toISOString(),
       review_notes: notes || null,
     })
     .eq('id', id);
 
   if (updateError) {
-    console.error('Error rejecting access request:', updateError);
+    logger.error('Error rejecting access request:', { error: updateError });
     return { success: false, error: updateError.message };
   }
 
+  revalidatePath('/[locale]/admin/access-requests');
   return { success: true };
 }
 
@@ -497,12 +512,13 @@ export async function rejectAccessRequest(
 export async function deleteAccessRequest(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
-  const profile = await getCurrentProfile();
-  if (!profile || profile.role !== 'ADMIN') {
+  try {
+    await requireRole(['ADMIN']);
+  } catch {
     return { success: false, error: 'Unauthorized' };
   }
 
-  const supabase = await createServiceSupabaseClient();
+  const supabase = await createServerSupabaseClient();
 
   const { error } = await supabase
     .from('access_requests')
@@ -510,9 +526,10 @@ export async function deleteAccessRequest(
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting access request:', error);
+    logger.error('Error deleting access request:', { error });
     return { success: false, error: error.message };
   }
 
+  revalidatePath('/[locale]/admin/access-requests');
   return { success: true };
 }

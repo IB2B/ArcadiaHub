@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { createCase, updateCase } from '@/lib/data/admin';
 import Button from '@/components/ui/Button';

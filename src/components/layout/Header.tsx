@@ -48,7 +48,7 @@ interface HeaderProps {
   onMarkAllAsRead?: () => void;
 }
 
-function Header({ user, notifications = [], unreadCount: propUnreadCount, onMarkAsRead, onMarkAllAsRead }: HeaderProps) {
+function Header({ user, notifications = [], unreadCount: propUnreadCount, onMarkAsRead }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();

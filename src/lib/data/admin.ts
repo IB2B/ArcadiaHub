@@ -1,8 +1,11 @@
 'use server';
 
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/database/server';
-import { Database, Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
+import { requireRole } from '@/lib/auth/guards';
+import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
+import { logger } from '@/lib/logger';
 import {
   notifyEventPublished,
   notifyCaseCreated,
@@ -57,55 +60,65 @@ interface ListOptions {
 // ADMIN STATS
 // ============================================================================
 
+const _fetchAdminStats = unstable_cache(
+  async (): Promise<AdminStats> => {
+    const supabase = await createClient();
+
+    // Fetch all counts in parallel
+    const [
+      partnersResult,
+      activePartnersResult,
+      casesResult,
+      eventsResult,
+      upcomingEventsResult,
+      academyResult,
+      documentsResult,
+      blogResult,
+      publishedBlogResult,
+      caseStatusResult,
+    ] = (await Promise.allSettled([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'PARTNER'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'PARTNER').eq('is_active', true),
+      supabase.from('cases').select('*', { count: 'exact', head: true }),
+      supabase.from('events').select('*', { count: 'exact', head: true }),
+      supabase.from('events').select('*', { count: 'exact', head: true }).gte('start_datetime', new Date().toISOString()),
+      supabase.from('academy_content').select('*', { count: 'exact', head: true }),
+      supabase.from('documents').select('*', { count: 'exact', head: true }),
+      supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
+      supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('is_published', true),
+      supabase.from('cases').select('status'),
+    ])).map((r) => (r.status === 'fulfilled' ? r.value : { data: null, count: 0, error: null }));
+
+    // Calculate cases by status
+    const casesByStatus: Record<string, number> = {};
+    const caseStatusData = caseStatusResult.data as Array<{ status: string | null }> | null;
+    if (caseStatusData) {
+      caseStatusData.forEach((c) => {
+        const status = c.status || 'UNKNOWN';
+        casesByStatus[status] = (casesByStatus[status] || 0) + 1;
+      });
+    }
+
+    return {
+      totalPartners: partnersResult.count || 0,
+      activePartners: activePartnersResult.count || 0,
+      totalCases: casesResult.count || 0,
+      casesByStatus,
+      totalEvents: eventsResult.count || 0,
+      upcomingEvents: upcomingEventsResult.count || 0,
+      totalAcademyContent: academyResult.count || 0,
+      totalDocuments: documentsResult.count || 0,
+      totalBlogPosts: blogResult.count || 0,
+      publishedBlogPosts: publishedBlogResult.count || 0,
+    };
+  },
+  ['admin-stats'],
+  { revalidate: 60, tags: ['admin-stats'] }
+);
+
 export async function getAdminStats(): Promise<AdminStats> {
-  const supabase = await createClient();
-
-  // Fetch all counts in parallel
-  const [
-    partnersResult,
-    activePartnersResult,
-    casesResult,
-    eventsResult,
-    upcomingEventsResult,
-    academyResult,
-    documentsResult,
-    blogResult,
-    publishedBlogResult,
-    caseStatusResult,
-  ] = await Promise.all([
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'PARTNER'),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'PARTNER').eq('is_active', true),
-    supabase.from('cases').select('*', { count: 'exact', head: true }),
-    supabase.from('events').select('*', { count: 'exact', head: true }),
-    supabase.from('events').select('*', { count: 'exact', head: true }).gte('start_datetime', new Date().toISOString()),
-    supabase.from('academy_content').select('*', { count: 'exact', head: true }),
-    supabase.from('documents').select('*', { count: 'exact', head: true }),
-    supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
-    supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('is_published', true),
-    supabase.from('cases').select('status'),
-  ]);
-
-  // Calculate cases by status
-  const casesByStatus: Record<string, number> = {};
-  if (caseStatusResult.data) {
-    caseStatusResult.data.forEach((c) => {
-      const status = c.status || 'UNKNOWN';
-      casesByStatus[status] = (casesByStatus[status] || 0) + 1;
-    });
-  }
-
-  return {
-    totalPartners: partnersResult.count || 0,
-    activePartners: activePartnersResult.count || 0,
-    totalCases: casesResult.count || 0,
-    casesByStatus,
-    totalEvents: eventsResult.count || 0,
-    upcomingEvents: upcomingEventsResult.count || 0,
-    totalAcademyContent: academyResult.count || 0,
-    totalDocuments: documentsResult.count || 0,
-    totalBlogPosts: blogResult.count || 0,
-    publishedBlogPosts: publishedBlogResult.count || 0,
-  };
+  await requireRole(['ADMIN', 'COMMERCIAL']);
+  return _fetchAdminStats();
 }
 
 // ============================================================================
@@ -116,6 +129,7 @@ export async function getAdminPartners(options: ListOptions & {
   status?: 'active' | 'inactive' | 'all';
   category?: string;
 }): Promise<PaginatedResult<Profile>> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
   const { page = 1, pageSize = 10, search, sortBy = 'created_at', sortOrder = 'desc', status = 'all', category } = options;
   const offset = (page - 1) * pageSize;
@@ -137,7 +151,8 @@ export async function getAdminPartners(options: ListOptions & {
   }
 
   if (search) {
-    query = query.or(`company_name.ilike.%${search}%,email.ilike.%${search}%,contact_first_name.ilike.%${search}%,contact_last_name.ilike.%${search}%`);
+    const safeSearch = search.replace(/[.,()\[\]]/g, '');
+    query = query.or(`company_name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,contact_first_name.ilike.%${safeSearch}%,contact_last_name.ilike.%${safeSearch}%`);
   }
 
   // Apply sorting and pagination
@@ -146,7 +161,7 @@ export async function getAdminPartners(options: ListOptions & {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching admin partners:', error);
+    logger.error('Error fetching admin partners:', { error });
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
 
@@ -160,6 +175,7 @@ export async function getAdminPartners(options: ListOptions & {
 }
 
 export async function getAdminPartner(id: string): Promise<Profile | null> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -169,7 +185,7 @@ export async function getAdminPartner(id: string): Promise<Profile | null> {
     .single();
 
   if (error) {
-    console.error('Error fetching partner:', error);
+    logger.error('Error fetching partner:', { error });
     return null;
   }
 
@@ -177,6 +193,7 @@ export async function getAdminPartner(id: string): Promise<Profile | null> {
 }
 
 export async function createPartner(data: TablesInsert<'profiles'>): Promise<{ success: boolean; error?: string; data?: Profile }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data: result, error } = await supabase
@@ -194,6 +211,7 @@ export async function createPartner(data: TablesInsert<'profiles'>): Promise<{ s
 }
 
 export async function updatePartner(id: string, data: TablesUpdate<'profiles'>): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -215,6 +233,7 @@ export async function togglePartnerStatus(id: string, isActive: boolean): Promis
 }
 
 export async function deletePartner(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -236,6 +255,7 @@ export async function deletePartner(id: string): Promise<{ success: boolean; err
 export async function uploadPartnerLogo(
   formData: FormData
 ): Promise<{ success: boolean; url?: string; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const file = formData.get('file') as File;
@@ -268,7 +288,7 @@ export async function uploadPartnerLogo(
     });
 
   if (error) {
-    console.error('Error uploading partner logo:', error);
+    logger.error('Error uploading partner logo:', { error });
     return { success: false, error: error.message };
   }
 
@@ -288,6 +308,7 @@ export async function getAdminCases(options: ListOptions & {
   status?: string;
   partnerId?: string;
 }): Promise<PaginatedResult<Case & { partner?: Profile }>> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
   const { page = 1, pageSize = 10, search, sortBy = 'created_at', sortOrder = 'desc', status, partnerId } = options;
   const offset = (page - 1) * pageSize;
@@ -307,7 +328,8 @@ export async function getAdminCases(options: ListOptions & {
   }
 
   if (search) {
-    query = query.or(`case_code.ilike.%${search}%,client_name.ilike.%${search}%`);
+    const safeSearch = search.replace(/[.,()\[\]]/g, '');
+    query = query.or(`case_code.ilike.%${safeSearch}%,client_name.ilike.%${safeSearch}%`);
   }
 
   // Apply sorting and pagination
@@ -316,7 +338,7 @@ export async function getAdminCases(options: ListOptions & {
   const { data: cases, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching admin cases:', error);
+    logger.error('Error fetching admin cases:', { error });
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
 
@@ -350,6 +372,7 @@ export async function getAdminCases(options: ListOptions & {
 }
 
 export async function getAdminCase(id: string): Promise<(Case & { partner?: Profile }) | null> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data: caseData, error } = await supabase
@@ -359,7 +382,7 @@ export async function getAdminCase(id: string): Promise<(Case & { partner?: Prof
     .single();
 
   if (error) {
-    console.error('Error fetching case:', error);
+    logger.error('Error fetching case:', { error });
     return null;
   }
 
@@ -378,6 +401,7 @@ export async function getAdminCase(id: string): Promise<(Case & { partner?: Prof
 }
 
 export async function createCase(data: TablesInsert<'cases'>): Promise<{ success: boolean; error?: string; data?: Case }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data: result, error } = await supabase
@@ -404,7 +428,7 @@ export async function createCase(data: TablesInsert<'cases'>): Promise<{ success
       case_code: result.case_code,
       partner_id: result.partner_id,
       client_name: result.client_name,
-    }).catch(console.error);
+    }).catch((e) => logger.error('Background notification failed', { error: e }));
   }
 
   // Notify admins about the new case
@@ -412,13 +436,14 @@ export async function createCase(data: TablesInsert<'cases'>): Promise<{ success
     id: result.id,
     case_code: result.case_code,
     client_name: result.client_name,
-  }).catch(console.error);
+  }).catch((e) => logger.error('Background notification failed', { error: e }));
 
   revalidatePath('/admin/cases');
   return { success: true, data: result };
 }
 
-export async function updateCase(id: string, data: TablesUpdate<'cases'>, historyNote?: string): Promise<{ success: boolean; error?: string }> {
+export async function updateCase(id: string, data: TablesUpdate<'cases'>, _historyNote?: string): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   // Get current case to track status change
@@ -433,16 +458,8 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
     return { success: false, error: error.message };
   }
 
-  // Add history entry and notify partner if status changed
+  // Notify partner if status changed
   if (data.status && currentCase?.status !== data.status) {
-    await supabase.from('case_history').insert({
-      case_id: id,
-      old_status: currentCase?.status,
-      new_status: data.status,
-      notes: historyNote || 'Status updated',
-    });
-
-    // Notify the partner about the status change
     if (currentCase?.partner_id && currentCase.status) {
       notifyCaseStatusChanged({
         id,
@@ -450,7 +467,7 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
         partner_id: currentCase.partner_id,
         old_status: currentCase.status,
         new_status: data.status,
-      }).catch(console.error);
+      }).catch((e) => logger.error('Background notification failed', { error: e }));
     }
   }
 
@@ -460,11 +477,15 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
 }
 
 export async function deleteCase(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   // Delete related records first
-  await supabase.from('case_history').delete().eq('case_id', id);
-  await supabase.from('case_documents').delete().eq('case_id', id);
+  const { error: historyError } = await supabase.from('case_history').delete().eq('case_id', id);
+  if (historyError) return { success: false, error: `Failed to delete case history: ${historyError.message}` };
+
+  const { error: docsError } = await supabase.from('case_documents').delete().eq('case_id', id);
+  if (docsError) return { success: false, error: `Failed to delete case documents: ${docsError.message}` };
 
   const { error } = await supabase.from('cases').delete().eq('id', id);
 
@@ -484,6 +505,7 @@ export async function getAdminEvents(options: ListOptions & {
   eventType?: string;
   upcoming?: boolean;
 }): Promise<PaginatedResult<Event>> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
   const { page = 1, pageSize = 10, search, sortBy = 'start_datetime', sortOrder = 'desc', eventType, upcoming } = options;
   const offset = (page - 1) * pageSize;
@@ -500,7 +522,8 @@ export async function getAdminEvents(options: ListOptions & {
   }
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,location.ilike.%${search}%`);
+    const safeSearch = search.replace(/[.,()\[\]]/g, '');
+    query = query.or(`title.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%,location.ilike.%${safeSearch}%`);
   }
 
   // Apply sorting and pagination
@@ -509,7 +532,7 @@ export async function getAdminEvents(options: ListOptions & {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching admin events:', error);
+    logger.error('Error fetching admin events:', { error });
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
 
@@ -523,12 +546,13 @@ export async function getAdminEvents(options: ListOptions & {
 }
 
 export async function getAdminEvent(id: string): Promise<Event | null> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data, error } = await supabase.from('events').select('*').eq('id', id).single();
 
   if (error) {
-    console.error('Error fetching event:', error);
+    logger.error('Error fetching event:', { error });
     return null;
   }
 
@@ -536,6 +560,7 @@ export async function getAdminEvent(id: string): Promise<Event | null> {
 }
 
 export async function createEvent(data: TablesInsert<'events'>): Promise<{ success: boolean; error?: string; data?: Event }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data: result, error } = await supabase.from('events').insert(data).select().single();
@@ -551,7 +576,7 @@ export async function createEvent(data: TablesInsert<'events'>): Promise<{ succe
       title: result.title,
       event_type: result.event_type,
       start_datetime: result.start_datetime,
-    }).catch(console.error); // Non-blocking
+    }).catch((e) => logger.error('Background notification failed', { error: e })); // Non-blocking
   }
 
   revalidatePath('/admin/events');
@@ -560,6 +585,7 @@ export async function createEvent(data: TablesInsert<'events'>): Promise<{ succe
 }
 
 export async function updateEvent(id: string, data: TablesUpdate<'events'>): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -578,10 +604,12 @@ export async function updateEvent(id: string, data: TablesUpdate<'events'>): Pro
 }
 
 export async function deleteEvent(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   // Delete registrations first
-  await supabase.from('event_registrations').delete().eq('event_id', id);
+  const { error: regError } = await supabase.from('event_registrations').delete().eq('event_id', id);
+  if (regError) return { success: false, error: `Failed to delete event registrations: ${regError.message}` };
 
   const { error } = await supabase.from('events').delete().eq('id', id);
 
@@ -603,6 +631,7 @@ export async function getAdminAcademyContent(options: ListOptions & {
   year?: number;
   published?: boolean;
 }): Promise<PaginatedResult<AcademyContent>> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
   const { page = 1, pageSize = 10, search, sortBy = 'created_at', sortOrder = 'desc', contentType, year, published } = options;
   const offset = (page - 1) * pageSize;
@@ -623,7 +652,8 @@ export async function getAdminAcademyContent(options: ListOptions & {
   }
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,theme.ilike.%${search}%`);
+    const safeSearch = search.replace(/[.,()\[\]]/g, '');
+    query = query.or(`title.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%,theme.ilike.%${safeSearch}%`);
   }
 
   query = query.order(sortBy, { ascending: sortOrder === 'asc' }).range(offset, offset + pageSize - 1);
@@ -631,7 +661,7 @@ export async function getAdminAcademyContent(options: ListOptions & {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching admin academy content:', error);
+    logger.error('Error fetching admin academy content:', { error });
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
 
@@ -645,12 +675,13 @@ export async function getAdminAcademyContent(options: ListOptions & {
 }
 
 export async function getAdminAcademyItem(id: string): Promise<AcademyContent | null> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data, error } = await supabase.from('academy_content').select('*').eq('id', id).single();
 
   if (error) {
-    console.error('Error fetching academy item:', error);
+    logger.error('Error fetching academy item:', { error });
     return null;
   }
 
@@ -658,6 +689,7 @@ export async function getAdminAcademyItem(id: string): Promise<AcademyContent | 
 }
 
 export async function createAcademyContent(data: TablesInsert<'academy_content'>): Promise<{ success: boolean; error?: string; data?: AcademyContent }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data: result, error } = await supabase.from('academy_content').insert(data).select().single();
@@ -672,7 +704,7 @@ export async function createAcademyContent(data: TablesInsert<'academy_content'>
       id: result.id,
       title: result.title,
       content_type: result.content_type,
-    }).catch(console.error);
+    }).catch((e) => logger.error('Background notification failed', { error: e }));
   }
 
   revalidatePath('/admin/academy');
@@ -681,6 +713,7 @@ export async function createAcademyContent(data: TablesInsert<'academy_content'>
 }
 
 export async function updateAcademyContent(id: string, data: TablesUpdate<'academy_content'>): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   // Check if content is being published for the first time
@@ -693,7 +726,7 @@ export async function updateAcademyContent(id: string, data: TablesUpdate<'acade
         id,
         title: data.title || current.title,
         content_type: data.content_type || current.content_type,
-      }).catch(console.error);
+      }).catch((e) => logger.error('Background notification failed', { error: e }));
     }
   }
 
@@ -712,10 +745,12 @@ export async function updateAcademyContent(id: string, data: TablesUpdate<'acade
 }
 
 export async function deleteAcademyContent(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   // Delete completions first
-  await supabase.from('content_completions').delete().eq('content_id', id);
+  const { error: completionsError } = await supabase.from('content_completions').delete().eq('content_id', id);
+  if (completionsError) return { success: false, error: `Failed to delete content completions: ${completionsError.message}` };
 
   const { error } = await supabase.from('academy_content').delete().eq('id', id);
 
@@ -736,6 +771,7 @@ export async function getAdminDocuments(options: ListOptions & {
   category?: string;
   published?: boolean;
 }): Promise<PaginatedResult<Document>> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
   const { page = 1, pageSize = 10, search, sortBy = 'created_at', sortOrder = 'desc', category, published } = options;
   const offset = (page - 1) * pageSize;
@@ -751,7 +787,8 @@ export async function getAdminDocuments(options: ListOptions & {
   }
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    const safeSearch = search.replace(/[.,()\[\]]/g, '');
+    query = query.or(`title.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%`);
   }
 
   query = query.order(sortBy, { ascending: sortOrder === 'asc' }).range(offset, offset + pageSize - 1);
@@ -759,7 +796,7 @@ export async function getAdminDocuments(options: ListOptions & {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching admin documents:', error);
+    logger.error('Error fetching admin documents:', { error });
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
 
@@ -773,12 +810,13 @@ export async function getAdminDocuments(options: ListOptions & {
 }
 
 export async function getAdminDocument(id: string): Promise<Document | null> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data, error } = await supabase.from('documents').select('*').eq('id', id).single();
 
   if (error) {
-    console.error('Error fetching document:', error);
+    logger.error('Error fetching document:', { error });
     return null;
   }
 
@@ -786,6 +824,7 @@ export async function getAdminDocument(id: string): Promise<Document | null> {
 }
 
 export async function createDocument(data: TablesInsert<'documents'>): Promise<{ success: boolean; error?: string; data?: Document }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data: result, error } = await supabase.from('documents').insert(data).select().single();
@@ -800,7 +839,7 @@ export async function createDocument(data: TablesInsert<'documents'>): Promise<{
       id: result.id,
       title: result.title,
       category: result.category,
-    }).catch(console.error);
+    }).catch((e) => logger.error('Background notification failed', { error: e }));
   }
 
   revalidatePath('/admin/documents');
@@ -809,6 +848,7 @@ export async function createDocument(data: TablesInsert<'documents'>): Promise<{
 }
 
 export async function updateDocument(id: string, data: TablesUpdate<'documents'>): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   // Check if document is being published for the first time
@@ -823,7 +863,7 @@ export async function updateDocument(id: string, data: TablesUpdate<'documents'>
         id,
         title: data.title || current.title,
         category: data.category || current.category,
-      }).catch(console.error);
+      }).catch((e) => logger.error('Background notification failed', { error: e }));
     }
   }
 
@@ -842,6 +882,7 @@ export async function updateDocument(id: string, data: TablesUpdate<'documents'>
 }
 
 export async function deleteDocument(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { error } = await supabase.from('documents').delete().eq('id', id);
@@ -863,6 +904,7 @@ export async function getAdminBlogPosts(options: ListOptions & {
   category?: string;
   published?: boolean;
 }): Promise<PaginatedResult<BlogPost>> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
   const { page = 1, pageSize = 10, search, sortBy = 'created_at', sortOrder = 'desc', category, published } = options;
   const offset = (page - 1) * pageSize;
@@ -878,7 +920,8 @@ export async function getAdminBlogPosts(options: ListOptions & {
   }
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%,content.ilike.%${search}%`);
+    const safeSearch = search.replace(/[.,()\[\]]/g, '');
+    query = query.or(`title.ilike.%${safeSearch}%,excerpt.ilike.%${safeSearch}%,content.ilike.%${safeSearch}%`);
   }
 
   query = query.order(sortBy, { ascending: sortOrder === 'asc' }).range(offset, offset + pageSize - 1);
@@ -886,7 +929,7 @@ export async function getAdminBlogPosts(options: ListOptions & {
   const { data, count, error } = await query;
 
   if (error) {
-    console.error('Error fetching admin blog posts:', error);
+    logger.error('Error fetching admin blog posts:', { error });
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
 
@@ -900,12 +943,13 @@ export async function getAdminBlogPosts(options: ListOptions & {
 }
 
 export async function getAdminBlogPost(id: string): Promise<BlogPost | null> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data, error } = await supabase.from('blog_posts').select('*').eq('id', id).single();
 
   if (error) {
-    console.error('Error fetching blog post:', error);
+    logger.error('Error fetching blog post:', { error });
     return null;
   }
 
@@ -913,6 +957,7 @@ export async function getAdminBlogPost(id: string): Promise<BlogPost | null> {
 }
 
 export async function createBlogPost(data: TablesInsert<'blog_posts'>): Promise<{ success: boolean; error?: string; data?: BlogPost }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { data: result, error } = await supabase.from('blog_posts').insert(data).select().single();
@@ -926,7 +971,7 @@ export async function createBlogPost(data: TablesInsert<'blog_posts'>): Promise<
     notifyBlogPostPublished({
       slug: result.slug,
       title: result.title,
-    }).catch(console.error);
+    }).catch((e) => logger.error('Background notification failed', { error: e }));
   }
 
   revalidatePath('/admin/blog');
@@ -935,6 +980,7 @@ export async function createBlogPost(data: TablesInsert<'blog_posts'>): Promise<
 }
 
 export async function updateBlogPost(id: string, data: TablesUpdate<'blog_posts'>): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   // Check if blog post is being published for the first time
@@ -946,7 +992,7 @@ export async function updateBlogPost(id: string, data: TablesUpdate<'blog_posts'
       notifyBlogPostPublished({
         slug: data.slug || current.slug,
         title: data.title || current.title,
-      }).catch(console.error);
+      }).catch((e) => logger.error('Background notification failed', { error: e }));
     }
   }
 
@@ -965,6 +1011,7 @@ export async function updateBlogPost(id: string, data: TablesUpdate<'blog_posts'
 }
 
 export async function deleteBlogPost(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
   const { error } = await supabase.from('blog_posts').delete().eq('id', id);

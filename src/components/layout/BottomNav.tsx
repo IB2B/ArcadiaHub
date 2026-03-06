@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useCallback, useState, useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 
@@ -170,10 +170,13 @@ function BottomNav({ userRole }: BottomNavProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMoreMenu]);
 
-  // Close menu on route change
-  useEffect(() => {
+  // Close menu on route change: track previous pathname in state (React-blessed pattern,
+  // avoids both setState-in-effect and ref-during-render lint errors)
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setShowMoreMenu(false);
-  }, [pathname]);
+  }
 
   const toggleMoreMenu = useCallback(() => {
     setShowMoreMenu((prev) => !prev);

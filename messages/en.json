@@ -1122,5 +1122,17 @@
       "title": "Contact Us",
       "description": "If you have any questions about these Terms of Service, please contact us."
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "noNotificationsDesc": "You will see activity here when something happens.",
+    "unread": "unread",
+    "markRead": "Mark as read",
+    "justNow": "Just now",
+    "minutesAgo": "{count} min ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago"
   }
 }

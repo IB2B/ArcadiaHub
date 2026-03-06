@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useState, useCallback, useTransition } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
 

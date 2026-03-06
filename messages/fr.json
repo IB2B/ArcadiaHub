@@ -334,7 +334,7 @@
       "uploadLogo": "Cliquez pour telecharger le logo",
       "logoUploaded": "Logo telecharge avec succes",
       "maxSize": "Max 10 Mo",
-      "uploading": "Téléchargement..."
+      "uploading": "T\u00c3\u00a9l\u00c3\u00a9chargement..."
     },
     "errors": {
       "required": "Ce champ est obligatoire",
@@ -1107,5 +1107,17 @@
       "title": "Nous Contacter",
       "description": "Si vous avez des questions concernant ces Conditions d'Utilisation, veuillez nous contacter."
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "noNotifications": "Aucune notification",
+    "noNotificationsDesc": "Vous verrez l activite ici.",
+    "unread": "non lu",
+    "markRead": "Marquer comme lu",
+    "justNow": "A l instant",
+    "minutesAgo": "Il y a {count} min",
+    "hoursAgo": "Il y a {count}h",
+    "daysAgo": "Il y a {count}j"
   }
 }

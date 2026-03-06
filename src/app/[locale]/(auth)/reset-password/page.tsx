@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useTransition, useEffect } from 'react';
+import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { Link } from '@/navigation';
 import { resetPassword } from '@/lib/auth';
 import Button from '@/components/ui/Button';
@@ -17,15 +17,11 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [hasToken, setHasToken] = useState(true);
-
-  useEffect(() => {
-    // Check if we have the recovery token in the URL hash
+  const [hasToken] = useState(() => {
+    if (typeof window === 'undefined') return true;
     const hash = window.location.hash;
-    if (!hash || !hash.includes('access_token')) {
-      setHasToken(false);
-    }
-  }, []);
+    return !!(hash && hash.includes('access_token'));
+  });
 
   const handleSubmit = useCallback(async (formData: FormData) => {
     setError(null);
