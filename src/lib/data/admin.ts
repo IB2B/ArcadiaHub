@@ -1,7 +1,7 @@
 'use server';
 
 import { unstable_cache } from 'next/cache';
-import { createClient } from '@/lib/database/server';
+import { createClient, createServiceSupabaseClient } from '@/lib/database/server';
 import { requireRole } from '@/lib/auth/guards';
 import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
@@ -192,17 +192,66 @@ export async function getAdminPartner(id: string): Promise<Profile | null> {
   return data;
 }
 
-export async function createPartner(data: TablesInsert<'profiles'>): Promise<{ success: boolean; error?: string; data?: Profile }> {
+export async function createPartner(data: {
+  email: string;
+  company_name?: string | null;
+  contact_first_name?: string | null;
+  contact_last_name?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  region?: string | null;
+  country?: string | null;
+  postal_code?: string | null;
+  category?: string | null;
+  website?: string | null;
+  description?: string | null;
+  is_active?: boolean;
+  logo_url?: string | null;
+}): Promise<{ success: boolean; error?: string; data?: Profile }> {
   await requireRole(['ADMIN', 'COMMERCIAL']);
-  const supabase = await createClient();
+  const supabase = await createServiceSupabaseClient();
 
+  // Generate a temporary password; partner can reset via forgot-password
+  const tempPassword = `Arcadia${Date.now()}!${Math.random().toString(36).slice(2, 8)}`;
+
+  // Create the auth user (trigger handle_new_user will auto-create the profile row)
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email: data.email,
+    password: tempPassword,
+    email_confirm: true,
+  });
+
+  if (authError || !authData.user) {
+    return { success: false, error: authError?.message || 'Failed to create auth user' };
+  }
+
+  // Update the auto-created profile with partner details
   const { data: result, error } = await supabase
     .from('profiles')
-    .insert(data)
+    .update({
+      company_name: data.company_name || null,
+      contact_first_name: data.contact_first_name || null,
+      contact_last_name: data.contact_last_name || null,
+      phone: data.phone || null,
+      address: data.address || null,
+      city: data.city || null,
+      region: data.region || null,
+      country: data.country || null,
+      postal_code: data.postal_code || null,
+      category: data.category || null,
+      website: data.website || null,
+      description: data.description || null,
+      is_active: data.is_active ?? true,
+      logo_url: data.logo_url || null,
+    })
+    .eq('id', authData.user.id)
     .select()
     .single();
 
   if (error) {
+    // Clean up: delete auth user if profile update fails
+    await supabase.auth.admin.deleteUser(authData.user.id);
     return { success: false, error: error.message };
   }
 
@@ -256,7 +305,7 @@ export async function uploadPartnerLogo(
   formData: FormData
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   await requireRole(['ADMIN', 'COMMERCIAL']);
-  const supabase = await createClient();
+  const supabase = await createServiceSupabaseClient();
 
   const file = formData.get('file') as File;
   const partnerId = formData.get('partnerId') as string;

@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/navigation';
 import { Tables, TablesUpdate } from '@/types/database.types';
-import { updatePartner, uploadPartnerLogo } from '@/lib/data/admin';
+import { createPartner, updatePartner, uploadPartnerLogo } from '@/lib/data/admin';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -127,9 +127,28 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
             setMessage({ type: 'error', text: result.error || tMessages('error') });
           }
         } else {
-          // For new partner, we need to generate an ID or handle this differently
-          // In a real app, you'd typically create the user through Supabase Auth first
-          setMessage({ type: 'error', text: 'New partner creation requires auth user setup. Please use Supabase Auth to create the user first.' });
+          const result = await createPartner({
+            email: formData.email,
+            company_name: formData.company_name || null,
+            contact_first_name: formData.contact_first_name || null,
+            contact_last_name: formData.contact_last_name || null,
+            phone: formData.phone || null,
+            address: formData.address || null,
+            city: formData.city || null,
+            region: formData.region || null,
+            country: formData.country || null,
+            postal_code: formData.postal_code || null,
+            category: formData.category || null,
+            website: formData.website || null,
+            description: formData.description || null,
+            is_active: formData.is_active,
+            logo_url: formData.logo_url || null,
+          });
+          if (result.success) {
+            router.push('/admin/partners');
+          } else {
+            setMessage({ type: 'error', text: result.error || tMessages('error') });
+          }
         }
       } catch {
         setMessage({ type: 'error', text: tMessages('error') });
