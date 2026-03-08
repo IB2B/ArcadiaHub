@@ -119,16 +119,3 @@ export async function deleteFile(
     };
   }
 }
-
-/**
- * Get file path from URL
- */
-export async function getPathFromUrl(url: string, bucket: StorageBucket): Promise<string | null> {
-  try {
-    const regex = new RegExp(`/storage/v1/object/public/${bucket}/(.+)$`);
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  } catch {
-    return null;
-  }
-}

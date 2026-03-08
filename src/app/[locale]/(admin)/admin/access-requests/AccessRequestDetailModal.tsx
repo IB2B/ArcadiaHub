@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { type AccessRequest } from '@/lib/data/accessRequests';
+import { type AccessRequest } from '@/lib/data/admin';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
@@ -201,7 +201,7 @@ export default function AccessRequestDetailModal({
                   <span>{t('detail.reviewed')}: {format(new Date(request.reviewed_at), 'PPP')}</span>
                 )}
                 {request.reviewer && (
-                  <span>{t('detail.reviewedBy')}: {request.reviewer.first_name} {request.reviewer.last_name}</span>
+                  <span>{t('detail.reviewedBy')}: {request.reviewer.contact_first_name} {request.reviewer.contact_last_name}</span>
                 )}
               </div>
               {request.review_notes && (

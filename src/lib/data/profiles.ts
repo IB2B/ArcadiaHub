@@ -5,6 +5,7 @@ import { requireAuth, authErrorToResult } from '@/lib/auth/guards';
 import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
+import { validateImageUpload, generateUploadPath } from '@/lib/utils/uploadHelpers';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
@@ -165,20 +166,12 @@ export async function uploadProfileLogo(
     return { success: false, error: 'No file provided' };
   }
 
-  // Validate file type
-  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-  if (!validTypes.includes(file.type)) {
-    return { success: false, error: 'Invalid file type. Please upload an image.' };
+  const validation = validateImageUpload(file);
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
   }
 
-  // Validate file size (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    return { success: false, error: 'File too large. Maximum size is 5MB.' };
-  }
-
-  const timestamp = Date.now();
-  const ext = file.name.split('.').pop();
-  const path = `${userId}-${timestamp}.${ext}`;
+  const path = generateUploadPath(userId, file.name);
 
   const { data, error } = await supabase.storage
     .from('partner-logos')

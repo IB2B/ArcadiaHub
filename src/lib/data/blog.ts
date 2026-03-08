@@ -2,7 +2,6 @@
 
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/database/server';
-import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
 
@@ -176,15 +175,12 @@ export async function incrementBlogViewCount(slug: string): Promise<void> {
 
   const { data: post } = await supabase
     .from('blog_posts')
-    .select('id, view_count')
+    .select('id')
     .eq('slug', slug)
     .single();
 
   if (post) {
-    await supabase
-      .from('blog_posts')
-      .update({ view_count: (post.view_count || 0) + 1 })
-      .eq('id', post.id);
-    revalidatePath('/[locale]/blog/[slug]');
+    // Atomic view count increment (avoids race conditions)
+    await (supabase as any).rpc('increment_view_count', { table_name: 'blog_posts', row_id: post.id });
   }
 }

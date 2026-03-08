@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { getAccessRequests, type AccessRequestStatus } from '@/lib/data/accessRequests';
+import { getAccessRequests, type AccessRequestStatus } from '@/lib/data/admin';
 import AccessRequestsClient from './AccessRequestsClient';
 
 interface PageProps {

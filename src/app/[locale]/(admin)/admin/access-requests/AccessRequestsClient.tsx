@@ -12,7 +12,7 @@ import {
   approveAccessRequest,
   rejectAccessRequest,
   deleteAccessRequest,
-} from '@/lib/data/accessRequests';
+} from '@/lib/data/admin';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
@@ -26,8 +26,8 @@ import {
   TableHead,
   TableCell,
   TableEmpty,
-  Pagination,
 } from '@/components/ui/Table';
+import Pagination from '@/components/ui/Pagination';
 import AccessRequestDetailModal from './AccessRequestDetailModal';
 
 interface AccessRequestsClientProps {

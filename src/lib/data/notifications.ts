@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/database/server';
-import { requireAuth, authErrorToResult } from '@/lib/auth/guards';
+import { requireAuth, requireRole, authErrorToResult } from '@/lib/auth/guards';
 import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
@@ -74,12 +74,21 @@ export async function getUnreadCount(): Promise<number> {
 export async function markAsRead(
   notificationId: string
 ): Promise<{ success: boolean; error?: string }> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase
     .from('notifications')
     .update({ is_read: true })
-    .eq('id', notificationId);
+    .eq('id', notificationId)
+    .eq('user_id', userId);
 
   if (error) {
     return { success: false, error: error.message };
@@ -118,6 +127,12 @@ export async function createNotification(
   userId: string,
   notification: Omit<NotificationInsert, 'user_id'>
 ): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase

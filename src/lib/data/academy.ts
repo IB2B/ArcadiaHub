@@ -93,11 +93,8 @@ export async function getAcademyItem(itemId: string): Promise<AcademyContent | n
     return null;
   }
 
-  // Increment view count
-  await supabase
-    .from('academy_content')
-    .update({ view_count: (data.view_count || 0) + 1 })
-    .eq('id', itemId);
+  // Atomic view count increment (avoids race conditions)
+  await (supabase as any).rpc('increment_view_count', { table_name: 'academy_content', row_id: itemId });
 
   return data;
 }

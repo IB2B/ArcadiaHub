@@ -210,9 +210,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     getMyCases({ limit: 5 }),
     getMyNotifications({ limit: 10 }),
     getUnreadCount(),
-    getLatestAcademyContent(3),
     getLatestDocuments(3),
-    getLatestBlogPosts(3),
   ]);
 
   const getValue = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
@@ -224,88 +222,10 @@ export async function getDashboardData(): Promise<DashboardData> {
   const recentCases = getValue(results[3] as PromiseSettledResult<{ data: Case[]; count: number }>, { data: [], count: 0 });
   const notifications = getValue(results[4] as PromiseSettledResult<Notification[]>, []);
   const unreadCount = getValue(results[5] as PromiseSettledResult<number>, 0);
-  const latestContent = getValue(results[6] as PromiseSettledResult<Awaited<ReturnType<typeof getLatestAcademyContent>>>, []);
-  const latestDocuments = getValue(results[7] as PromiseSettledResult<Awaited<ReturnType<typeof getLatestDocuments>>>, []);
-  const latestBlogPosts = getValue(results[8] as PromiseSettledResult<Awaited<ReturnType<typeof getLatestBlogPosts>>>, []);
+  const latestDocuments = getValue(results[6] as PromiseSettledResult<Awaited<ReturnType<typeof getLatestDocuments>>>, []);
 
-  // Build activity feed from various sources
-  const activityFeed: ActivityFeedItem[] = [];
-
-  // Add recent cases to feed
-  recentCases.data.slice(0, 3).forEach((c) => {
-    activityFeed.push({
-      id: `case-${c.id}`,
-      type: 'case',
-      title: `Case ${c.case_code}: ${c.client_name}`,
-      description: c.notes || undefined,
-      timestamp: new Date(c.updated_at || c.created_at || new Date()),
-      metadata: {
-        status: c.status || 'PENDING',
-      },
-    });
-  });
-
-  // Add upcoming events to feed (use created_at for sorting, not the event date)
-  upcomingEvents.slice(0, 3).forEach((e) => {
-    activityFeed.push({
-      id: `event-${e.id}`,
-      type: 'event',
-      title: e.title,
-      description: e.description || undefined,
-      timestamp: new Date(e.created_at || new Date()),
-      metadata: {
-        category: e.event_type,
-      },
-    });
-  });
-
-  // Add latest content to feed
-  latestContent.forEach((c) => {
-    activityFeed.push({
-      id: `content-${c.id}`,
-      type: 'content',
-      title: c.title,
-      description: c.description || undefined,
-      timestamp: new Date(c.created_at || new Date()),
-      image: c.thumbnail_url || undefined,
-      metadata: {
-        category: c.content_type,
-      },
-    });
-  });
-
-  // Add latest documents to feed
-  latestDocuments.forEach((d) => {
-    activityFeed.push({
-      id: `document-${d.id}`,
-      type: 'document',
-      title: d.title,
-      description: d.description || undefined,
-      timestamp: new Date(d.created_at || new Date()),
-      metadata: {
-        category: d.category,
-      },
-    });
-  });
-
-  // Add latest blog posts to feed
-  latestBlogPosts.forEach((b) => {
-    activityFeed.push({
-      id: `blog-${b.id}`,
-      type: 'blog',
-      title: b.title,
-      description: b.excerpt || undefined,
-      timestamp: new Date(b.published_at || b.created_at || new Date()),
-      image: b.featured_image || undefined,
-      metadata: {
-        category: b.category || undefined,
-        link: `/blog/${b.slug}`,
-      },
-    });
-  });
-
-  // Sort feed by timestamp (newest first)
-  activityFeed.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  // Reuse getActivityFeed to avoid duplicating feed-building logic
+  const activityFeedResult = await getActivityFeed({ limit: 10 });
 
   return {
     profile,
@@ -320,6 +240,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     upcomingEvents,
     recentCases: recentCases.data.slice(0, 5),
     notifications,
-    activityFeed: activityFeed.slice(0, 10),
+    activityFeed: activityFeedResult.data,
   };
 }

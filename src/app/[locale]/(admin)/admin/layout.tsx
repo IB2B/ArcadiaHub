@@ -2,7 +2,7 @@ import { redirect } from '@/navigation';
 import { AdminLayout } from '@/components/admin';
 import { getCurrentUserProfile } from '@/lib/data/profiles';
 import { getUser } from '@/lib/auth';
-import { getPendingAccessRequestsCount } from '@/lib/data/accessRequests';
+import { getPendingAccessRequestsCount } from '@/lib/data/admin';
 
 export default async function AdminRootLayout({
   children,

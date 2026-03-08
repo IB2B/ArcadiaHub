@@ -19,8 +19,8 @@ import {
   TableHead,
   TableCell,
   TableEmpty,
-  Pagination,
 } from '@/components/ui/Table';
+import Pagination from '@/components/ui/Pagination';
 
 type Document = Tables<'documents'>;
 

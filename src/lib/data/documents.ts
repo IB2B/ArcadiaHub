@@ -75,24 +75,6 @@ export async function getLatestDocuments(limit: number = 5): Promise<Document[]>
   return _getLatestDocuments(limit);
 }
 
-export async function getDocumentsByCategory(): Promise<Record<string, number>> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('documents')
-    .select('category')
-    .eq('is_published', true);
-
-  if (error || !data) {
-    return {};
-  }
-
-  return data.reduce((acc: Record<string, number>, doc: { category: string }) => {
-    acc[doc.category] = (acc[doc.category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-}
-
 export async function getDocument(documentId: string): Promise<Document | null> {
   const supabase = await createClient();
 

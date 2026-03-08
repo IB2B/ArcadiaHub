@@ -19,8 +19,10 @@ export {
   TableCell,
   TableEmpty,
   TableSkeleton,
-  Pagination,
 } from './Table';
+
+// Pagination
+export { default as Pagination } from './Pagination';
 
 // Tabs Components
 export { Tabs, TabList, TabTrigger, TabContent } from './Tabs';

@@ -1,13 +1,11 @@
 'use server';
 
 import { unstable_cache } from 'next/cache';
-import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/database/server';
 import { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
 
 type Event = Database['public']['Tables']['events']['Row'];
-type EventInsert = Database['public']['Tables']['events']['Insert'];
 
 export async function getEvents(options?: {
   eventType?: string;
@@ -93,33 +91,6 @@ export async function getEvent(eventId: string): Promise<Event | null> {
   }
 
   return data;
-}
-
-export async function createEvent(
-  event: EventInsert
-): Promise<{ success: boolean; data?: Event; error?: string }> {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: 'Not authenticated' };
-  }
-
-  const { data, error } = await supabase
-    .from('events')
-    .insert({
-      ...event,
-      created_by: user.id,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-
-  revalidatePath('/[locale]/events', 'page');
-  return { success: true, data };
 }
 
 export async function getEventStats(): Promise<{

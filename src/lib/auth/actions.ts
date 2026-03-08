@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/database/server';
 import { redirect } from '@/navigation';
+import { getLocale } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 import {
   LoginSchema,
@@ -33,7 +34,8 @@ export async function login(formData: FormData): Promise<AuthResult> {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/dashboard' as never);
+  const locale = await getLocale();
+  redirect({ href: '/dashboard', locale });
   return { success: true };
 }
 
@@ -73,7 +75,8 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/dashboard' as never);
+  const locale = await getLocale();
+  redirect({ href: '/dashboard', locale });
   return { success: true };
 }
 
@@ -81,7 +84,8 @@ export async function logout(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
-  redirect('/login' as never);
+  const locale = await getLocale();
+  redirect({ href: '/login', locale });
 }
 
 export async function getUser() {
@@ -141,33 +145,3 @@ export async function resetPassword(formData: FormData): Promise<AuthResult> {
   return { success: true };
 }
 
-export async function updatePassword(currentPassword: string, newPassword: string): Promise<AuthResult> {
-  const supabase = await createClient();
-
-  // First verify current password by re-authenticating
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) {
-    return { success: false, error: 'User not found' };
-  }
-
-  // Try to sign in with current password to verify
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: user.email,
-    password: currentPassword,
-  });
-
-  if (signInError) {
-    return { success: false, error: 'Current password is incorrect' };
-  }
-
-  // Update to new password
-  const { error } = await supabase.auth.updateUser({
-    password: newPassword,
-  });
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
-}
