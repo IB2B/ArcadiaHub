@@ -686,7 +686,17 @@
       "c2Desc": "Dark sidebar with white content area",
       "c3": "Soft Gradient",
       "c3Desc": "Soft blue gradient with glassmorphism"
-    }
+    },
+    "emailNotifications": "Email Notifications",
+    "emailNotificationsSubtitle": "Choose which emails you want to receive",
+    "emailCaseUpdates": "Case Status Updates",
+    "emailCaseUpdatesDesc": "Get notified when your case status changes",
+    "emailEvents": "New Events",
+    "emailEventsDesc": "Receive emails about new events and trainings",
+    "emailContent": "New Academy Content",
+    "emailContentDesc": "Be notified when new learning content is published",
+    "emailMentions": "Comment Mentions",
+    "emailMentionsDesc": "Get emails when someone mentions you in a comment"
   },
   "uiPicker": {
     "title": "UI Style Picker",
@@ -728,6 +738,7 @@
       "documents": "Documents",
       "blog": "Blog",
       "settings": "Settings",
+      "suggestions": "Suggestions",
       "backToDashboard": "Back to Dashboard"
     },
     "dashboard": {
@@ -1137,5 +1148,75 @@
     "minutesAgo": "{count} min ago",
     "hoursAgo": "{count}h ago",
     "daysAgo": "{count}d ago"
+  },
+  "suggestions": {
+    "title": "My Suggestions",
+    "subtitle": "Track your submitted feedback and suggestions",
+    "sendFeedback": "Send Feedback",
+    "subject": "Subject",
+    "subjectPlaceholder": "Brief summary of your suggestion",
+    "message": "Message",
+    "messagePlaceholder": "Describe your suggestion in detail...",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "success": "Thank you! Your feedback has been submitted.",
+    "noSuggestions": "No suggestions yet",
+    "noSuggestionsHint": "Submit your first suggestion using the feedback button.",
+    "adminReply": "Admin Reply",
+    "status": {
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "resolved": "Resolved"
+    },
+    "admin": {
+      "title": "Suggestions",
+      "subtitle": "Review and respond to partner feedback",
+      "all": "All",
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "resolved": "Resolved",
+      "partner": "Partner",
+      "subject": "Subject",
+      "date": "Date",
+      "status": "Status",
+      "noSuggestions": "No suggestions found",
+      "updateStatus": "Update Status",
+      "replyPlaceholder": "Write a reply to this suggestion...",
+      "save": "Save",
+      "saving": "Saving..."
+    }
+  },
+  "comments": {
+    "title": "Comments",
+    "placeholder": "Write a comment... type @ to mention someone",
+    "submit": "Post",
+    "submitting": "Posting...",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edited": "edited",
+    "deleted": "[deleted]",
+    "noComments": "No comments yet. Be the first to comment!",
+    "loadMore": "Load more comments",
+    "reply": "Reply",
+    "confirmDelete": "Delete this comment?",
+    "deleteWarning": "This action cannot be undone."
+  },
+  "subUsers": {
+    "createUser": "Create User",
+    "resendInvite": "Resend Invite",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "modal": {
+      "title": "Create New User",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "role": "Role",
+      "create": "Create User",
+      "creating": "Creating...",
+      "success": "User created and invite email sent."
+    }
   }
 }

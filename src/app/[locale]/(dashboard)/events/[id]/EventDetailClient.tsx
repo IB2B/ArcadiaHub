@@ -6,6 +6,7 @@ import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import AddToCalendarButton from '@/components/events/AddToCalendarButton';
+import CommentSection from '@/components/comments/CommentSection';
 import { Database, Json } from '@/types/database.types';
 
 type Event = Database['public']['Tables']['events']['Row'];
@@ -334,6 +335,13 @@ export default function EventDetailClient({
           </Card>
         </div>
       </div>
+
+      {/* Comments */}
+      <Card>
+        <CardContent className="p-4">
+          <CommentSection entityType="event" entityId={event.id} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createClient } from '@/lib/database/client';
 import { getMyNotifications, getUnreadCount, markAsRead, markAllAsRead } from '@/lib/data/notifications';
 import { Database } from '@/types/database.types';
 
@@ -38,9 +39,35 @@ export function useNotifications(limit: number = 10): UseNotificationsReturn {
   useEffect(() => {
     fetchNotifications();
 
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    // Get current user for Realtime filter
+    const supabase = createClient();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+
+      channel = supabase
+        .channel(`notifications:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            fetchNotifications();
+          }
+        )
+        .subscribe();
+    });
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [fetchNotifications]);
 
   const handleMarkAsRead = useCallback(async (id: string) => {

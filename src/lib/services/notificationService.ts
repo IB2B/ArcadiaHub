@@ -13,7 +13,9 @@ type NotificationType =
   | 'blog_post_published'
   | 'partner_registered'
   | 'access_request_submitted'
-  | 'system_announcement';
+  | 'system_announcement'
+  | 'mention'
+  | 'suggestion_reply';
 
 type UserRole = 'ADMIN' | 'PARTNER' | 'COMMERCIAL';
 
@@ -364,6 +366,28 @@ export async function notifyNewPartnerRegistration(partner: {
     message: `${partner.email} has registered as a new partner.`,
     type: 'partner_registered',
     link: `/admin/partners/${partner.id}`,
+  });
+}
+
+// ============================================
+// MENTION NOTIFICATIONS
+// ============================================
+
+/**
+ * Notify a user when they are mentioned in a comment
+ */
+export async function notifyUserMentioned(data: {
+  mentionedUserId: string;
+  mentionedByName: string;
+  entityType: string;
+  entityTitle: string;
+  entityLink: string;
+}): Promise<void> {
+  await createNotification(data.mentionedUserId, {
+    title: `${data.mentionedByName} mentioned you`,
+    message: `You were mentioned in a comment on "${data.entityTitle}".`,
+    type: 'mention',
+    link: data.entityLink,
   });
 }
 

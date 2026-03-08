@@ -146,6 +146,50 @@ export async function updateCurrentUserProfile(
 }
 
 /**
+ * Update notification preferences for the current user
+ */
+export async function updateNotificationPreferences(
+  prefs: {
+    email_case_updates?: boolean;
+    email_events?: boolean;
+    email_content?: boolean;
+    email_mentions?: boolean;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
+  const supabase = await createClient();
+
+  // Merge with existing preferences
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('notification_preferences')
+    .eq('id', userId)
+    .single();
+
+  const current = (existing?.notification_preferences as Record<string, boolean> | null) ?? {};
+  const merged = { ...current, ...prefs };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ notification_preferences: merged, updated_at: new Date().toISOString() })
+    .eq('id', userId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/[locale]/settings');
+  return { success: true };
+}
+
+/**
  * Upload logo for current user's profile
  */
 export async function uploadProfileLogo(

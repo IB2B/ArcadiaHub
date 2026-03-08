@@ -5,7 +5,7 @@ import { requireRole } from '@/lib/auth/guards';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
 import { notifyAdminsAccessRequestSubmitted } from '@/lib/services/notificationService';
-import { sendPartnerWelcomeEmail } from '@/lib/email';
+import { sendPartnerWelcomeEmail, sendAccessRequestRejectionEmail } from '@/lib/email';
 
 export type AccessRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -321,6 +321,13 @@ export async function rejectAccessRequest(
     logger.error('Error rejecting access request:', { error: updateError });
     return { success: false, error: updateError.message };
   }
+
+  sendAccessRequestRejectionEmail({
+    to: request.contact_email,
+    firstName: request.contact_first_name,
+    companyName: request.company_name,
+    reviewNotes: notes,
+  }).catch((e) => logger.error('Failed to send rejection email', { error: e }));
 
   revalidatePath('/[locale]/admin/access-requests');
   return { success: true };

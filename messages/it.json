@@ -699,7 +699,17 @@
       "c2Desc": "Sidebar scura con area contenuto bianca",
       "c3": "Gradiente Morbido",
       "c3Desc": "Gradiente blu morbido con glassmorphism"
-    }
+    },
+    "emailNotifications": "Notifiche Email",
+    "emailNotificationsSubtitle": "Scegli quali email vuoi ricevere",
+    "emailCaseUpdates": "Aggiornamenti Stato Pratica",
+    "emailCaseUpdatesDesc": "Ricevi notifiche quando lo stato della tua pratica cambia",
+    "emailEvents": "Nuovi Eventi",
+    "emailEventsDesc": "Ricevi email su nuovi eventi e formazioni",
+    "emailContent": "Nuovo Contenuto Academy",
+    "emailContentDesc": "Vieni avvisato quando vengono pubblicati nuovi contenuti formativi",
+    "emailMentions": "Menzioni nei Commenti",
+    "emailMentionsDesc": "Ricevi email quando qualcuno ti menziona in un commento"
   },
   "uiPicker": {
     "title": "Selettore Stile UI",
@@ -741,6 +751,7 @@
       "documents": "Documenti",
       "blog": "Blog",
       "settings": "Impostazioni",
+      "suggestions": "Suggerimenti",
       "backToDashboard": "Torna alla Dashboard"
     },
     "dashboard": {
@@ -1150,5 +1161,75 @@
     "minutesAgo": "{count} min fa",
     "hoursAgo": "{count}h fa",
     "daysAgo": "{count}g fa"
+  },
+  "suggestions": {
+    "title": "I Miei Suggerimenti",
+    "subtitle": "Monitora i tuoi feedback e suggerimenti inviati",
+    "sendFeedback": "Invia Feedback",
+    "subject": "Oggetto",
+    "subjectPlaceholder": "Breve riepilogo del tuo suggerimento",
+    "message": "Messaggio",
+    "messagePlaceholder": "Descrivi il tuo suggerimento in dettaglio...",
+    "submit": "Invia",
+    "submitting": "Invio in corso...",
+    "success": "Grazie! Il tuo feedback e stato inviato.",
+    "noSuggestions": "Nessun suggerimento ancora",
+    "noSuggestionsHint": "Invia il tuo primo suggerimento usando il pulsante feedback.",
+    "adminReply": "Risposta Admin",
+    "status": {
+      "pending": "In attesa",
+      "reviewed": "Revisionato",
+      "resolved": "Risolto"
+    },
+    "admin": {
+      "title": "Suggerimenti",
+      "subtitle": "Revisiona e rispondi ai feedback dei partner",
+      "all": "Tutti",
+      "pending": "In attesa",
+      "reviewed": "Revisionati",
+      "resolved": "Risolti",
+      "partner": "Partner",
+      "subject": "Oggetto",
+      "date": "Data",
+      "status": "Stato",
+      "noSuggestions": "Nessun suggerimento trovato",
+      "updateStatus": "Aggiorna Stato",
+      "replyPlaceholder": "Scrivi una risposta a questo suggerimento...",
+      "save": "Salva",
+      "saving": "Salvataggio..."
+    }
+  },
+  "comments": {
+    "title": "Commenti",
+    "placeholder": "Scrivi un commento... digita @ per menzionare qualcuno",
+    "submit": "Pubblica",
+    "submitting": "Pubblicazione...",
+    "edit": "Modifica",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edited": "modificato",
+    "deleted": "[eliminato]",
+    "noComments": "Nessun commento ancora. Sii il primo a commentare!",
+    "loadMore": "Carica altri commenti",
+    "reply": "Rispondi",
+    "confirmDelete": "Eliminare questo commento?",
+    "deleteWarning": "Questa azione non puo essere annullata."
+  },
+  "subUsers": {
+    "createUser": "Crea Utente",
+    "resendInvite": "Reinvia Invito",
+    "deactivate": "Disattiva",
+    "reactivate": "Riattiva",
+    "modal": {
+      "title": "Crea Nuovo Utente",
+      "email": "Email",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "role": "Ruolo",
+      "create": "Crea Utente",
+      "creating": "Creazione...",
+      "success": "Utente creato e email di invito inviata."
+    }
   }
 }

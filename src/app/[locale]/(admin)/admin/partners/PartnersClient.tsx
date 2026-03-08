@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { Link } from '@/navigation';
 import { Tables } from '@/types/database.types';
-import { togglePartnerStatus, deletePartner, type PaginatedResult } from '@/lib/data/admin';
+import { togglePartnerStatus, deletePartner, resendInviteEmail, type PaginatedResult } from '@/lib/data/admin';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Avatar from '@/components/ui/Avatar';
@@ -23,6 +23,7 @@ import {
   TableEmpty,
 } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
+import CreateUserModal from './CreateUserModal';
 
 type Profile = Tables<'profiles'>;
 
@@ -34,11 +35,13 @@ interface PartnersClientProps {
     status: string;
     category: string;
   };
+  currentUserRole?: string;
 }
 
-export default function PartnersClient({ initialData, categories, initialFilters }: PartnersClientProps) {
+export default function PartnersClient({ initialData, categories, initialFilters, currentUserRole = 'COMMERCIAL' }: PartnersClientProps) {
   const t = useTranslations('admin');
   const tPartners = useTranslations('admin.partners');
+  const tSubUsers = useTranslations('subUsers');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -50,6 +53,7 @@ export default function PartnersClient({ initialData, categories, initialFilters
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [partnerToDelete, setPartnerToDelete] = useState<Profile | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [createUserModalOpen, setCreateUserModalOpen] = useState(false);
 
   // Update URL with filters
   const updateFilters = useCallback((updates: Record<string, string>) => {
@@ -109,6 +113,13 @@ export default function PartnersClient({ initialData, categories, initialFilters
     }
   }, [partnerToDelete, router]);
 
+  // Handle resend invite
+  const handleResendInvite = useCallback(async (partnerId: string) => {
+    startTransition(async () => {
+      await resendInviteEmail(partnerId);
+    });
+  }, []);
+
   // Clear filters
   const handleClearFilters = useCallback(() => {
     setSearch('');
@@ -154,18 +165,30 @@ export default function PartnersClient({ initialData, categories, initialFilters
 
   return (
     <>
-      <AdminFilterBar
-        searchValue={search}
-        searchPlaceholder={t('actions.search')}
-        onSearchChange={setSearch}
-        onSearchSubmit={handleSearch}
-        filters={filters}
-        hasActiveFilters={hasActiveFilters}
-        onClearFilters={handleClearFilters}
-        newHref="/admin/partners/new"
-        newLabel={t('actions.newPartner')}
-        isLoading={isPending}
-      />
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <AdminFilterBar
+            searchValue={search}
+            searchPlaceholder={t('actions.search')}
+            onSearchChange={setSearch}
+            onSearchSubmit={handleSearch}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={handleClearFilters}
+            newHref="/admin/partners/new"
+            newLabel={t('actions.newPartner')}
+            isLoading={isPending}
+          />
+        </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setCreateUserModalOpen(true)}
+          className="shrink-0"
+        >
+          {tSubUsers('createUser')}
+        </Button>
+      </div>
 
       {/* Partners - Mobile Cards */}
       <div className={`md:hidden transition-opacity ${isPending ? 'opacity-50' : ''}`}>
@@ -320,6 +343,20 @@ export default function PartnersClient({ initialData, categories, initialFilters
                           </svg>
                         </Button>
                       </Link>
+                      {/* Resend invite if never signed in */}
+                      {!partner.updated_at && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleResendInvite(partner.id)}
+                          title={tSubUsers('resendInvite')}
+                          disabled={isPending}
+                        >
+                          <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                          </svg>
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -377,6 +414,13 @@ export default function PartnersClient({ initialData, categories, initialFilters
         cancelText={t('actions.cancel')}
         variant="danger"
         isLoading={isDeleting}
+      />
+
+      {/* Create User Modal */}
+      <CreateUserModal
+        isOpen={createUserModalOpen}
+        onClose={() => setCreateUserModalOpen(false)}
+        currentUserRole={currentUserRole}
       />
     </>
   );

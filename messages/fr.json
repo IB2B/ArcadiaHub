@@ -689,7 +689,17 @@
       "c2Desc": "Barre laterale sombre avec zone de contenu blanche",
       "c3": "Degrade Doux",
       "c3Desc": "Degrade bleu doux avec effet glassmorphism"
-    }
+    },
+    "emailNotifications": "Notifications par Email",
+    "emailNotificationsSubtitle": "Choisissez les emails que vous souhaitez recevoir",
+    "emailCaseUpdates": "Mises a Jour des Dossiers",
+    "emailCaseUpdatesDesc": "Soyez notifie quand le statut de votre dossier change",
+    "emailEvents": "Nouveaux Evenements",
+    "emailEventsDesc": "Recevez des emails sur les nouveaux evenements et formations",
+    "emailContent": "Nouveau Contenu Academy",
+    "emailContentDesc": "Soyez informe quand de nouveaux contenus sont publies",
+    "emailMentions": "Mentions dans les Commentaires",
+    "emailMentionsDesc": "Recevez des emails quand quelqu un vous mentionne dans un commentaire"
   },
   "uiPicker": {
     "title": "Selecteur de Style UI",
@@ -731,6 +741,7 @@
       "documents": "Documents",
       "blog": "Blog",
       "settings": "Parametres",
+      "suggestions": "Suggestions",
       "backToDashboard": "Retour au Tableau de Bord"
     },
     "dashboard": {
@@ -1122,5 +1133,75 @@
     "minutesAgo": "Il y a {count} min",
     "hoursAgo": "Il y a {count}h",
     "daysAgo": "Il y a {count}j"
+  },
+  "suggestions": {
+    "title": "Mes Suggestions",
+    "subtitle": "Suivez vos retours et suggestions soumis",
+    "sendFeedback": "Envoyer un Retour",
+    "subject": "Sujet",
+    "subjectPlaceholder": "Bref resume de votre suggestion",
+    "message": "Message",
+    "messagePlaceholder": "Decrivez votre suggestion en detail...",
+    "submit": "Envoyer",
+    "submitting": "Envoi en cours...",
+    "success": "Merci ! Votre retour a ete soumis.",
+    "noSuggestions": "Aucune suggestion encore",
+    "noSuggestionsHint": "Soumettez votre premiere suggestion via le bouton feedback.",
+    "adminReply": "Reponse Admin",
+    "status": {
+      "pending": "En attente",
+      "reviewed": "Examine",
+      "resolved": "Resolu"
+    },
+    "admin": {
+      "title": "Suggestions",
+      "subtitle": "Examinez et repondez aux retours des partenaires",
+      "all": "Tout",
+      "pending": "En attente",
+      "reviewed": "Examinees",
+      "resolved": "Resolues",
+      "partner": "Partenaire",
+      "subject": "Sujet",
+      "date": "Date",
+      "status": "Statut",
+      "noSuggestions": "Aucune suggestion trouvee",
+      "updateStatus": "Mettre a jour le statut",
+      "replyPlaceholder": "Ecrire une reponse a cette suggestion...",
+      "save": "Sauvegarder",
+      "saving": "Sauvegarde..."
+    }
+  },
+  "comments": {
+    "title": "Commentaires",
+    "placeholder": "Ecrire un commentaire... tapez @ pour mentionner quelqu'un",
+    "submit": "Publier",
+    "submitting": "Publication...",
+    "edit": "Modifier",
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edited": "modifie",
+    "deleted": "[supprime]",
+    "noComments": "Aucun commentaire pour l'instant. Soyez le premier !",
+    "loadMore": "Charger plus de commentaires",
+    "reply": "Repondre",
+    "confirmDelete": "Supprimer ce commentaire ?",
+    "deleteWarning": "Cette action est irreversible."
+  },
+  "subUsers": {
+    "createUser": "Creer un Utilisateur",
+    "resendInvite": "Renvoyer l'Invitation",
+    "deactivate": "Desactiver",
+    "reactivate": "Reactiver",
+    "modal": {
+      "title": "Creer un Nouvel Utilisateur",
+      "email": "Email",
+      "firstName": "Prenom",
+      "lastName": "Nom",
+      "role": "Role",
+      "create": "Creer l'Utilisateur",
+      "creating": "Creation...",
+      "success": "Utilisateur cree et email d'invitation envoye."
+    }
   }
 }

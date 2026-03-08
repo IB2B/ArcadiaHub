@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
+import Toggle from '@/components/ui/Toggle';
+import { updateNotificationPreferences } from '@/lib/data/profiles';
 
 const icons = {
   palette: (
@@ -64,11 +66,27 @@ const themes = [
   },
 ];
 
-export default function SettingsPageClient() {
+interface SettingsPageClientProps {
+  notificationPreferences?: {
+    email_case_updates?: boolean;
+    email_events?: boolean;
+    email_content?: boolean;
+    email_mentions?: boolean;
+  };
+}
+
+export default function SettingsPageClient({ notificationPreferences }: SettingsPageClientProps) {
   const t = useTranslations('settings');
   const [currentTheme, setCurrentTheme] = useState(() =>
     typeof window !== 'undefined' ? localStorage.getItem('theme') || 'c1' : 'c1'
   );
+  const [isPending, startTransition] = useTransition();
+  const [emailPrefs, setEmailPrefs] = useState({
+    email_case_updates: notificationPreferences?.email_case_updates ?? true,
+    email_events: notificationPreferences?.email_events ?? true,
+    email_content: notificationPreferences?.email_content ?? true,
+    email_mentions: notificationPreferences?.email_mentions ?? true,
+  });
 
   // Sync DOM attribute when theme changes (no setState inside)
   useEffect(() => {
@@ -79,6 +97,14 @@ export default function SettingsPageClient() {
     setCurrentTheme(themeId);
     localStorage.setItem('theme', themeId);
     document.documentElement.setAttribute('data-theme', themeId);
+  };
+
+  const handlePrefChange = (key: keyof typeof emailPrefs, value: boolean) => {
+    const updated = { ...emailPrefs, [key]: value };
+    setEmailPrefs(updated);
+    startTransition(async () => {
+      await updateNotificationPreferences({ [key]: value });
+    });
   };
 
   return (
@@ -183,20 +209,46 @@ export default function SettingsPageClient() {
             <div className="text-[var(--text-muted)]">{icons.external}</div>
           </Link>
 
-          <div className="flex items-center justify-between p-4 hover:bg-[var(--card-hover)] transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[var(--card-hover)] text-[var(--text-muted)]">
-                {icons.bell}
-              </div>
-              <div>
-                <p className="font-medium text-[var(--text)]">{t('notificationSettings')}</p>
-                <p className="text-xs text-[var(--text-muted)]">
-                  {t('notificationSettingsDesc')}
-                </p>
-              </div>
-            </div>
-            <div className="text-[var(--text-muted)]">{icons.external}</div>
-          </div>
+        </CardContent>
+      </Card>
+
+      {/* Email Notifications */}
+      <Card padding="none">
+        <CardHeader
+          title={t('emailNotifications')}
+          subtitle={t('emailNotificationsSubtitle')}
+          className="p-4 border-b border-[var(--border)]"
+          action={<div className="text-[var(--primary)]">{icons.bell}</div>}
+        />
+        <CardContent className="p-4 space-y-4">
+          <Toggle
+            label={t('emailCaseUpdates')}
+            description={t('emailCaseUpdatesDesc')}
+            checked={emailPrefs.email_case_updates}
+            disabled={isPending}
+            onChange={(e) => handlePrefChange('email_case_updates', e.target.checked)}
+          />
+          <Toggle
+            label={t('emailEvents')}
+            description={t('emailEventsDesc')}
+            checked={emailPrefs.email_events}
+            disabled={isPending}
+            onChange={(e) => handlePrefChange('email_events', e.target.checked)}
+          />
+          <Toggle
+            label={t('emailContent')}
+            description={t('emailContentDesc')}
+            checked={emailPrefs.email_content}
+            disabled={isPending}
+            onChange={(e) => handlePrefChange('email_content', e.target.checked)}
+          />
+          <Toggle
+            label={t('emailMentions')}
+            description={t('emailMentionsDesc')}
+            checked={emailPrefs.email_mentions}
+            disabled={isPending}
+            onChange={(e) => handlePrefChange('email_mentions', e.target.checked)}
+          />
         </CardContent>
       </Card>
     </div>

@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { getAdminPartners, getCategories } from '@/lib/data/admin';
+import { requireRole } from '@/lib/auth/guards';
 import PartnersClient from './PartnersClient';
 
 interface PageProps {
@@ -19,6 +20,14 @@ export default async function PartnersPage({ searchParams }: PageProps) {
   const search = params.search || '';
   const status = (params.status as 'active' | 'inactive' | 'all') || 'all';
   const category = params.category || '';
+
+  let currentUserRole = 'COMMERCIAL';
+  try {
+    const ctx = await requireRole(['ADMIN', 'COMMERCIAL']);
+    currentUserRole = ctx.profile.role;
+  } catch {
+    // fallback
+  }
 
   const [partnersData, categories] = await Promise.all([
     getAdminPartners({ page, pageSize: 10, search, status, category }),
@@ -40,6 +49,7 @@ export default async function PartnersPage({ searchParams }: PageProps) {
         initialData={partnersData}
         categories={categories}
         initialFilters={{ search, status, category }}
+        currentUserRole={currentUserRole}
       />
     </div>
   );

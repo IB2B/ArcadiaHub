@@ -5,6 +5,7 @@ import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import FileUpload from '@/components/ui/FileUpload';
 import CaseTimeline from '@/components/cases/CaseTimeline';
+import CommentSection from '@/components/comments/CommentSection';
 import { Database } from '@/types/database.types';
 
 type Case = Database['public']['Tables']['cases']['Row'];
@@ -217,6 +218,13 @@ export default function CaseDetailClient({ caseData, uploadDocumentAction }: Cas
           </Card>
         </div>
       </div>
+
+      {/* Comments */}
+      <Card padding="none">
+        <CardContent className="p-4">
+          <CommentSection entityType="case" entityId={caseData.id} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

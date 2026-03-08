@@ -3,6 +3,7 @@
 import { createServiceSupabaseClient } from '@/lib/database/server';
 import { logger } from '@/lib/logger';
 import { notifyAdminsAccessRequestSubmitted } from '@/lib/services/notificationService';
+import { sendAccessRequestReceivedEmail, sendAdminAlertEmail } from '@/lib/email';
 
 interface AccessRequestData {
   contact_first_name: string;
@@ -57,17 +58,25 @@ export async function submitAccessRequest(
       return { success: false, error: error.message };
     }
 
-    try {
-      await notifyAdminsAccessRequestSubmitted({
-        id: result.id,
-        company_name: data.company_name,
-        contact_email: data.contact_email,
-        contact_first_name: data.contact_first_name,
-        contact_last_name: data.contact_last_name,
-      });
-    } catch (notifyError) {
-      logger.error('Error sending notification:', { error: notifyError });
-    }
+    notifyAdminsAccessRequestSubmitted({
+      id: result.id,
+      company_name: data.company_name,
+      contact_email: data.contact_email,
+      contact_first_name: data.contact_first_name,
+      contact_last_name: data.contact_last_name,
+    }).catch((e) => logger.error('Background notification failed', { error: e }));
+
+    sendAccessRequestReceivedEmail({
+      to: data.contact_email,
+      firstName: data.contact_first_name,
+      companyName: data.company_name,
+    }).catch((e) => logger.error('Failed to send access request received email', { error: e }));
+
+    sendAdminAlertEmail({
+      subject: `New access request: ${data.company_name}`,
+      body: `${data.contact_first_name} ${data.contact_last_name} (${data.contact_email}) submitted an access request for ${data.company_name}.`,
+      actionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/access-requests`,
+    }).catch((e) => logger.error('Failed to send admin alert email', { error: e }));
 
     return { success: true, requestId: result.id };
   } catch (error) {

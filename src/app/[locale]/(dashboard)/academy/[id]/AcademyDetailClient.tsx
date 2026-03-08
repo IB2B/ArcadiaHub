@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import CommentSection from '@/components/comments/CommentSection';
 import { Database } from '@/types/database.types';
 
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
@@ -359,6 +360,13 @@ export default function AcademyDetailClient({ item, relatedContent, isCompleted:
           )}
         </div>
       </div>
+
+      {/* Comments */}
+      <Card>
+        <div className="p-4">
+          <CommentSection entityType="academy_content" entityId={item.id} />
+        </div>
+      </Card>
     </div>
   );
 }

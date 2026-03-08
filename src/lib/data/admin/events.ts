@@ -6,6 +6,7 @@ import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
 import { notifyEventPublished } from '@/lib/services/notificationService';
+import { sendEventPublishedEmail } from '@/lib/email';
 import { PaginatedResult, ListOptions } from './types';
 import { buildPaginatedResult } from '@/lib/utils/pagination';
 
@@ -78,6 +79,37 @@ export async function createEvent(data: TablesInsert<'events'>): Promise<{ succe
       event_type: result.event_type,
       start_datetime: result.start_datetime,
     }).catch((e) => logger.error('Background notification failed', { error: e }));
+
+    // Fetch active partner emails and send event published bulk email (fire-and-forget)
+    const eventSnapshot = { id: result.id, title: result.title, event_type: result.event_type, start_datetime: result.start_datetime, location: result.location };
+    Promise.resolve().then(async () => {
+      try {
+        const supabaseForEmail = await createClient();
+        const { data: partners } = await supabaseForEmail
+          .from('profiles')
+          .select('email, notification_preferences')
+          .eq('role', 'PARTNER')
+          .eq('is_active', true);
+        if (!partners || partners.length === 0) return;
+        const recipients = partners
+          .filter((p) => {
+            const prefs = (p.notification_preferences as Record<string, boolean> | null) ?? {};
+            return prefs.email_events !== false;
+          })
+          .map((p) => p.email);
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+        await sendEventPublishedEmail({
+          recipients,
+          eventTitle: eventSnapshot.title,
+          eventType: eventSnapshot.event_type,
+          startDatetime: eventSnapshot.start_datetime,
+          location: eventSnapshot.location ?? undefined,
+          registrationUrl: `${appUrl}/events/${eventSnapshot.id}`,
+        });
+      } catch (e) {
+        logger.error('Failed to send event email', { error: e });
+      }
+    });
   }
 
   revalidatePath('/[locale]/admin/events');
@@ -89,6 +121,13 @@ export async function updateEvent(id: string, data: TablesUpdate<'events'>): Pro
   await requireRole(['ADMIN', 'COMMERCIAL']);
   const supabase = await createClient();
 
+  // Check if this is a publish flip
+  let wasUnpublished = false;
+  if (data.is_published === true) {
+    const { data: existing } = await supabase.from('events').select('is_published').eq('id', id).single();
+    wasUnpublished = existing?.is_published === false;
+  }
+
   const { error } = await supabase
     .from('events')
     .update({ ...data, updated_at: new Date().toISOString() })
@@ -96,6 +135,40 @@ export async function updateEvent(id: string, data: TablesUpdate<'events'>): Pro
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Send event email blast if this is a fresh publish (fire-and-forget)
+  if (wasUnpublished && data.is_published === true) {
+    const eventId = id;
+    Promise.resolve().then(async () => {
+      try {
+        const { data: event } = await supabase.from('events').select('*').eq('id', eventId).single();
+        if (!event) return;
+        const { data: partners } = await supabase
+          .from('profiles')
+          .select('email, notification_preferences')
+          .eq('role', 'PARTNER')
+          .eq('is_active', true);
+        if (!partners || partners.length === 0) return;
+        const recipients = partners
+          .filter((p) => {
+            const prefs = (p.notification_preferences as Record<string, boolean> | null) ?? {};
+            return prefs.email_events !== false;
+          })
+          .map((p) => p.email);
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+        await sendEventPublishedEmail({
+          recipients,
+          eventTitle: event.title,
+          eventType: event.event_type,
+          startDatetime: event.start_datetime,
+          location: event.location ?? undefined,
+          registrationUrl: `${appUrl}/events/${eventId}`,
+        });
+      } catch (e) {
+        logger.error('Failed to send event email on publish', { error: e });
+      }
+    });
   }
 
   revalidatePath('/[locale]/admin/events');

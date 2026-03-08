@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import Card from '@/components/ui/Card';
+import CommentSection from '@/components/comments/CommentSection';
 import { Database } from '@/types/database.types';
 
 type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
@@ -137,6 +138,11 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
             </div>
           </div>
         )}
+      </Card>
+
+      {/* Comments */}
+      <Card>
+        <CommentSection entityType="blog_post" entityId={post.id} />
       </Card>
     </div>
   );

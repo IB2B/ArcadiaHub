@@ -10,6 +10,7 @@ import {
   notifyCaseStatusChanged,
   notifyAdminsCaseCreated,
 } from '@/lib/services/notificationService';
+import { sendCaseStatusUpdateEmail } from '@/lib/email';
 import { PaginatedResult, ListOptions } from './types';
 import { buildPaginatedResult } from '@/lib/utils/pagination';
 
@@ -162,6 +163,37 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, _histo
         old_status: currentCase.status,
         new_status: data.status,
       }).catch((e) => logger.error('Background notification failed', { error: e }));
+
+      // Fetch partner email and send case status update email (fire-and-forget)
+      const partnerId = currentCase.partner_id;
+      const caseCode = currentCase.case_code;
+      const oldSt = currentCase.status ?? '';
+      const newSt = data.status as string;
+      const caseId = id;
+      Promise.resolve().then(async () => {
+        try {
+          const supabaseForEmail = await createClient();
+          const { data: partner } = await supabaseForEmail
+            .from('profiles')
+            .select('email, contact_first_name, notification_preferences')
+            .eq('id', partnerId)
+            .single();
+          if (!partner) return;
+          const prefs = (partner.notification_preferences as Record<string, boolean> | null) ?? {};
+          if (prefs.email_case_updates === false) return;
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+          await sendCaseStatusUpdateEmail({
+            to: partner.email,
+            firstName: partner.contact_first_name ?? '',
+            caseCode,
+            oldStatus: oldSt,
+            newStatus: newSt,
+            caseUrl: `${appUrl}/cases/${caseId}`,
+          });
+        } catch (e) {
+          logger.error('Failed to send case status email', { error: e });
+        }
+      });
     }
   }
 

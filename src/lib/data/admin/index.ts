@@ -10,3 +10,4 @@ export * from './academy';
 export * from './documents';
 export * from './blog';
 export * from './accessRequests';
+export * from './subUsers';
