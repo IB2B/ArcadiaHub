@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 import { getAdminPartner, getCategories } from '@/lib/data/admin';
 import PartnerForm from '../PartnerForm';
+import PartnerStatusToggle from '../PartnerStatusToggle';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -33,10 +34,11 @@ export default async function EditPartnerPage({ params }: PageProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)]">{t('edit')}</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">{t('details')}</p>
         </div>
+        <PartnerStatusToggle userId={partner.id} isActive={partner.is_active ?? true} />
       </div>
 
       {/* Form */}

@@ -650,27 +650,30 @@ export type Database = {
         Row: {
           id: string
           user_id: string
-          title: string
-          description: string | null
+          subject: string
+          message: string
           status: string | null
+          admin_reply: string | null
           created_at: string | null
           updated_at: string | null
         }
         Insert: {
           id?: string
           user_id: string
-          title: string
-          description?: string | null
+          subject: string
+          message: string
           status?: string | null
+          admin_reply?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
         Update: {
           id?: string
           user_id?: string
-          title?: string
-          description?: string | null
+          subject?: string
+          message?: string
           status?: string | null
+          admin_reply?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -679,30 +682,39 @@ export type Database = {
       comments: {
         Row: {
           id: string
-          user_id: string
           entity_type: string
           entity_id: string
+          author_id: string
           content: string
+          parent_id: string | null
+          mentions: string[] | null
+          is_edited: boolean | null
+          edited_at: string | null
           created_at: string | null
-          updated_at: string | null
         }
         Insert: {
           id?: string
-          user_id: string
           entity_type: string
           entity_id: string
+          author_id: string
           content: string
+          parent_id?: string | null
+          mentions?: string[] | null
+          is_edited?: boolean | null
+          edited_at?: string | null
           created_at?: string | null
-          updated_at?: string | null
         }
         Update: {
           id?: string
-          user_id?: string
           entity_type?: string
           entity_id?: string
+          author_id?: string
           content?: string
+          parent_id?: string | null
+          mentions?: string[] | null
+          is_edited?: boolean | null
+          edited_at?: string | null
           created_at?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }

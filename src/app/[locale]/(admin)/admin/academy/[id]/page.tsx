@@ -2,7 +2,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 import { getAdminAcademyItem } from '@/lib/data/admin';
+import { getComments } from '@/lib/data/comments';
 import AcademyForm from '../AcademyForm';
+import AdminCommentsList from '@/components/comments/AdminCommentsList';
+import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,7 +15,10 @@ export default async function EditAcademyContentPage({ params }: PageProps) {
   const { id } = await params;
   const t = await getTranslations('admin.academy');
 
-  const contentData = await getAdminAcademyItem(id);
+  const [contentData, commentsResult] = await Promise.all([
+    getAdminAcademyItem(id),
+    getComments('academy_content', id, 1),
+  ]);
 
   if (!contentData) {
     notFound();
@@ -40,6 +46,19 @@ export default async function EditAcademyContentPage({ params }: PageProps) {
 
       {/* Form */}
       <AcademyForm contentData={contentData} />
+
+      {/* Comments Moderation */}
+      <Card>
+        <CardHeader title="Comments" />
+        <CardContent>
+          <AdminCommentsList
+            entityType="academy_content"
+            entityId={id}
+            initialComments={commentsResult.comments}
+            initialTotal={commentsResult.total}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

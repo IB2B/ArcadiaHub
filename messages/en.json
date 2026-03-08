@@ -739,6 +739,7 @@
       "blog": "Blog",
       "settings": "Settings",
       "suggestions": "Suggestions",
+      "team": "My Team",
       "backToDashboard": "Back to Dashboard"
     },
     "dashboard": {
@@ -1036,6 +1037,17 @@
       "deleteSuccess": "Deleted successfully",
       "error": "An error occurred. Please try again.",
       "confirmAction": "Are you sure you want to proceed?"
+    },
+    "team": {
+      "title": "My Team",
+      "subtitle": "Manage the partners and users you created",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "createdBy": "Created By",
+      "noPartners": "No team members found.",
+      "searchPlaceholder": "Search by name or email..."
     }
   },
   "privacy": {

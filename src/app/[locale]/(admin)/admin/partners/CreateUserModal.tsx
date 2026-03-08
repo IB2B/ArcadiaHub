@@ -13,9 +13,12 @@ interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUserRole: string;
+  onCreated?: () => void;
+  prefilledCommercialId?: string;
+  prefilledRole?: 'PARTNER' | 'COMMERCIAL';
 }
 
-export default function CreateUserModal({ isOpen, onClose, currentUserRole }: CreateUserModalProps) {
+export default function CreateUserModal({ isOpen, onClose, currentUserRole, onCreated, prefilledCommercialId, prefilledRole }: CreateUserModalProps) {
   const t = useTranslations('subUsers.modal');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -26,10 +29,10 @@ export default function CreateUserModal({ isOpen, onClose, currentUserRole }: Cr
     email: '',
     firstName: '',
     lastName: '',
-    role: 'PARTNER' as 'PARTNER' | 'COMMERCIAL',
+    role: (prefilledRole ?? 'PARTNER') as 'PARTNER' | 'COMMERCIAL',
   });
 
-  const roleOptions = currentUserRole === 'ADMIN'
+  const roleOptions = currentUserRole === 'ADMIN' && !prefilledRole
     ? [
         { value: 'PARTNER', label: 'Partner' },
         { value: 'COMMERCIAL', label: 'Commercial' },
@@ -45,6 +48,7 @@ export default function CreateUserModal({ isOpen, onClose, currentUserRole }: Cr
         firstName: form.firstName,
         lastName: form.lastName,
         role: form.role,
+        assignedCommercialId: prefilledCommercialId,
       });
 
       if (!result.success) {
@@ -56,7 +60,8 @@ export default function CreateUserModal({ isOpen, onClose, currentUserRole }: Cr
       router.refresh();
       setTimeout(() => {
         setSuccess(false);
-        setForm({ email: '', firstName: '', lastName: '', role: 'PARTNER' });
+        setForm({ email: '', firstName: '', lastName: '', role: prefilledRole ?? 'PARTNER' });
+        onCreated?.();
         onClose();
       }, 1500);
     });

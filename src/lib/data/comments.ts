@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/database/server';
-import { requireAuth, authErrorToResult } from '@/lib/auth/guards';
+import { requireAuth, requireRole, authErrorToResult } from '@/lib/auth/guards';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
 import { notifyUserMentioned } from '@/lib/services/notificationService';
@@ -260,6 +260,27 @@ export async function deleteComment(
 
     if (error) return { success: false, error: error.message };
   }
+
+  return { success: true };
+}
+
+export async function adminDeleteComment(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await (supabase as any)
+    .from('comments')
+    .delete()
+    .eq('id', id);
+
+  if (error) return { success: false, error: error.message };
 
   return { success: true };
 }

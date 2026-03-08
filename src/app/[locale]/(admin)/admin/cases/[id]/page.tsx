@@ -2,7 +2,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 import { getAdminCase, getPartnerOptions } from '@/lib/data/admin';
+import { getComments } from '@/lib/data/comments';
 import CaseForm from '../CaseForm';
+import AdminCommentsList from '@/components/comments/AdminCommentsList';
+import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,9 +15,10 @@ export default async function EditCasePage({ params }: PageProps) {
   const { id } = await params;
   const t = await getTranslations('admin.cases');
 
-  const [caseData, partnerOptions] = await Promise.all([
+  const [caseData, partnerOptions, commentsResult] = await Promise.all([
     getAdminCase(id),
     getPartnerOptions(),
+    getComments('case', id, 1),
   ]);
 
   if (!caseData) {
@@ -43,6 +47,19 @@ export default async function EditCasePage({ params }: PageProps) {
 
       {/* Form */}
       <CaseForm caseData={caseData} partnerOptions={partnerOptions} />
+
+      {/* Comments Moderation */}
+      <Card>
+        <CardHeader title="Comments" />
+        <CardContent>
+          <AdminCommentsList
+            entityType="case"
+            entityId={id}
+            initialComments={commentsResult.comments}
+            initialTotal={commentsResult.total}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

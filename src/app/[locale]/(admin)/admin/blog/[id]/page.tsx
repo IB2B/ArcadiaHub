@@ -2,7 +2,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 import { getAdminBlogPost } from '@/lib/data/admin';
+import { getComments } from '@/lib/data/comments';
 import BlogForm from '../BlogForm';
+import AdminCommentsList from '@/components/comments/AdminCommentsList';
+import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,7 +15,10 @@ export default async function EditBlogPostPage({ params }: PageProps) {
   const { id } = await params;
   const t = await getTranslations('admin.blog');
 
-  const postData = await getAdminBlogPost(id);
+  const [postData, commentsResult] = await Promise.all([
+    getAdminBlogPost(id),
+    getComments('blog_post', id, 1),
+  ]);
 
   if (!postData) {
     notFound();
@@ -40,6 +46,19 @@ export default async function EditBlogPostPage({ params }: PageProps) {
 
       {/* Form */}
       <BlogForm postData={postData} />
+
+      {/* Comments Moderation */}
+      <Card>
+        <CardHeader title="Comments" />
+        <CardContent>
+          <AdminCommentsList
+            entityType="blog_post"
+            entityId={id}
+            initialComments={commentsResult.comments}
+            initialTotal={commentsResult.total}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

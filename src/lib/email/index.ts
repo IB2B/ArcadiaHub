@@ -8,6 +8,8 @@ import { caseStatusUpdateTemplate } from './templates/case-status-update';
 import { eventPublishedTemplate } from './templates/event-published';
 import { userInviteTemplate } from './templates/user-invite';
 import { commentMentionTemplate } from './templates/comment-mention';
+import { caseDocumentAddedTemplate } from './templates/case-document-added';
+import { suggestionReceivedTemplate } from './templates/suggestion-received';
 
 // Re-export types
 export type { SendEmailResult, SendEmailParams } from './send';
@@ -173,6 +175,34 @@ export async function sendUserInviteEmail(params: {
 }): Promise<SendEmailResult> {
   const { to, ...templateParams } = params;
   const template = userInviteTemplate(templateParams);
+  return sendEmail({ to, subject: template.subject, html: template.html, text: template.text });
+}
+
+/**
+ * Send case document added email to a partner
+ */
+export async function sendCaseDocumentAddedEmail(params: {
+  to: string;
+  firstName: string;
+  caseCode: string;
+  documentTitle: string;
+  caseUrl: string;
+}): Promise<SendEmailResult> {
+  const { to, ...templateParams } = params;
+  const template = caseDocumentAddedTemplate(templateParams);
+  return sendEmail({ to, subject: template.subject, html: template.html, text: template.text });
+}
+
+/**
+ * Send suggestion received confirmation to the submitting partner
+ */
+export async function sendSuggestionReceivedEmail(params: {
+  to: string;
+  firstName: string;
+  subject: string;
+}): Promise<SendEmailResult> {
+  const { to, ...templateParams } = params;
+  const template = suggestionReceivedTemplate(templateParams);
   return sendEmail({ to, subject: template.subject, html: template.html, text: template.text });
 }
 

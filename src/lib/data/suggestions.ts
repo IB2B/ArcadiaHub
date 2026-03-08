@@ -4,7 +4,7 @@ import { createClient } from '@/lib/database/server';
 import { requireAuth, requireRole, authErrorToResult } from '@/lib/auth/guards';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
-import { sendAdminAlertEmail } from '@/lib/email';
+import { sendAdminAlertEmail, sendSuggestionReceivedEmail } from '@/lib/email';
 import { notifyUserMentioned } from '@/lib/services/notificationService';
 
 export type SuggestionStatus = 'pending' | 'reviewed' | 'resolved';
@@ -69,6 +69,23 @@ export async function submitSuggestion(
     body: `${userEmail} submitted a new suggestion.\n\nSubject: ${subject.trim()}\n\n${message.trim()}`,
     actionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/suggestions`,
   }).catch((e) => logger.error('Failed to send admin alert for suggestion', { error: e }));
+
+  // Send confirmation email to partner (fire-and-forget)
+  const submitterEmail = userEmail;
+  const suggSubject = subject.trim();
+  const ctx2Promise = createClient().then(async (sb) => {
+    try {
+      const { data: profile } = await sb.from('profiles').select('contact_first_name').eq('id', userId).single();
+      await sendSuggestionReceivedEmail({
+        to: submitterEmail,
+        firstName: profile?.contact_first_name ?? '',
+        subject: suggSubject,
+      });
+    } catch (e) {
+      logger.error('Failed to send suggestion received email', { error: e });
+    }
+  });
+  ctx2Promise.catch((e) => logger.error('Failed to send suggestion received email', { error: e }));
 
   revalidatePath('/[locale]/suggestions');
   return { success: true };

@@ -151,6 +151,8 @@ SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_PROJECT_ID=
 RESEND_API_KEY=
 FROM_EMAIL=
+ADMIN_NOTIFICATION_EMAIL=        # receives admin alert emails (new suggestions, access requests)
+PARTNER_BULK_EMAIL_ENABLED=true  # set to "true" to enable batch event published emails to all partners
 ```
 
 ## Git Workflow

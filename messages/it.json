@@ -752,6 +752,7 @@
       "blog": "Blog",
       "settings": "Impostazioni",
       "suggestions": "Suggerimenti",
+      "team": "Il Mio Team",
       "backToDashboard": "Torna alla Dashboard"
     },
     "dashboard": {
@@ -1049,6 +1050,17 @@
       "deleteSuccess": "Eliminato con successo",
       "error": "Si e verificato un errore. Riprova.",
       "confirmAction": "Sei sicuro di voler procedere?"
+    },
+    "team": {
+      "title": "Il Mio Team",
+      "subtitle": "Gestisci i partner e gli utenti che hai creato",
+      "name": "Nome",
+      "email": "Email",
+      "role": "Ruolo",
+      "status": "Stato",
+      "createdBy": "Creato Da",
+      "noPartners": "Nessun membro del team trovato.",
+      "searchPlaceholder": "Cerca per nome o email..."
     }
   },
   "privacy": {

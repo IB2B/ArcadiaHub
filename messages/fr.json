@@ -742,6 +742,7 @@
       "blog": "Blog",
       "settings": "Parametres",
       "suggestions": "Suggestions",
+      "team": "Mon Equipe",
       "backToDashboard": "Retour au Tableau de Bord"
     },
     "dashboard": {
@@ -1021,6 +1022,17 @@
       "deleteSuccess": "Supprime avec succes",
       "error": "Une erreur s'est produite. Veuillez reessayer.",
       "confirmAction": "Etes-vous sur de vouloir continuer?"
+    },
+    "team": {
+      "title": "Mon Equipe",
+      "subtitle": "Gerez les partenaires et utilisateurs que vous avez crees",
+      "name": "Nom",
+      "email": "Email",
+      "role": "Role",
+      "status": "Statut",
+      "createdBy": "Cree Par",
+      "noPartners": "Aucun membre d'equipe trouve.",
+      "searchPlaceholder": "Rechercher par nom ou email..."
     }
   },
   "privacy": {

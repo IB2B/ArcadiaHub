@@ -2,7 +2,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 import { getAdminEvent } from '@/lib/data/admin';
+import { getComments } from '@/lib/data/comments';
 import EventForm from '../EventForm';
+import AdminCommentsList from '@/components/comments/AdminCommentsList';
+import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,7 +15,10 @@ export default async function EditEventPage({ params }: PageProps) {
   const { id } = await params;
   const t = await getTranslations('admin.events');
 
-  const eventData = await getAdminEvent(id);
+  const [eventData, commentsResult] = await Promise.all([
+    getAdminEvent(id),
+    getComments('event', id, 1),
+  ]);
 
   if (!eventData) {
     notFound();
@@ -40,6 +46,19 @@ export default async function EditEventPage({ params }: PageProps) {
 
       {/* Form */}
       <EventForm eventData={eventData} />
+
+      {/* Comments Moderation */}
+      <Card>
+        <CardHeader title="Comments" />
+        <CardContent>
+          <AdminCommentsList
+            entityType="event"
+            entityId={id}
+            initialComments={commentsResult.comments}
+            initialTotal={commentsResult.total}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

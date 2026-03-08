@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
 import { CreateCaseSchema, UpdateCaseStatusSchema } from '@/lib/validators';
+import { sendCaseDocumentAddedEmail } from '@/lib/email';
 
 type Case = Database['public']['Tables']['cases']['Row'];
 type CaseDocument = Database['public']['Tables']['case_documents']['Row'];
@@ -273,6 +274,39 @@ export async function uploadCaseDocument(
   }
 
   revalidatePath('/[locale]/cases/[id]', 'page');
+
+  // Notify partner by email (fire-and-forget)
+  const documentTitle = file.name;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+  Promise.resolve().then(async () => {
+    try {
+      const supabaseForEmail = await createClient();
+      const { data: caseRow } = await supabaseForEmail
+        .from('cases')
+        .select('case_code, partner_id')
+        .eq('id', caseId)
+        .single();
+      if (!caseRow?.partner_id) return;
+      const { data: partner } = await supabaseForEmail
+        .from('profiles')
+        .select('email, contact_first_name, notification_preferences')
+        .eq('id', caseRow.partner_id)
+        .single();
+      if (!partner) return;
+      const prefs = (partner.notification_preferences as Record<string, boolean> | null) ?? {};
+      if (prefs.email_case_updates === false) return;
+      await sendCaseDocumentAddedEmail({
+        to: partner.email,
+        firstName: partner.contact_first_name ?? '',
+        caseCode: caseRow.case_code,
+        documentTitle,
+        caseUrl: `${appUrl}/cases/${caseId}`,
+      });
+    } catch (e) {
+      logger.error('Failed to send case document email', { error: e });
+    }
+  });
+
   return { success: true, url: urlData.publicUrl };
 }
 
