@@ -505,6 +505,7 @@
     "eventDetails": "Dettagli Evento",
     "register": "Registrati",
     "registered": "Registrato",
+    "unregister": "Annulla iscrizione",
     "attendees": "Partecipanti",
     "description": "Descrizione",
     "attachments": "Allegati",
@@ -560,7 +561,9 @@
     "noPreview": "Anteprima non disponibile",
     "downloadMaterials": "Scarica Materiali",
     "downloadHint": "Scarica slide, documenti e risorse aggiuntive",
-    "podcast": "Episodio Podcast"
+    "podcast": "Episodio Podcast",
+    "markComplete": "Segna come completato",
+    "completed": "Completato"
   },
   "documents": {
     "title": "Documenti",

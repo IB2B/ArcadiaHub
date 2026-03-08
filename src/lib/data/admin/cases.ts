@@ -11,6 +11,7 @@ import {
   notifyAdminsCaseCreated,
 } from '@/lib/services/notificationService';
 import { PaginatedResult, ListOptions } from './types';
+import { buildPaginatedResult } from '@/lib/utils/pagination';
 
 type Profile = Tables<'profiles'>;
 type Case = Tables<'cases'>;
@@ -47,11 +48,11 @@ export async function getAdminCases(options: ListOptions & {
 
   if (error) {
     logger.error('Error fetching admin cases:', { error });
-    return { data: [], count: 0, page, pageSize, totalPages: 0 };
+    return buildPaginatedResult(null, 0, page, pageSize);
   }
 
   if (!cases || cases.length === 0) {
-    return { data: [], count: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) };
+    return buildPaginatedResult(null, count, page, pageSize);
   }
 
   const partnerIds = [...new Set(cases.map(c => c.partner_id).filter(Boolean))];
@@ -67,13 +68,7 @@ export async function getAdminCases(options: ListOptions & {
     partner: partnerMap.get(c.partner_id) as Profile | undefined,
   }));
 
-  return {
-    data: casesWithPartners,
-    count: count || 0,
-    page,
-    pageSize,
-    totalPages: Math.ceil((count || 0) / pageSize),
-  };
+  return buildPaginatedResult(casesWithPartners, count, page, pageSize);
 }
 
 export async function getAdminCase(id: string): Promise<(Case & { partner?: Profile }) | null> {

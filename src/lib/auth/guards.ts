@@ -47,7 +47,7 @@ export async function requireAuth(): Promise<AuthContext> {
   const { data: profile, error } = await supabase
     .from('profiles')
     .select(
-      'id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_at, updated_at'
+      'id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_by, created_at, updated_at'
     )
     .eq('id', user.id)
     .single();

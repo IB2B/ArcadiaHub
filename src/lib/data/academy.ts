@@ -2,6 +2,8 @@
 
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/database/server';
+import { requireAuth, authErrorToResult } from '@/lib/auth/guards';
+import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
 
@@ -97,6 +99,68 @@ export async function getAcademyItem(itemId: string): Promise<AcademyContent | n
   await (supabase as any).rpc('increment_view_count', { table_name: 'academy_content', row_id: itemId });
 
   return data;
+}
+
+export async function markContentComplete(contentId: string): Promise<{ success: boolean; error?: string }> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('content_completions')
+    .upsert(
+      { content_id: contentId, user_id: userId, completed_at: new Date().toISOString() },
+      { onConflict: 'content_id,user_id' }
+    );
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/[locale]/academy');
+  revalidatePath('/[locale]/academy/[id]', 'page');
+  return { success: true };
+}
+
+export async function getMyCompletions(): Promise<string[]> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch {
+    return [];
+  }
+
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from('content_completions')
+    .select('content_id')
+    .eq('user_id', userId);
+
+  return (data || []).map((c) => c.content_id);
+}
+
+export async function checkContentCompleted(contentId: string): Promise<boolean> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data } = await supabase
+    .from('content_completions')
+    .select('id')
+    .eq('content_id', contentId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return !!data;
 }
 
 export async function getAcademyStats(): Promise<{

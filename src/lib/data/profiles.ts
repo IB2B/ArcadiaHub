@@ -15,7 +15,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_at, updated_at')
+    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_by, created_at, updated_at')
     .eq('id', userId)
     .single();
 
@@ -66,7 +66,7 @@ export async function getPartners(options?: {
 
   let query = supabase
     .from('profiles')
-    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_at, updated_at', { count: 'exact' })
+    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_by, created_at, updated_at', { count: 'exact' })
     .eq('role', 'PARTNER');
 
   if (options?.category) {
@@ -102,7 +102,7 @@ export async function searchPartners(searchTerm: string): Promise<Profile[]> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_at, updated_at')
+    .select('id, email, role, company_name, logo_url, contact_first_name, contact_last_name, phone, address, city, region, country, postal_code, category, website, description, social_links, tags, is_active, notification_preferences, assigned_commercial_id, created_by, created_at, updated_at')
     .eq('role', 'PARTNER')
     .eq('is_active', true)
     .or(`company_name.ilike.%${searchTerm}%,contact_first_name.ilike.%${searchTerm}%,contact_last_name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)

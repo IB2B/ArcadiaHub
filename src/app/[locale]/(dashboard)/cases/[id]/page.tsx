@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getMyCase } from '@/lib/data/cases';
+import { getMyCase, uploadCaseDocument } from '@/lib/data/cases';
 import CaseDetailClient from './CaseDetailClient';
 
 interface CaseDetailPageProps {
@@ -14,5 +14,7 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
     notFound();
   }
 
-  return <CaseDetailClient caseData={caseData} />;
+  const uploadDocumentAction = uploadCaseDocument.bind(null, id);
+
+  return <CaseDetailClient caseData={caseData} uploadDocumentAction={uploadDocumentAction} />;
 }

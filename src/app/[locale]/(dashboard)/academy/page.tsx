@@ -1,4 +1,4 @@
-import { getAcademyContent, getAcademyStats } from '@/lib/data/academy';
+import { getAcademyContent, getAcademyStats, getMyCompletions } from '@/lib/data/academy';
 import AcademyPageClient from './AcademyPageClient';
 
 const PAGE_SIZE = 9;
@@ -21,21 +21,25 @@ export default async function AcademyPage({ searchParams }: AcademyPageProps) {
 
   const offset = (page - 1) * PAGE_SIZE;
 
-  const { data: content, count } = await getAcademyContent({
-    search: search || undefined,
-    contentType: contentType || undefined,
-    year,
-    limit: PAGE_SIZE,
-    offset,
-  });
+  const [{ data: content, count }, stats, completedIds] = await Promise.all([
+    getAcademyContent({
+      search: search || undefined,
+      contentType: contentType || undefined,
+      year,
+      limit: PAGE_SIZE,
+      offset,
+    }),
+    getAcademyStats(),
+    getMyCompletions(),
+  ]);
 
-  const stats = await getAcademyStats();
   const totalPages = Math.ceil(count / PAGE_SIZE);
 
   return (
     <AcademyPageClient
       content={content}
       stats={stats}
+      completedIds={completedIds}
       pagination={{
         currentPage: page,
         totalPages,

@@ -1,8 +1,10 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import AddToCalendarButton from '@/components/events/AddToCalendarButton';
 import { Database, Json } from '@/types/database.types';
 
@@ -10,6 +12,10 @@ type Event = Database['public']['Tables']['events']['Row'];
 
 interface EventDetailClientProps {
   event: Event;
+  isRegistered: boolean;
+  registrationCount: number;
+  registerAction: () => Promise<{ success: boolean; error?: string }>;
+  unregisterAction: () => Promise<{ success: boolean; error?: string }>;
 }
 
 const eventTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info'; key: string }> = {
@@ -106,11 +112,31 @@ interface Attachment {
   url: string;
 }
 
-export default function EventDetailClient({ event }: EventDetailClientProps) {
+export default function EventDetailClient({
+  event,
+  isRegistered: initialIsRegistered,
+  registrationCount: initialCount,
+  registerAction,
+  unregisterAction,
+}: EventDetailClientProps) {
   const t = useTranslations('events');
   const typeConfig = eventTypeConfig[event.event_type] || eventTypeConfig.TRAINING;
   const isPast = isEventPast(event.start_datetime);
   const attachments = (event.attachments as Attachment[] | null) || [];
+  const [isPending, startTransition] = useTransition();
+  const [isRegistered, setIsRegistered] = useState(initialIsRegistered);
+  const [registrationCount, setRegistrationCount] = useState(initialCount);
+
+  const handleToggleRegistration = () => {
+    startTransition(async () => {
+      const action = isRegistered ? unregisterAction : registerAction;
+      const result = await action();
+      if (result.success) {
+        setIsRegistered((prev) => !prev);
+        setRegistrationCount((prev) => isRegistered ? prev - 1 : prev + 1);
+      }
+    });
+  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -133,16 +159,33 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)]">
                 {event.title}
               </h1>
+              {registrationCount > 0 && (
+                <p className="text-sm text-[var(--text-muted)] mt-1">
+                  {registrationCount} {t('attendees')}
+                </p>
+              )}
             </div>
-            {!isPast && (
-              <AddToCalendarButton
-                title={event.title}
-                description={event.description || ''}
-                startDate={event.start_datetime}
-                endDate={event.end_datetime || undefined}
-                location={event.location || event.meeting_link || ''}
-              />
-            )}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {!isPast && (
+                <Button
+                  onClick={handleToggleRegistration}
+                  disabled={isPending}
+                  variant={isRegistered ? 'secondary' : 'primary'}
+                  size="sm"
+                >
+                  {isRegistered ? t('unregister') : t('register')}
+                </Button>
+              )}
+              {!isPast && (
+                <AddToCalendarButton
+                  title={event.title}
+                  description={event.description || ''}
+                  startDate={event.start_datetime}
+                  endDate={event.end_datetime || undefined}
+                  location={event.location || event.meeting_link || ''}
+                />
+              )}
+            </div>
           </div>
 
           {/* Event Info */}

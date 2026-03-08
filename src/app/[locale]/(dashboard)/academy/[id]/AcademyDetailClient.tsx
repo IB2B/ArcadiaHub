@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { format } from 'date-fns';
@@ -13,6 +14,8 @@ type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 interface AcademyDetailClientProps {
   item: AcademyContent;
   relatedContent: AcademyContent[];
+  isCompleted: boolean;
+  markCompleteAction: () => Promise<{ success: boolean; error?: string }>;
 }
 
 const contentTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info' | 'default'; key: string }> = {
@@ -74,9 +77,21 @@ function getVimeoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-export default function AcademyDetailClient({ item, relatedContent }: AcademyDetailClientProps) {
+export default function AcademyDetailClient({ item, relatedContent, isCompleted: initialIsCompleted, markCompleteAction }: AcademyDetailClientProps) {
   const t = useTranslations('academy');
   const typeConfig = contentTypeConfig[item.content_type] || contentTypeConfig.VIDEO;
+  const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
+  const [isPending, startTransition] = useTransition();
+
+  const handleMarkComplete = () => {
+    if (isCompleted) return;
+    startTransition(async () => {
+      const result = await markCompleteAction();
+      if (result.success) {
+        setIsCompleted(true);
+      }
+    });
+  };
 
   const renderMedia = () => {
     if (item.content_type === 'VIDEO' || item.content_type === 'RECORDING') {
@@ -246,6 +261,26 @@ export default function AcademyDetailClient({ item, relatedContent }: AcademyDet
 
         {/* Sidebar - 1 column */}
         <div className="space-y-6">
+          {/* Mark as Complete */}
+          <div>
+            {isCompleted ? (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-[var(--success-light)] text-[var(--success)]">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                <span className="text-sm font-medium">{t('completed')}</span>
+              </div>
+            ) : (
+              <Button
+                onClick={handleMarkComplete}
+                disabled={isPending}
+                className="w-full"
+              >
+                {t('markComplete')}
+              </Button>
+            )}
+          </div>
+
           {/* Info Card */}
           <Card padding="md">
             <h3 className="font-semibold text-[var(--text)] mb-4">{t('details')}</h3>

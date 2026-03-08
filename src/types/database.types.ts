@@ -39,6 +39,7 @@ export type Database = {
           is_active: boolean | null
           notification_preferences: Json | null
           assigned_commercial_id: string | null
+          created_by: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -64,6 +65,7 @@ export type Database = {
           is_active?: boolean | null
           notification_preferences?: Json | null
           assigned_commercial_id?: string | null
+          created_by?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -89,6 +91,7 @@ export type Database = {
           is_active?: boolean | null
           notification_preferences?: Json | null
           assigned_commercial_id?: string | null
+          created_by?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -638,6 +641,66 @@ export type Database = {
           pec?: string
           company_description?: string
           company_logo_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      suggestions: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          description: string | null
+          status: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          description?: string | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          description?: string | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          id: string
+          user_id: string
+          entity_type: string
+          entity_id: string
+          content: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          entity_type: string
+          entity_id: string
+          content: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          entity_type?: string
+          entity_id?: string
+          content?: string
           created_at?: string | null
           updated_at?: string | null
         }

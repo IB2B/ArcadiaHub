@@ -490,6 +490,7 @@
     "eventDetails": "Event Details",
     "register": "Register",
     "registered": "Registered",
+    "unregister": "Unregister",
     "attendees": "Attendees",
     "description": "Description",
     "attachments": "Attachments",
@@ -546,7 +547,9 @@
     "noPreview": "No preview available",
     "downloadMaterials": "Download Materials",
     "downloadHint": "Download slides, documents, and additional resources",
-    "podcast": "Podcast Episode"
+    "podcast": "Podcast Episode",
+    "markComplete": "Mark as Complete",
+    "completed": "Completed"
   },
   "documents": {
     "title": "Documents",

@@ -14,6 +14,7 @@ type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 
 interface AcademyPageClientProps {
   content: AcademyContent[];
+  completedIds: string[];
   stats: {
     totalContent: number;
     totalVideos: number;
@@ -134,6 +135,7 @@ function formatDuration(minutes: number | null): string {
 
 export default function AcademyPageClient({
   content,
+  completedIds,
   stats,
   pagination,
   initialFilters,
@@ -305,6 +307,7 @@ export default function AcademyPageClient({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {content.map((item) => {
               const typeConfig = contentTypeConfig[item.content_type] || contentTypeConfig.VIDEO;
+              const isCompleted = completedIds.includes(item.id);
               return (
                 <Link key={item.id} href={`/academy/${item.id}`}>
                   <Card hover className="group h-full">
@@ -327,6 +330,14 @@ export default function AcademyPageClient({
                           <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center text-[var(--primary)]">
                             {icons.play}
                           </div>
+                        </div>
+                      )}
+                      {/* Completion badge */}
+                      {isCompleted && (
+                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[var(--success)] flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
                         </div>
                       )}
                     </div>

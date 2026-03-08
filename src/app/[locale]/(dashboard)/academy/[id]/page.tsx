@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getAcademyItem, getAcademyContent } from '@/lib/data/academy';
+import { getAcademyItem, getAcademyContent, checkContentCompleted, markContentComplete } from '@/lib/data/academy';
 import AcademyDetailClient from './AcademyDetailClient';
 
 interface AcademyDetailPageProps {
@@ -8,7 +8,10 @@ interface AcademyDetailPageProps {
 
 export default async function AcademyDetailPage({ params }: AcademyDetailPageProps) {
   const { id } = await params;
-  const item = await getAcademyItem(id);
+  const [item, isCompleted] = await Promise.all([
+    getAcademyItem(id),
+    checkContentCompleted(id),
+  ]);
 
   if (!item) {
     notFound();
@@ -18,5 +21,14 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
   const { data: allContent } = await getAcademyContent({ contentType: item.content_type, limit: 4 });
   const relatedContent = allContent.filter((c) => c.id !== item.id).slice(0, 3);
 
-  return <AcademyDetailClient item={item} relatedContent={relatedContent} />;
+  const markCompleteAction = markContentComplete.bind(null, id);
+
+  return (
+    <AcademyDetailClient
+      item={item}
+      relatedContent={relatedContent}
+      isCompleted={isCompleted}
+      markCompleteAction={markCompleteAction}
+    />
+  );
 }

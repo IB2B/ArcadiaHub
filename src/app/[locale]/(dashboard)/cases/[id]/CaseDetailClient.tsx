@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import FileUpload from '@/components/ui/FileUpload';
 import CaseTimeline from '@/components/cases/CaseTimeline';
 import { Database } from '@/types/database.types';
 
@@ -17,6 +18,7 @@ type CaseWithDetails = Case & {
 
 interface CaseDetailClientProps {
   caseData: CaseWithDetails;
+  uploadDocumentAction: (formData: FormData) => Promise<{ success: boolean; url?: string; error?: string }>;
 }
 
 const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; key: string }> = {
@@ -75,7 +77,7 @@ function getFileIcon(fileType: string | null) {
   return icons.document;
 }
 
-export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
+export default function CaseDetailClient({ caseData, uploadDocumentAction }: CaseDetailClientProps) {
   const t = useTranslations('cases');
   const status = caseData.status || 'PENDING';
   const config = statusConfig[status] || statusConfig.PENDING;
@@ -188,6 +190,15 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
                   </p>
                 </div>
               )}
+              <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                <FileUpload
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                  maxSize={10 * 1024 * 1024}
+                  uploadAction={uploadDocumentAction}
+                  hint="PDF, DOC, DOCX, or images — max 10MB"
+                  showPreview={false}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>

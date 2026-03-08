@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
 import { validateImageUpload, generateUploadPath } from '@/lib/utils/uploadHelpers';
 import { PaginatedResult, ListOptions } from './types';
+import { buildPaginatedResult } from '@/lib/utils/pagination';
 
 type Profile = Tables<'profiles'>;
 
@@ -45,16 +46,10 @@ export async function getAdminPartners(options: ListOptions & {
 
   if (error) {
     logger.error('Error fetching admin partners:', { error });
-    return { data: [], count: 0, page, pageSize, totalPages: 0 };
+    return buildPaginatedResult(null, 0, page, pageSize);
   }
 
-  return {
-    data: data || [],
-    count: count || 0,
-    page,
-    pageSize,
-    totalPages: Math.ceil((count || 0) / pageSize),
-  };
+  return buildPaginatedResult(data, count, page, pageSize);
 }
 
 export async function getAdminPartner(id: string): Promise<Profile | null> {

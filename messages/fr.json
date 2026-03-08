@@ -495,6 +495,7 @@
     "eventDetails": "Details de l'Evenement",
     "register": "S'inscrire",
     "registered": "Inscrit",
+    "unregister": "Se desinscrire",
     "attendees": "Participants",
     "description": "Description",
     "attachments": "Pieces Jointes",
@@ -550,7 +551,9 @@
     "noPreview": "Apercu non disponible",
     "downloadMaterials": "Telecharger les Materiaux",
     "downloadHint": "Telecharger les slides, documents et ressources supplementaires",
-    "podcast": "Episode de Podcast"
+    "podcast": "Episode de Podcast",
+    "markComplete": "Marquer comme termine",
+    "completed": "Termine"
   },
   "documents": {
     "title": "Documents",

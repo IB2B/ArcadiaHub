@@ -206,6 +206,76 @@ export async function updateCaseStatus(
   return { success: true };
 }
 
+export async function uploadCaseDocument(
+  caseId: string,
+  formData: FormData
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
+  const file = formData.get('file') as File;
+  if (!file || file.size === 0) {
+    return { success: false, error: 'No file provided' };
+  }
+
+  const validTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+  ];
+  if (!validTypes.includes(file.type)) {
+    return { success: false, error: 'Invalid file type. Allowed: PDF, DOC, DOCX, images.' };
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return { success: false, error: 'File too large. Maximum size is 10MB.' };
+  }
+
+  const supabase = await createClient();
+
+  const timestamp = Date.now();
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const path = `${caseId}/${timestamp}-${sanitizedName}`;
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('case-documents')
+    .upload(path, file, { cacheControl: '3600', upsert: false });
+
+  if (uploadError) {
+    logger.error('Error uploading case document:', { error: uploadError });
+    return { success: false, error: uploadError.message };
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('case-documents')
+    .getPublicUrl(uploadData.path);
+
+  const { error: insertError } = await supabase
+    .from('case_documents')
+    .insert({
+      case_id: caseId,
+      title: file.name,
+      file_url: urlData.publicUrl,
+      file_type: file.type,
+      uploaded_by: userId,
+    });
+
+  if (insertError) {
+    logger.error('Error inserting case document record:', { error: insertError });
+    return { success: false, error: insertError.message };
+  }
+
+  revalidatePath('/[locale]/cases/[id]', 'page');
+  return { success: true, url: urlData.publicUrl };
+}
+
 export async function getCaseStats(partnerId?: string): Promise<{
   total: number;
   pending: number;

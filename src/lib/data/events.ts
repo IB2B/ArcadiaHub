@@ -2,6 +2,8 @@
 
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/database/server';
+import { requireAuth, authErrorToResult } from '@/lib/auth/guards';
+import { revalidatePath } from 'next/cache';
 import { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
 
@@ -91,6 +93,104 @@ export async function getEvent(eventId: string): Promise<Event | null> {
   }
 
   return data;
+}
+
+export async function registerForEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('event_registrations')
+    .insert({ event_id: eventId, user_id: userId });
+
+  if (error) {
+    if (error.code === '23505') {
+      return { success: false, error: 'Already registered for this event' };
+    }
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/[locale]/events/[id]', 'page');
+  return { success: true };
+}
+
+export async function unregisterFromEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch (err) {
+    return authErrorToResult(err);
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('event_registrations')
+    .delete()
+    .eq('event_id', eventId)
+    .eq('user_id', userId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/[locale]/events/[id]', 'page');
+  return { success: true };
+}
+
+export async function getMyEventRegistrations(): Promise<string[]> {
+  let userId: string;
+  try {
+    const ctx = await requireAuth();
+    userId = ctx.userId;
+  } catch {
+    return [];
+  }
+
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from('event_registrations')
+    .select('event_id')
+    .eq('user_id', userId);
+
+  return (data || []).map((r) => r.event_id);
+}
+
+export async function getEventRegistrationInfo(
+  eventId: string
+): Promise<{ isRegistered: boolean; count: number }> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [countResult, userRegResult] = await Promise.all([
+    supabase
+      .from('event_registrations')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_id', eventId),
+    user
+      ? supabase
+          .from('event_registrations')
+          .select('id')
+          .eq('event_id', eventId)
+          .eq('user_id', user.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  return {
+    isRegistered: !!userRegResult.data,
+    count: countResult.count || 0,
+  };
 }
 
 export async function getEventStats(): Promise<{

@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
 import { notifyDocumentPublished } from '@/lib/services/notificationService';
 import { PaginatedResult, ListOptions } from './types';
+import { buildPaginatedResult } from '@/lib/utils/pagination';
 
 type Document = Tables<'documents'>;
 
@@ -40,16 +41,10 @@ export async function getAdminDocuments(options: ListOptions & {
 
   if (error) {
     logger.error('Error fetching admin documents:', { error });
-    return { data: [], count: 0, page, pageSize, totalPages: 0 };
+    return buildPaginatedResult(null, 0, page, pageSize);
   }
 
-  return {
-    data: data || [],
-    count: count || 0,
-    page,
-    pageSize,
-    totalPages: Math.ceil((count || 0) / pageSize),
-  };
+  return buildPaginatedResult(data, count, page, pageSize);
 }
 
 export async function getAdminDocument(id: string): Promise<Document | null> {

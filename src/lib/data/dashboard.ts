@@ -5,10 +5,9 @@ import { getCurrentUserProfile } from './profiles';
 import { getMyCases, getCaseStats } from './cases';
 import { getUpcomingEvents } from './events';
 import { getMyNotifications, getUnreadCount } from './notifications';
-import { getLatestAcademyContent } from './academy';
 import { getLatestDocuments } from './documents';
-import { getLatestBlogPosts } from './blog';
 import { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type Case = Database['public']['Tables']['cases']['Row'];
@@ -65,114 +64,53 @@ export async function getActivityFeed(options?: {
   const offset = options?.offset || 0;
   const filterType = options?.type;
 
-  // Fetch more items from each source to ensure we have enough after filtering
-  const fetchLimit = limit + offset + 20;
+  // Fetch enough items to allow client-side filtering and pagination
+  const fetchLimit = Math.max(100, (limit + offset) * 5 + 20);
 
-  const [
-    casesResult,
-    events,
-    content,
-    documents,
-    blogPosts,
-  ] = await Promise.all([
-    getMyCases({ limit: fetchLimit }),
-    getUpcomingEvents(fetchLimit),
-    getLatestAcademyContent(fetchLimit),
-    getLatestDocuments(fetchLimit),
-    getLatestBlogPosts(fetchLimit),
-  ]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rpcData, error } = await (supabase as any).rpc('get_activity_feed', {
+    p_user_id: user.id,
+    p_limit: fetchLimit,
+  });
 
-  const activityFeed: ActivityFeedItem[] = [];
-
-  // Add cases
-  if (!filterType || filterType === 'case') {
-    casesResult.data.forEach((c) => {
-      activityFeed.push({
-        id: `case-${c.id}`,
-        type: 'case',
-        title: `Case ${c.case_code}: ${c.client_name}`,
-        description: c.notes || undefined,
-        timestamp: new Date(c.updated_at || c.created_at || new Date()),
-        metadata: {
-          status: c.status || 'PENDING',
-          link: `/cases/${c.id}`,
-        },
-      });
-    });
+  if (error) {
+    logger.error('Error fetching activity feed via RPC:', { error });
+    return { data: [], count: 0 };
   }
 
-  // Add events
-  if (!filterType || filterType === 'event') {
-    events.forEach((e) => {
-      activityFeed.push({
-        id: `event-${e.id}`,
-        type: 'event',
-        title: e.title,
-        description: e.description || undefined,
-        timestamp: new Date(e.created_at || new Date()),
-        metadata: {
-          category: e.event_type,
-          link: `/events/${e.id}`,
-        },
-      });
-    });
-  }
+  // Map RPC type values to ActivityFeedItem type values
+  const typeMap: Record<string, ActivityFeedItem['type']> = {
+    academy: 'content',
+    notification: 'announcement',
+  };
 
-  // Add academy content
-  if (!filterType || filterType === 'content') {
-    content.forEach((c) => {
-      activityFeed.push({
-        id: `content-${c.id}`,
-        type: 'content',
-        title: c.title,
-        description: c.description || undefined,
-        timestamp: new Date(c.created_at || new Date()),
-        image: c.thumbnail_url || undefined,
-        metadata: {
-          category: c.content_type,
-          link: `/academy/${c.id}`,
-        },
-      });
-    });
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let activityFeed: ActivityFeedItem[] = (rpcData || []).map((row: any) => {
+    const mappedType = typeMap[row.type] ?? (row.type as ActivityFeedItem['type']);
+    const meta = row.metadata || {};
+    const link =
+      row.type === 'blog' ? `/blog/${meta.slug}` :
+      row.type === 'case' ? `/cases/${row.id}` :
+      row.type === 'event' ? `/events/${row.id}` :
+      row.type === 'academy' ? `/academy/${row.id}` :
+      undefined;
 
-  // Add documents
-  if (!filterType || filterType === 'document') {
-    documents.forEach((d) => {
-      activityFeed.push({
-        id: `document-${d.id}`,
-        type: 'document',
-        title: d.title,
-        description: d.description || undefined,
-        timestamp: new Date(d.created_at || new Date()),
-        metadata: {
-          category: d.category,
-          link: `/documents/${d.id}`,
-        },
-      });
-    });
-  }
+    return {
+      id: `${row.type}-${row.id}`,
+      type: mappedType,
+      title: row.title,
+      description: row.description || undefined,
+      timestamp: new Date(row.created_at),
+      metadata: {
+        category: meta.content_type || meta.event_type,
+        link,
+      },
+    } as ActivityFeedItem;
+  });
 
-  // Add blog posts
-  if (!filterType || filterType === 'blog') {
-    blogPosts.forEach((b) => {
-      activityFeed.push({
-        id: `blog-${b.id}`,
-        type: 'blog',
-        title: b.title,
-        description: b.excerpt || undefined,
-        timestamp: new Date(b.published_at || b.created_at || new Date()),
-        image: b.featured_image || undefined,
-        metadata: {
-          category: b.category || undefined,
-          link: `/blog/${b.slug}`,
-        },
-      });
-    });
+  if (filterType) {
+    activityFeed = activityFeed.filter((item) => item.type === filterType);
   }
-
-  // Sort by timestamp (newest first)
-  activityFeed.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   const totalCount = activityFeed.length;
   const paginatedData = activityFeed.slice(offset, offset + limit);
