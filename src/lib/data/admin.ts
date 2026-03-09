@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/database/server';
+import { createClient, createServiceSupabaseClient } from '@/lib/database/server';
 import { Database, Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
 import {
@@ -176,17 +176,56 @@ export async function getAdminPartner(id: string): Promise<Profile | null> {
   return data;
 }
 
-export async function createPartner(data: TablesInsert<'profiles'>): Promise<{ success: boolean; error?: string; data?: Profile }> {
-  const supabase = await createClient();
+export async function createPartner(data: Omit<TablesInsert<'profiles'>, 'id'>): Promise<{ success: boolean; error?: string; data?: Profile }> {
+  const supabase = await createServiceSupabaseClient();
 
-  const { data: result, error } = await supabase
+  // Create the auth user first (required before inserting into profiles due to RLS/FK)
+  const tempPassword = crypto.randomUUID() + 'Aa1!';
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email: data.email!,
+    password: tempPassword,
+    email_confirm: true,
+    user_metadata: {
+      company_name: data.company_name,
+      contact_first_name: data.contact_first_name,
+      contact_last_name: data.contact_last_name,
+    },
+  });
+
+  if (authError) {
+    return { success: false, error: authError.message };
+  }
+
+  const userId = authData.user.id;
+
+  // Update the profile row created by the DB trigger
+  const { data: result, error: profileError } = await supabase
     .from('profiles')
-    .insert(data)
+    .update({
+      company_name: data.company_name,
+      contact_first_name: data.contact_first_name,
+      contact_last_name: data.contact_last_name,
+      phone: data.phone,
+      address: data.address,
+      city: data.city,
+      region: data.region,
+      country: data.country,
+      postal_code: data.postal_code,
+      category: data.category,
+      website: data.website,
+      description: data.description,
+      is_active: data.is_active,
+      logo_url: data.logo_url,
+      role: 'PARTNER',
+    })
+    .eq('id', userId)
     .select()
     .single();
 
-  if (error) {
-    return { success: false, error: error.message };
+  if (profileError) {
+    // Clean up the auth user to avoid orphaned accounts
+    await supabase.auth.admin.deleteUser(userId);
+    return { success: false, error: profileError.message };
   }
 
   revalidatePath('/admin/partners');
@@ -236,7 +275,7 @@ export async function deletePartner(id: string): Promise<{ success: boolean; err
 export async function uploadPartnerLogo(
   formData: FormData
 ): Promise<{ success: boolean; url?: string; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createServiceSupabaseClient();
 
   const file = formData.get('file') as File;
   const partnerId = formData.get('partnerId') as string;

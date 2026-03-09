@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
@@ -57,9 +57,22 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
     logo_url: partner?.logo_url || '',
   });
 
-  // Track if adding new category
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState('');
+  // Category dropdown state
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryValue, setNewCategoryValue] = useState('');
+  const categoryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryOpen(false);
+        setShowNewCategoryInput(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Update field
   const updateField = (field: string, value: string | boolean) => {
@@ -127,9 +140,31 @@ export default function PartnerForm({ partner, categories }: PartnerFormProps) {
             setMessage({ type: 'error', text: result.error || tMessages('error') });
           }
         } else {
-          // For new partner, we need to generate an ID or handle this differently
-          // In a real app, you'd typically create the user through Supabase Auth first
-          setMessage({ type: 'error', text: 'New partner creation requires auth user setup. Please use Supabase Auth to create the user first.' });
+          const insertData: Omit<TablesInsert<'profiles'>, 'id'> = {
+            company_name: formData.company_name || null,
+            email: formData.email,
+            contact_first_name: formData.contact_first_name || null,
+            contact_last_name: formData.contact_last_name || null,
+            phone: formData.phone || null,
+            address: formData.address || null,
+            city: formData.city || null,
+            region: formData.region || null,
+            country: formData.country || null,
+            postal_code: formData.postal_code || null,
+            category: formData.category || null,
+            website: formData.website || null,
+            description: formData.description || null,
+            is_active: formData.is_active,
+            logo_url: formData.logo_url || null,
+          };
+
+          const result = await createPartner(insertData);
+          if (result.success) {
+            setMessage({ type: 'success', text: tMessages('createSuccess') });
+            setTimeout(() => router.push('/admin/partners'), 1500);
+          } else {
+            setMessage({ type: 'error', text: result.error || tMessages('error') });
+          }
         }
       } catch {
         setMessage({ type: 'error', text: tMessages('error') });
