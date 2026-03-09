@@ -147,12 +147,20 @@ export async function resetPassword(formData: FormData): Promise<AuthResult> {
     return { success: false, error: 'Password must be at least 8 characters' };
   }
 
-  const { error } = await supabase.auth.updateUser({
+  const { data: updateData, error } = await supabase.auth.updateUser({
     password,
   });
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Activate the profile — covers first-time setup via admin invite
+  if (updateData.user) {
+    await supabase
+      .from('profiles')
+      .update({ is_active: true })
+      .eq('id', updateData.user.id);
   }
 
   return { success: true };

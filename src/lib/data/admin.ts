@@ -3,6 +3,7 @@
 import { createClient, createServiceSupabaseClient } from '@/lib/database/server';
 import { Database, Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
+import { sendPartnerWelcomeEmail } from '@/lib/email';
 import {
   notifyEventPublished,
   notifyCaseCreated,
@@ -199,6 +200,7 @@ export async function createPartner(data: Omit<TablesInsert<'profiles'>, 'id'>):
   const userId = authData.user.id;
 
   // Update the profile row created by the DB trigger
+  // Always start as inactive — account activates when partner sets up their password
   const { data: result, error: profileError } = await supabase
     .from('profiles')
     .update({
@@ -214,7 +216,7 @@ export async function createPartner(data: Omit<TablesInsert<'profiles'>, 'id'>):
       category: data.category,
       website: data.website,
       description: data.description,
-      is_active: data.is_active,
+      is_active: false,
       logo_url: data.logo_url,
       role: 'PARTNER',
     })
@@ -223,9 +225,33 @@ export async function createPartner(data: Omit<TablesInsert<'profiles'>, 'id'>):
     .single();
 
   if (profileError) {
-    // Clean up the auth user to avoid orphaned accounts
     await supabase.auth.admin.deleteUser(userId);
     return { success: false, error: profileError.message };
+  }
+
+  // Generate a recovery link so the partner can set up their password
+  const { data: linkData } = await supabase.auth.admin.generateLink({
+    type: 'recovery',
+    email: data.email!,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
+    },
+  });
+
+  // Send welcome email with setup link (fire-and-forget)
+  if (linkData?.properties?.action_link) {
+    Promise.resolve().then(async () => {
+      try {
+        await sendPartnerWelcomeEmail({
+          to: data.email!,
+          firstName: data.contact_first_name || data.company_name || 'Partner',
+          companyName: data.company_name || '',
+          loginUrl: linkData.properties.action_link,
+        });
+      } catch (e) {
+        console.error('Failed to send partner welcome email:', e);
+      }
+    });
   }
 
   revalidatePath('/admin/partners');
