@@ -26,6 +26,7 @@ export type Database = {
           contact_first_name: string | null
           contact_last_name: string | null
           phone: string | null
+          mobile: string | null
           address: string | null
           city: string | null
           region: string | null
@@ -33,6 +34,7 @@ export type Database = {
           postal_code: string | null
           category: string | null
           website: string | null
+          video_url: string | null
           description: string | null
           social_links: Json | null
           tags: string[] | null
@@ -51,6 +53,7 @@ export type Database = {
           contact_first_name?: string | null
           contact_last_name?: string | null
           phone?: string | null
+          mobile?: string | null
           address?: string | null
           city?: string | null
           region?: string | null
@@ -58,6 +61,7 @@ export type Database = {
           postal_code?: string | null
           category?: string | null
           website?: string | null
+          video_url?: string | null
           description?: string | null
           social_links?: Json | null
           tags?: string[] | null
@@ -76,6 +80,7 @@ export type Database = {
           contact_first_name?: string | null
           contact_last_name?: string | null
           phone?: string | null
+          mobile?: string | null
           address?: string | null
           city?: string | null
           region?: string | null
@@ -83,6 +88,7 @@ export type Database = {
           postal_code?: string | null
           category?: string | null
           website?: string | null
+          video_url?: string | null
           description?: string | null
           social_links?: Json | null
           tags?: string[] | null

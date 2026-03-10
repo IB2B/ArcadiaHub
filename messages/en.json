@@ -863,6 +863,8 @@
         "addCategory": "+ Add new category",
         "newCategoryPlaceholder": "New category name",
         "add": "Add",
+        "mobile": "Mobile",
+        "videoUrl": "Partner Video URL",
         "activeDescription": "Active partners can access the platform"
       }
     },

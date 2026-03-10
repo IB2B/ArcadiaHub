@@ -130,40 +130,28 @@ export async function forgotPassword(formData: FormData): Promise<AuthResult> {
   return { success: true };
 }
 
-export async function resetPassword(formData: FormData): Promise<AuthResult> {
-  const supabase = await createClient();
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
-
+// Validate password fields only — actual updateUser is done client-side
+// to ensure the recovery token from the URL hash is used, not the cookie session
+export async function validatePasswordReset(password: string, confirmPassword: string): Promise<AuthResult> {
   if (!password || !confirmPassword) {
     return { success: false, error: 'Password is required' };
   }
-
   if (password !== confirmPassword) {
     return { success: false, error: 'Passwords do not match' };
   }
-
   if (password.length < 8) {
     return { success: false, error: 'Password must be at least 8 characters' };
   }
-
-  const { data: updateData, error } = await supabase.auth.updateUser({
-    password,
-  });
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-
-  // Activate the profile — covers first-time setup via admin invite
-  if (updateData.user) {
-    await supabase
-      .from('profiles')
-      .update({ is_active: true })
-      .eq('id', updateData.user.id);
-  }
-
   return { success: true };
+}
+
+// Called after client-side updateUser succeeds — activates the profile
+export async function activateProfile(userId: string): Promise<void> {
+  const supabase = await createClient();
+  await supabase
+    .from('profiles')
+    .update({ is_active: true })
+    .eq('id', userId);
 }
 
 export async function updatePassword(currentPassword: string, newPassword: string): Promise<AuthResult> {

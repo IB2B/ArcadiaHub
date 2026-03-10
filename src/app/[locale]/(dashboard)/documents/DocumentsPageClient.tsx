@@ -3,7 +3,6 @@
 import { useState, useCallback, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Pagination from '@/components/ui/Pagination';
@@ -275,7 +274,11 @@ export default function DocumentsPageClient({
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {docs.map((doc) => (
-                        <Link key={doc.id} href={`/documents/${doc.id}`} className="block">
+                        <div
+                          key={doc.id}
+                          onClick={() => router.push(`/documents/${doc.id}`)}
+                          className="block cursor-pointer"
+                        >
                           <Card hover className="group h-full">
                             <div className="flex items-start gap-3">
                               <div className="flex-shrink-0 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition-colors">
@@ -312,7 +315,7 @@ export default function DocumentsPageClient({
                               </div>
                             </div>
                           </Card>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   </div>

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Link } from '@/navigation';
-import { resetPassword } from '@/lib/auth';
+import { validatePasswordReset, activateProfile } from '@/lib/auth';
+import { createClient } from '@/lib/database/client';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card, { CardContent } from '@/components/ui/Card';
@@ -18,41 +19,83 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [hasToken, setHasToken] = useState(true);
+  const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    // Check if we have the recovery token in the URL hash
     const hash = window.location.hash;
     if (!hash || !hash.includes('access_token')) {
       setHasToken(false);
+      return;
     }
+
+    // Parse tokens directly from the URL hash and set the session manually.
+    // onAuthStateChange can miss the PASSWORD_RECOVERY event if it fires
+    // before the listener is registered, so we set the session explicitly.
+    const params = new URLSearchParams(hash.slice(1));
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+
+    if (!accessToken || !refreshToken) {
+      setHasToken(false);
+      return;
+    }
+
+    const supabase = createClient();
+    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      .then(({ error }) => {
+        if (error) {
+          setHasToken(false);
+        } else {
+          setSessionReady(true);
+          // Clean the tokens from the URL to prevent reuse
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      });
   }, []);
 
-  const handleSubmit = useCallback(async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setError(null);
-    setSuccess(false);
+
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    // Validate fields
+    const validation = await validatePasswordReset(password, confirmPassword);
+    if (!validation.success) {
+      setError(validation.error || null);
+      return;
+    }
 
     startTransition(async () => {
-      const result = await resetPassword(formData);
-      if (!result.success && result.error) {
-        setError(result.error);
-      } else {
-        setSuccess(true);
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          router.push('/login');
-        }, 3000);
+      // Use the browser client — it holds the partner's recovery session
+      // established from the URL hash token, not the admin's cookie session
+      const supabase = createClient();
+      const { data, error: updateError } = await supabase.auth.updateUser({ password });
+
+      if (updateError) {
+        setError(updateError.message);
+        return;
       }
+
+      // Activate the profile via server action (safe — user ID comes from the
+      // just-updated browser session, not from cookies)
+      if (data.user) {
+        await activateProfile(data.user.id);
+      }
+
+      setSuccess(true);
+      setTimeout(() => router.push('/login'), 3000);
     });
-  }, [router]);
+  };
 
   if (!hasToken) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--background)] relative">
-        {/* Language Switcher */}
         <div className="absolute top-4 right-4">
           <LanguageSwitcher />
         </div>
-
         <div className="w-full max-w-md">
           <Card>
             <CardContent className="text-center py-8">
@@ -68,9 +111,7 @@ export default function ResetPasswordPage() {
                 {t('invalidResetLinkDescription')}
               </p>
               <Link href="/forgot-password">
-                <Button fullWidth>
-                  {t('requestNewLink')}
-                </Button>
+                <Button fullWidth>{t('requestNewLink')}</Button>
               </Link>
             </CardContent>
           </Card>
@@ -81,13 +122,11 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--background)] relative">
-      {/* Language Switcher */}
       <div className="absolute top-4 right-4">
         <LanguageSwitcher />
       </div>
 
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <h1 className="text-3xl font-bold gradient-text">{tCommon('appName')}</h1>
@@ -97,7 +136,6 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        {/* Form Card */}
         <Card>
           <CardContent>
             {success ? (
@@ -115,7 +153,7 @@ export default function ResetPasswordPage() {
                 </p>
               </div>
             ) : (
-              <form action={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {error && (
                   <div className="p-3 rounded-lg bg-[var(--error-light)] text-[var(--error)] text-sm">
                     {error}
@@ -130,6 +168,7 @@ export default function ResetPasswordPage() {
                   required
                   autoComplete="new-password"
                   hint={t('passwordHint')}
+                  disabled={!sessionReady}
                   leftIcon={
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
@@ -144,6 +183,7 @@ export default function ResetPasswordPage() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
+                  disabled={!sessionReady}
                   leftIcon={
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
@@ -151,7 +191,7 @@ export default function ResetPasswordPage() {
                   }
                 />
 
-                <Button type="submit" fullWidth isLoading={isPending}>
+                <Button type="submit" fullWidth isLoading={isPending} disabled={!sessionReady}>
                   {t('resetPassword')}
                 </Button>
               </form>
@@ -159,7 +199,6 @@ export default function ResetPasswordPage() {
           </CardContent>
         </Card>
 
-        {/* Back to login */}
         <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
           <Link href="/login" className="text-[var(--primary)] hover:underline font-medium">
             {t('backToLogin')}

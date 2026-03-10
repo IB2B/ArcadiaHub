@@ -849,6 +849,26 @@
         "all": "Tous les Partenaires",
         "active": "Actifs Uniquement",
         "inactive": "Inactifs Uniquement"
+      },
+      "form": {
+        "companyLogo": "Logo de l'entreprise",
+        "logoHint": "JPG, PNG, WebP jusqu'a 5MB",
+        "firstName": "Prenom",
+        "lastName": "Nom",
+        "mobile": "Mobile",
+        "website": "Site Web",
+        "videoUrl": "URL Video Partenaire",
+        "address": "Adresse",
+        "streetAddress": "Rue",
+        "city": "Ville",
+        "region": "Region",
+        "country": "Pays",
+        "postalCode": "Code Postal",
+        "description": "Description",
+        "addCategory": "+ Ajouter une categorie",
+        "newCategoryPlaceholder": "Nom de la nouvelle categorie",
+        "add": "Ajouter",
+        "activeDescription": "Les partenaires actifs peuvent acceder a la plateforme"
       }
     },
     "cases": {

@@ -215,6 +215,8 @@ export async function createPartner(data: Omit<TablesInsert<'profiles'>, 'id'>):
       postal_code: data.postal_code,
       category: data.category,
       website: data.website,
+      video_url: data.video_url,
+      mobile: data.mobile,
       description: data.description,
       is_active: false,
       logo_url: data.logo_url,
@@ -280,15 +282,13 @@ export async function togglePartnerStatus(id: string, isActive: boolean): Promis
 }
 
 export async function deletePartner(id: string): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createServiceSupabaseClient();
 
-  const { error } = await supabase
-    .from('profiles')
-    .delete()
-    .eq('id', id);
+  // Delete auth user first (cascades to profile via FK, or we delete profile explicitly)
+  const { error: authError } = await supabase.auth.admin.deleteUser(id);
 
-  if (error) {
-    return { success: false, error: error.message };
+  if (authError) {
+    return { success: false, error: authError.message };
   }
 
   revalidatePath('/admin/partners');

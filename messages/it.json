@@ -876,6 +876,8 @@
         "addCategory": "+ Aggiungi nuova categoria",
         "newCategoryPlaceholder": "Nome nuova categoria",
         "add": "Aggiungi",
+        "mobile": "Cellulare",
+        "videoUrl": "URL Video Partner",
         "activeDescription": "I partner attivi possono accedere alla piattaforma"
       }
     },

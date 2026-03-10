@@ -50,6 +50,8 @@ const router = useRouter();
     postal_code: partner?.postal_code || '',
     category: partner?.category || '',
     website: partner?.website || '',
+    video_url: partner?.video_url || '',
+    mobile: partner?.mobile || '',
     description: partner?.description || '',
     is_active: partner?.is_active ?? true,
     logo_url: partner?.logo_url || '',
@@ -120,6 +122,7 @@ const router = useRouter();
             contact_first_name: formData.contact_first_name || null,
             contact_last_name: formData.contact_last_name || null,
             phone: formData.phone || null,
+            mobile: formData.mobile || null,
             address: formData.address || null,
             city: formData.city || null,
             region: formData.region || null,
@@ -127,6 +130,7 @@ const router = useRouter();
             postal_code: formData.postal_code || null,
             category: formData.category || null,
             website: formData.website || null,
+            video_url: formData.video_url || null,
             description: formData.description || null,
             is_active: formData.is_active,
             logo_url: formData.logo_url || null,
@@ -145,6 +149,7 @@ const router = useRouter();
             contact_first_name: formData.contact_first_name || null,
             contact_last_name: formData.contact_last_name || null,
             phone: formData.phone || null,
+            mobile: formData.mobile || null,
             address: formData.address || null,
             city: formData.city || null,
             region: formData.region || null,
@@ -152,6 +157,7 @@ const router = useRouter();
             postal_code: formData.postal_code || null,
             category: formData.category || null,
             website: formData.website || null,
+            video_url: formData.video_url || null,
             description: formData.description || null,
             is_active: formData.is_active,
             logo_url: formData.logo_url || null,
@@ -256,11 +262,18 @@ const router = useRouter();
                 onChange={(e) => updateField('contact_last_name', e.target.value)}
               />
             </div>
-            <Input
-              label={tPartners('phone')}
-              value={formData.phone}
-              onChange={(e) => updateField('phone', e.target.value)}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label={tPartners('phone')}
+                value={formData.phone}
+                onChange={(e) => updateField('phone', e.target.value)}
+              />
+              <Input
+                label={tPartnersForm('mobile')}
+                value={formData.mobile}
+                onChange={(e) => updateField('mobile', e.target.value)}
+              />
+            </div>
             {/* Custom category dropdown */}
             <div className="w-full" ref={categoryRef}>
               <label className="block text-sm font-medium text-[var(--text)] mb-1.5">
@@ -341,21 +354,12 @@ const router = useRouter();
                 )}
               </div>
             </div>
-            <Input
-              label={tPartnersForm('website')}
-              type="url"
-              value={formData.website}
-              onChange={(e) => updateField('website', e.target.value)}
-              error={errors.website}
-              placeholder="https://..."
-            />
           </CardContent>
         </Card>
 
-        {/* Address */}
-        <Card>
-          <CardHeader title={tPartnersForm('address')} />
-          <CardContent className="space-y-4">
+        {/* Address & Details */}
+        <Card className="flex flex-col">
+          <CardContent className="flex flex-col flex-1 space-y-4">
             <Input
               label={tPartnersForm('streetAddress')}
               value={formData.address}
@@ -385,18 +389,41 @@ const router = useRouter();
                 onChange={(e) => updateField('postal_code', e.target.value)}
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Description */}
-        <Card className="lg:col-span-2">
-          <CardHeader title={tPartnersForm('description')} />
-          <CardContent>
+            <Input
+              label={tPartnersForm('website')}
+              type="url"
+              value={formData.website}
+              onChange={(e) => updateField('website', e.target.value)}
+              error={errors.website}
+              placeholder="https://..."
+            />
+            <Input
+              label={tPartnersForm('videoUrl')}
+              type="url"
+              value={formData.video_url}
+              onChange={(e) => updateField('video_url', e.target.value)}
+              error={errors.video_url}
+              placeholder="https://youtube.com/..."
+            />
             <Textarea
+              label={tPartnersForm('description')}
               value={formData.description}
               onChange={(e) => updateField('description', e.target.value)}
-              rows={4}
+              rows={3}
             />
+            <div className="flex items-center justify-end gap-3 pt-2 mt-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                disabled={isPending}
+              >
+                {t('actions.cancel')}
+              </Button>
+              <Button type="submit" isLoading={isPending}>
+                {isEditing ? t('actions.update') : t('actions.create')}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -414,21 +441,6 @@ const router = useRouter();
             </CardContent>
           </Card>
         )}
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-3 mt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          disabled={isPending}
-        >
-          {t('actions.cancel')}
-        </Button>
-        <Button type="submit" isLoading={isPending}>
-          {isEditing ? t('actions.update') : t('actions.create')}
-        </Button>
       </div>
     </form>
   );

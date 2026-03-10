@@ -7,6 +7,8 @@ export {
   getCurrentProfile,
   forgotPassword,
   resetPassword,
+  validatePasswordReset,
+  activateProfile,
   updatePassword,
   type AuthResult,
 } from './actions';
