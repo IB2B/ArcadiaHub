@@ -4,6 +4,7 @@ import { memo, useState, useCallback, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
+import Dropdown from '@/components/ui/Dropdown';
 
 interface CaseFiltersProps {
   initialFilters?: {
@@ -69,8 +70,8 @@ function CaseFilters({ initialFilters }: CaseFiltersProps) {
     updateURL({ search });
   }, [search, updateURL]);
 
-  const handleStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateURL({ status: e.target.value });
+  const handleStatusChange = useCallback((value: string) => {
+    updateURL({ status: value });
   }, [updateURL]);
 
   const handleClearFilters = useCallback(() => {
@@ -119,17 +120,16 @@ function CaseFilters({ initialFilters }: CaseFiltersProps) {
 
         {/* Status Select (Desktop) */}
         <div className="hidden md:block">
-          <select
+          <Dropdown
+            options={statusOptionsConfig.map((opt) => ({
+              value: opt.value,
+              label: opt.key === 'allStatus' ? t('allStatus') : t(`statuses.${opt.key}`),
+            }))}
             value={initialFilters?.status || ''}
             onChange={handleStatusChange}
-            className="h-full px-3 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
-          >
-            {statusOptionsConfig.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.key === 'allStatus' ? t('allStatus') : t(`statuses.${option.key}`)}
-              </option>
-            ))}
-          </select>
+            size="sm"
+            className="w-40"
+          />
         </div>
 
         {/* Clear Button (Desktop) */}
@@ -153,17 +153,15 @@ function CaseFilters({ initialFilters }: CaseFiltersProps) {
             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">
               {t('status')}
             </label>
-            <select
+            <Dropdown
+              options={statusOptionsConfig.map((opt) => ({
+                value: opt.value,
+                label: opt.key === 'allStatus' ? t('allStatus') : t(`statuses.${opt.key}`),
+              }))}
               value={initialFilters?.status || ''}
               onChange={handleStatusChange}
-              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
-            >
-              {statusOptionsConfig.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.key === 'allStatus' ? t('allStatus') : t(`statuses.${option.key}`)}
-                </option>
-              ))}
-            </select>
+              size="sm"
+            />
           </div>
 
           {hasActiveFilters && (

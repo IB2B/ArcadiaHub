@@ -195,6 +195,29 @@ body {
 }
 
 /* ============================================
+   Interactive Element Cursors
+   ============================================ */
+@layer base {
+  button:not(:disabled),
+  a,
+  [role="button"]:not(:disabled),
+  select:not(:disabled),
+  label[for],
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [disabled] {
+    cursor: not-allowed;
+  }
+}
+
+/* ============================================
    Utility Classes
    ============================================ */
 .gradient-text {

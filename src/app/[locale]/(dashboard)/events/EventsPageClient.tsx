@@ -9,6 +9,7 @@ import EventCard from '@/components/events/EventCard';
 import CalendarView from '@/components/events/CalendarView';
 import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
+import Dropdown from '@/components/ui/Dropdown';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type ViewMode = 'list' | 'calendar';
@@ -216,17 +217,15 @@ export default function EventsPageClient({
         </form>
 
         {/* Type Filter */}
-        <select
+        <Dropdown
+          options={eventTypes.map((type) => ({
+            value: type.value,
+            label: type.key === 'allTypes' ? t('allTypes') : t(`types.${type.key}`),
+          }))}
           value={eventType}
-          onChange={(e) => handleEventTypeChange(e.target.value)}
-          className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
-        >
-          {eventTypes.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.key === 'allTypes' ? t('allTypes') : t(`types.${type.key}`)}
-            </option>
-          ))}
-        </select>
+          onChange={handleEventTypeChange}
+          className="w-40"
+        />
 
         {/* Upcoming Toggle */}
         <Button

@@ -322,7 +322,7 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
                   <button
                     onClick={handleLogout}
                     disabled={isLoggingOut}
-                    className="block w-full px-4 py-2 text-left text-sm text-[var(--error)] hover:bg-[var(--card-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="block w-full px-4 py-2 text-left text-sm text-[var(--error)] hover:bg-[var(--card-hover)] disabled:opacity-50"
                   >
                     {isLoggingOut ? 'Signing out...' : t('signOut')}
                   </button>

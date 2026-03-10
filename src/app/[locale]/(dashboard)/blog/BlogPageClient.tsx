@@ -7,6 +7,7 @@ import { Link } from '@/navigation';
 import Card from '@/components/ui/Card';
 import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
+import Dropdown from '@/components/ui/Dropdown';
 
 type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
 
@@ -181,20 +182,15 @@ export default function BlogPageClient({
           </form>
 
           {/* Category Filter */}
-          <select
+          <Dropdown
+            options={[
+              { value: '', label: `${tCommon('all')} ${t('category')}` },
+              ...categories.map((cat) => ({ value: cat, label: cat })),
+            ]}
             value={category}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            className="px-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent text-sm min-w-[140px]"
-          >
-            <option value="">
-              {tCommon('all')} {t('category')}
-            </option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+            onChange={handleCategoryChange}
+            className="w-44"
+          />
         </div>
       </Card>
 

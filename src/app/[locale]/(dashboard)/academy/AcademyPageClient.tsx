@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Pagination from '@/components/ui/Pagination';
 import { Database } from '@/types/database.types';
+import Dropdown from '@/components/ui/Dropdown';
 
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 
@@ -269,32 +270,29 @@ export default function AcademyPageClient({
         </form>
 
         {/* Type Filter */}
-        <select
+        <Dropdown
+          options={[
+            { value: '', label: t('allTypes') },
+            ...contentTypeValues.map((type) => ({
+              value: type,
+              label: t(`types.${contentTypeConfig[type].key}`),
+            })),
+          ]}
           value={contentType}
-          onChange={(e) => handleContentTypeChange(e.target.value)}
-          className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
-        >
-          <option value="">{t('allTypes')}</option>
-          {contentTypeValues.map((type) => (
-            <option key={type} value={type}>
-              {t(`types.${contentTypeConfig[type].key}`)}
-            </option>
-          ))}
-        </select>
+          onChange={handleContentTypeChange}
+          className="w-40"
+        />
 
         {/* Year Filter */}
-        <select
+        <Dropdown
+          options={[
+            { value: '', label: t('allYears') },
+            ...yearValues.map((year) => ({ value: year.toString(), label: year.toString() })),
+          ]}
           value={selectedYear}
-          onChange={(e) => handleYearChange(e.target.value)}
-          className="px-3 py-2 sm:py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent cursor-pointer"
-        >
-          <option value="">{t('allYears')}</option>
-          {yearValues.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+          onChange={handleYearChange}
+          className="w-28"
+        />
       </div>
 
       {/* Loading State */}
