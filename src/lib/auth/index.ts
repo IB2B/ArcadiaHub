@@ -6,7 +6,6 @@ export {
   getUser,
   getCurrentProfile,
   forgotPassword,
-  resetPassword,
   validatePasswordReset,
   activateProfile,
   updatePassword,
