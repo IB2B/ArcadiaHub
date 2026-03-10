@@ -21,6 +21,7 @@ interface SelectProps {
   disabled?: boolean;
   className?: string;
   id?: string;
+  required?: boolean;
 }
 
 // Wrapper around Dropdown that keeps the existing Select API
