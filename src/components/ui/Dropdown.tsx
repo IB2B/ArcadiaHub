@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useId, memo } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface DropdownOption {
   value: string;
@@ -42,7 +43,9 @@ function Dropdown({
   id,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const generatedId = useId();
   const inputId = id || generatedId;
 
@@ -51,13 +54,55 @@ function Dropdown({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (
+        ref.current &&
+        !ref.current.contains(e.target as Node) &&
+        !(e.target as Element)?.closest('[data-dropdown-menu]')
+      ) {
         setOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Reposition on scroll/resize while open
+  useEffect(() => {
+    if (!open) return;
+    const update = () => {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        setMenuStyle({
+          position: 'fixed',
+          top: rect.bottom + 4,
+          left: rect.left,
+          width: rect.width,
+          zIndex: 9999,
+        });
+      }
+    };
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [open]);
+
+  const handleToggle = () => {
+    if (disabled) return;
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+      });
+    }
+    setOpen((prev) => !prev);
+  };
 
   const handleSelect = (optionValue: string) => {
     if (disabled) return;
@@ -68,48 +113,14 @@ function Dropdown({
   // Check if any visible width class exists in className
   const hasWidthClass = /\bw-\d+\b|\bw-\[|\bw-full\b|\bw-auto\b/.test(className);
 
-  return (
-    <div className={hasWidthClass ? className : `w-full ${className}`} ref={ref}>
-      {label && (
-        <label
-          htmlFor={inputId}
-          className="block text-sm font-medium text-[var(--text)] mb-1.5"
-        >
-          {label}
-        </label>
-      )}
-
-      <div className="relative">
-        <button
-          id={inputId}
-          type="button"
-          disabled={disabled}
-          onClick={() => !disabled && setOpen(!open)}
-          className={`
-            w-full flex items-center justify-between rounded-lg border bg-[var(--card)]
-            transition-all duration-200 cursor-pointer
-            focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
-            disabled:bg-[var(--card-hover)] disabled:cursor-not-allowed disabled:opacity-60
-            ${error ? 'border-[var(--error)] focus:ring-[var(--error)]' : 'border-[var(--border)]'}
-            ${sizeStyles[size]}
-          `}
-        >
-          <span className={hasValue ? 'text-[var(--text)]' : 'text-[var(--text-light)]'}>
-            {selectedLabel || <span className="text-[var(--text-light)]">{placeholder}</span>}
-          </span>
-          <svg
-            className={`w-4 h-4 text-[var(--text-muted)] flex-shrink-0 ml-2 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+  const menu =
+    open && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            data-dropdown-menu
+            className="bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden"
+            style={menuStyle}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {open && (
-          <div className="absolute z-50 w-full mt-1 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden">
             <div className="max-h-56 overflow-y-auto">
               {options.map((option) => (
                 <button
@@ -139,8 +150,53 @@ function Dropdown({
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          </div>,
+          document.body
+        )
+      : null;
+
+  return (
+    <div className={hasWidthClass ? className : `w-full ${className}`} ref={ref}>
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="block text-sm font-medium text-[var(--text)] mb-1.5"
+        >
+          {label}
+        </label>
+      )}
+
+      <div className="relative">
+        <button
+          ref={buttonRef}
+          id={inputId}
+          type="button"
+          disabled={disabled}
+          onClick={handleToggle}
+          className={`
+            w-full flex items-center justify-between rounded-lg border bg-[var(--card)]
+            transition-all duration-200 cursor-pointer
+            focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
+            disabled:bg-[var(--card-hover)] disabled:cursor-not-allowed disabled:opacity-60
+            ${error ? 'border-[var(--error)] focus:ring-[var(--error)]' : 'border-[var(--border)]'}
+            ${sizeStyles[size]}
+          `}
+        >
+          <span className={hasValue ? 'text-[var(--text)]' : 'text-[var(--text-light)]'}>
+            {selectedLabel || <span className="text-[var(--text-light)]">{placeholder}</span>}
+          </span>
+          <svg
+            className={`w-4 h-4 text-[var(--text-muted)] flex-shrink-0 ml-2 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {menu}
       </div>
 
       {(error || hint) && (

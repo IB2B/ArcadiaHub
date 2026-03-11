@@ -4,6 +4,7 @@ import { createClient, createServiceSupabaseClient } from '@/lib/database/server
 import { Database, Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
 import { sendPartnerWelcomeEmail } from '@/lib/email';
+import { requireRole } from '@/lib/auth/guards';
 import {
   notifyEventPublished,
   notifyCaseCreated,
@@ -178,6 +179,11 @@ export async function getAdminPartner(id: string): Promise<Profile | null> {
 }
 
 export async function createPartner(data: Omit<TablesInsert<'profiles'>, 'id'>): Promise<{ success: boolean; error?: string; data?: Profile }> {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
+    return { success: false, error: 'Unauthorized' };
+  }
   const supabase = await createServiceSupabaseClient();
 
   // Create the auth user first (required before inserting into profiles due to RLS/FK)
@@ -282,6 +288,11 @@ export async function togglePartnerStatus(id: string, isActive: boolean): Promis
 }
 
 export async function deletePartner(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireRole(['ADMIN']);
+  } catch {
+    return { success: false, error: 'Unauthorized' };
+  }
   const supabase = await createServiceSupabaseClient();
 
   // Delete auth user first (cascades to profile via FK, or we delete profile explicitly)
@@ -301,6 +312,11 @@ export async function deletePartner(id: string): Promise<{ success: boolean; err
 export async function uploadPartnerLogo(
   formData: FormData
 ): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
+    return { success: false, error: 'Unauthorized' };
+  }
   const supabase = await createServiceSupabaseClient();
 
   const file = formData.get('file') as File;
@@ -455,12 +471,12 @@ export async function createCase(data: TablesInsert<'cases'>): Promise<{ success
     return { success: false, error: error.message };
   }
 
-  // Create initial history entry
+  // Create initial history entry (trigger only fires on status UPDATE, not INSERT)
   await supabase.from('case_history').insert({
     case_id: result.id,
     new_status: data.status || 'PENDING',
     notes: 'Case created',
-  });
+  } as never);
 
   // Notify the partner about their new case
   if (result.partner_id) {
@@ -498,15 +514,9 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
     return { success: false, error: error.message };
   }
 
-  // Add history entry and notify partner if status changed
+  // DB trigger log_case_status_change() handles the history INSERT on status UPDATE.
+  // We only need to notify the partner here.
   if (data.status && currentCase?.status !== data.status) {
-    await supabase.from('case_history').insert({
-      case_id: id,
-      old_status: currentCase?.status,
-      new_status: data.status,
-      notes: historyNote || 'Status updated',
-    });
-
     // Notify the partner about the status change
     if (currentCase?.partner_id && currentCase.status) {
       notifyCaseStatusChanged({

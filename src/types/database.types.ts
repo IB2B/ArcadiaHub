@@ -41,6 +41,7 @@ export type Database = {
           is_active: boolean | null
           notification_preferences: Json | null
           assigned_commercial_id: string | null
+          created_by: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -68,6 +69,7 @@ export type Database = {
           is_active?: boolean | null
           notification_preferences?: Json | null
           assigned_commercial_id?: string | null
+          created_by?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -95,6 +97,7 @@ export type Database = {
           is_active?: boolean | null
           notification_preferences?: Json | null
           assigned_commercial_id?: string | null
+          created_by?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -153,6 +156,7 @@ export type Database = {
           attachments: Json | null
           created_by: string | null
           is_published: boolean | null
+          max_capacity: number | null
           created_at: string | null
           updated_at: string | null
         }
@@ -169,6 +173,7 @@ export type Database = {
           attachments?: Json | null
           created_by?: string | null
           is_published?: boolean | null
+          max_capacity?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -185,6 +190,7 @@ export type Database = {
           attachments?: Json | null
           created_by?: string | null
           is_published?: boolean | null
+          max_capacity?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -649,12 +655,106 @@ export type Database = {
         }
         Relationships: []
       }
+      suggestions: {
+        Row: {
+          id: string
+          user_id: string
+          subject: string
+          content: string
+          status: string
+          admin_reply: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          subject: string
+          content: string
+          status?: string
+          admin_reply?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          subject?: string
+          content?: string
+          status?: string
+          admin_reply?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          id: string
+          content: string
+          author_id: string
+          entity_type: string
+          entity_id: string
+          parent_id: string | null
+          mentions: string[]
+          is_edited: boolean
+          edited_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          content: string
+          author_id: string
+          entity_type: string
+          entity_id: string
+          parent_id?: string | null
+          mentions?: string[]
+          is_edited?: boolean
+          edited_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          content?: string
+          author_id?: string
+          entity_type?: string
+          entity_id?: string
+          parent_id?: string | null
+          mentions?: string[]
+          is_edited?: boolean
+          edited_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      next_case_code: {
+        Args: Record<never, never>
+        Returns: string
+      }
+      increment_view_count: {
+        Args: { tbl: string; row_id: string }
+        Returns: undefined
+      }
+      is_admin: {
+        Args: Record<never, never>
+        Returns: boolean
+      }
+      is_commercial: {
+        Args: Record<never, never>
+        Returns: boolean
+      }
+      get_user_role: {
+        Args: Record<never, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

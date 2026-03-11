@@ -14,13 +14,6 @@ export type CaseWithDetails = Case & {
   history?: CaseHistory[];
 };
 
-// Generate unique case code
-function generateCaseCode(): string {
-  const year = new Date().getFullYear();
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `${year}-${random}`;
-}
-
 export async function getCases(options?: {
   status?: string;
   partnerId?: string;
@@ -131,7 +124,11 @@ export async function createCase(
     return { success: false, error: 'Not authenticated' };
   }
 
-  const caseCode = generateCaseCode();
+  const { data: codeData, error: codeError } = await supabase.rpc('next_case_code' as never);
+  if (codeError || !codeData) {
+    return { success: false, error: 'Failed to generate case code' };
+  }
+  const caseCode = codeData as string;
 
   const { data, error } = await supabase
     .from('cases')

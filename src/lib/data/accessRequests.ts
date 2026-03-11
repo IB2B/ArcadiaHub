@@ -1,6 +1,7 @@
 'use server';
 
-import { createServiceSupabaseClient, getCurrentProfile } from '@/lib/database/server';
+import { createServiceSupabaseClient } from '@/lib/database/server';
+import { requireRole } from '@/lib/auth/guards';
 import { notifyAdminsAccessRequestSubmitted } from '@/lib/services/notificationService';
 import { sendPartnerWelcomeEmail } from '@/lib/email';
 
@@ -197,8 +198,9 @@ export async function getAccessRequests(
 ): Promise<GetAccessRequestsResult> {
   const { status = 'ALL', page = 1, limit = 10, search = '' } = params;
 
-  const profile = await getCurrentProfile();
-  if (!profile || !['ADMIN', 'COMMERCIAL'].includes(profile.role)) {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
     return { requests: [], total: 0, page: 1, totalPages: 0 };
   }
 
@@ -242,8 +244,9 @@ export async function getAccessRequests(
  * Get a single access request by ID (admin only)
  */
 export async function getAccessRequest(id: string): Promise<AccessRequest | null> {
-  const profile = await getCurrentProfile();
-  if (!profile || !['ADMIN', 'COMMERCIAL'].includes(profile.role)) {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
     return null;
   }
 
@@ -282,8 +285,9 @@ export async function getAccessRequest(id: string): Promise<AccessRequest | null
  * Get count of pending access requests (for admin dashboard)
  */
 export async function getPendingAccessRequestsCount(): Promise<number> {
-  const profile = await getCurrentProfile();
-  if (!profile || !['ADMIN', 'COMMERCIAL'].includes(profile.role)) {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
     return 0;
   }
 
@@ -314,8 +318,10 @@ export async function approveAccessRequest(
   id: string,
   notes?: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> {
-  const adminProfile = await getCurrentProfile();
-  if (!adminProfile || adminProfile.role !== 'ADMIN') {
+  let adminProfile;
+  try {
+    adminProfile = await requireRole(['ADMIN']);
+  } catch {
     return { success: false, error: 'Unauthorized' };
   }
 
@@ -448,8 +454,10 @@ export async function rejectAccessRequest(
   id: string,
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
-  const adminProfile = await getCurrentProfile();
-  if (!adminProfile || adminProfile.role !== 'ADMIN') {
+  let adminProfile;
+  try {
+    adminProfile = await requireRole(['ADMIN']);
+  } catch {
     return { success: false, error: 'Unauthorized' };
   }
 
@@ -497,8 +505,9 @@ export async function rejectAccessRequest(
 export async function deleteAccessRequest(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
-  const profile = await getCurrentProfile();
-  if (!profile || profile.role !== 'ADMIN') {
+  try {
+    await requireRole(['ADMIN']);
+  } catch {
     return { success: false, error: 'Unauthorized' };
   }
 

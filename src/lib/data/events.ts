@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/database/server';
 import { Database } from '@/types/database.types';
+import { revalidatePath } from 'next/cache';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type EventInsert = Database['public']['Tables']['events']['Insert'];
@@ -107,6 +108,7 @@ export async function createEvent(
     return { success: false, error: error.message };
   }
 
+  revalidatePath('/[locale]/(dashboard)/events', 'page');
   return { success: true, data };
 }
 
