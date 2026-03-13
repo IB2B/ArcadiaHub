@@ -128,7 +128,7 @@ function Sidebar({ user }: SidebarProps) {
 
   const NavLink = useMemo(
     () =>
-      memo(({ item }: { item: NavItemConfig }) => {
+      memo(function NavLinkItem({ item }: { item: NavItemConfig }) {
         const active = isActive(item.href);
         const label = t(item.translationKey);
         return (

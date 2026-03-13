@@ -47,7 +47,7 @@ export async function getComments(
     return [];
   }
 
-  const topLevel = (data || []) as Comment[];
+  const topLevel = (data || []) as unknown as Comment[];
 
   // Fetch replies for all top-level comments
   if (topLevel.length > 0) {
@@ -61,7 +61,7 @@ export async function getComments(
       .order('created_at', { ascending: true });
 
     const repliesMap = new Map<string, Comment[]>();
-    for (const reply of (replies || []) as Comment[]) {
+    for (const reply of (replies || []) as unknown as Comment[]) {
       if (!reply.parent_id) continue;
       if (!repliesMap.has(reply.parent_id)) repliesMap.set(reply.parent_id, []);
       repliesMap.get(reply.parent_id)!.push(reply);
@@ -167,7 +167,7 @@ export async function createComment(data: {
     }
   }
 
-  return { success: true, comment: result as Comment };
+  return { success: true, comment: result as unknown as Comment };
 }
 
 export async function updateComment(

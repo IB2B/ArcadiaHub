@@ -70,6 +70,7 @@ export async function getActivityFeed(options?: {
   const filterType = options?.type;
 
   // Single query via UNION ALL view (BUG-6 fix)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any)
     .from('activity_feed_view')
     .select('*', { count: 'exact' })
@@ -88,6 +89,7 @@ export async function getActivityFeed(options?: {
     return { data: [], count: 0 };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const activityFeed: ActivityFeedItem[] = (data || []).map((row: any) => ({
     id: `${row.feed_type}-${row.id}`,
     type: row.feed_type as ActivityFeedItem['type'],

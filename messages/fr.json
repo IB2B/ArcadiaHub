@@ -46,6 +46,15 @@
       "lastPage": "Derniere page",
       "previousPage": "Page precedente",
       "nextPage": "Page suivante"
+    },
+    "fileUpload": {
+      "dropHere": "Deposez le fichier ici ou",
+      "browse": "parcourir",
+      "maxSize": "Taille max",
+      "accepted": "Acceptes",
+      "uploading": "Telechargement...",
+      "uploadComplete": "Telechargement termine",
+      "currentImage": "Image actuelle"
     }
   },
   "landing": {
@@ -334,7 +343,7 @@
       "uploadLogo": "Cliquez pour telecharger le logo",
       "logoUploaded": "Logo telecharge avec succes",
       "maxSize": "Max 10 Mo",
-      "uploading": "Téléchargement..."
+      "uploading": "TÃ©lÃ©chargement..."
     },
     "errors": {
       "required": "Ce champ est obligatoire",
@@ -463,7 +472,7 @@
       "completed": "Termine",
       "cancelled": "Annule"
     },
-    "uploadDoc": "Télécharger un document"
+    "uploadDoc": "TÃ©lÃ©charger un document"
   },
   "events": {
     "title": "Evenements",
@@ -516,7 +525,7 @@
       "webinar": "Webinaire",
       "physical": "Evenement Physique"
     },
-    "unregister": "Se désinscrire",
+    "unregister": "Se dÃ©sinscrire",
     "eventFull": "Complet",
     "attendeesCount": "{count} inscrits"
   },
@@ -557,9 +566,10 @@
     "downloadMaterials": "Telecharger les Materiaux",
     "downloadHint": "Telecharger les slides, documents et ressources supplementaires",
     "podcast": "Episode de Podcast",
-    "markComplete": "Marquer comme terminé",
-    "completed": "Terminé",
-    "completedLabel": "Terminé"
+    "markComplete": "Marquer comme terminÃ©",
+    "completed": "TerminÃ©",
+    "completedLabel": "TerminÃ©",
+    "backToAcademy": "Retour a la Academie"
   },
   "documents": {
     "title": "Documents",
@@ -592,7 +602,8 @@
     "category": "Categorie",
     "uploadedOn": "Telecharge le",
     "relatedDocuments": "Documents Similaires",
-    "documentPreview": "Apercu du Document"
+    "documentPreview": "Apercu du Document",
+    "backToDocuments": "Retour aux Documents"
   },
   "blog": {
     "title": "Blog",

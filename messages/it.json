@@ -55,7 +55,9 @@
       "maxSize": "Dimensione massima",
       "uploading": "Caricamento in corso...",
       "currentImage": "Immagine attuale",
-      "noFileChosen": "Nessun file selezionato"
+      "noFileChosen": "Nessun file selezionato",
+      "dropHere": "Trascina il file qui o",
+      "uploadComplete": "Caricamento completato"
     }
   },
   "landing": {
@@ -69,11 +71,11 @@
     "allRightsReserved": "Tutti i diritti riservati.",
     "trustedBy": "Scelto dai migliori partner in Italia",
     "scrollToExplore": "Scorri per esplorare",
-    "navFeatures": "Funzionalità",
+    "navFeatures": "FunzionalitÃ ",
     "navPlatform": "Piattaforma",
     "navCommunity": "Community",
-    "featuresLabel": "Funzionalità della Piattaforma",
-    "featuresTitle": "Tutto ciò di cui hai bisogno per avere successo",
+    "featuresLabel": "FunzionalitÃ  della Piattaforma",
+    "featuresTitle": "Tutto ciÃ² di cui hai bisogno per avere successo",
     "featuresSubtitle": "Una suite completa di strumenti progettati per semplificare la tua partnership con Harlock e accelerare la crescita del tuo business.",
     "features": {
       "cases": {
@@ -98,7 +100,7 @@
       },
       "blog": {
         "title": "News e Blog",
-        "description": "Resta informato con le ultime notizie, approfondimenti e aggiornamenti da Harlock. Sii il primo a conoscere le novità."
+        "description": "Resta informato con le ultime notizie, approfondimenti e aggiornamenti da Harlock. Sii il primo a conoscere le novitÃ ."
       }
     },
     "stats": {
@@ -120,7 +122,7 @@
       "community": "Community"
     },
     "moduleDescriptions": {
-      "dashboard": "La tua panoramica personalizzata con statistiche e attività recenti",
+      "dashboard": "La tua panoramica personalizzata con statistiche e attivitÃ  recenti",
       "cases": "Traccia e gestisci tutte le tue pratiche in un unico posto",
       "events": "Formazioni, workshop e webinar in programma",
       "academy": "Video, corsi e risorse formative",
@@ -130,7 +132,7 @@
     "moduleHighlights": {
       "dashboard": {
         "point1": "Panoramica statistiche in tempo reale",
-        "point2": "Feed attività recenti",
+        "point2": "Feed attivitÃ  recenti",
         "point3": "Accesso rapido a tutti i moduli"
       },
       "cases": {
@@ -163,7 +165,7 @@
       "dashboard": {
         "activeCases": "Pratiche Attive",
         "upcomingEvents": "Eventi in Arrivo",
-        "recentActivity": "Attività Recenti",
+        "recentActivity": "AttivitÃ  Recenti",
         "activity1": "Pratica #1234 aggiornata",
         "activity2": "Nuovo evento: Workshop Q1",
         "activity3": "Documento caricato"
@@ -229,7 +231,7 @@
       }
     },
     "communityLabel": "Unisciti alla Rete",
-    "communityTitle": "Diventa parte di qualcosa di più grande",
+    "communityTitle": "Diventa parte di qualcosa di piÃ¹ grande",
     "communitySubtitle": "Unisciti a una community fiorente di professionisti che condividono conoscenze, collaborano su progetti e crescono insieme.",
     "communityBenefits": {
       "network": {
@@ -246,13 +248,13 @@
       },
       "growth": {
         "title": "Crescita del Business",
-        "description": "Sfrutta i vantaggi della partnership per espandere le tue opportunità di business."
+        "description": "Sfrutta i vantaggi della partnership per espandere le tue opportunitÃ  di business."
       }
     },
     "ctaTitle": "Pronto per iniziare?",
     "ctaSubtitle": "Unisciti alla rete di partner Harlock e sblocca l'accesso a tutti gli strumenti e le risorse di cui hai bisogno per far crescere il tuo business.",
     "ctaButton": "Inizia Ora",
-    "ctaSecondary": "Scopri di Più",
+    "ctaSecondary": "Scopri di PiÃ¹",
     "footerDescription": "Il portale partner ufficiale di Harlock. Accedi alle risorse, gestisci le pratiche e connettiti con la community.",
     "footerPlatform": "Piattaforma",
     "footerCompany": "Azienda",
@@ -261,7 +263,7 @@
       "events": "Eventi",
       "academy": "Academy",
       "documents": "Documenti",
-      "about": "Chi è Harlock",
+      "about": "Chi Ã¨ Harlock",
       "contact": "Contattaci",
       "privacy": "Privacy Policy",
       "terms": "Termini di Servizio"
@@ -399,8 +401,8 @@
     "activeCases": "Pratiche Attive",
     "unreadNotifications": "Notifiche Non Lette",
     "newDocuments": "Nuovi Documenti",
-    "activityFeed": "Attività Recente",
-    "noActivity": "Nessuna attività recente. Il tuo feed mostrerà eventi, aggiornamenti pratiche e nuovi contenuti.",
+    "activityFeed": "AttivitÃ  Recente",
+    "noActivity": "Nessuna attivitÃ  recente. Il tuo feed mostrerÃ  eventi, aggiornamenti pratiche e nuovi contenuti.",
     "seeAll": "Vedi tutti",
     "noUpcomingEvents": "Nessun evento in programma",
     "myCases": "Le Mie Pratiche",
@@ -569,7 +571,8 @@
     "podcast": "Episodio Podcast",
     "markComplete": "Segna come completato",
     "completed": "Completato",
-    "completedLabel": "Completato"
+    "completedLabel": "Completato",
+    "backToAcademy": "Torna all'Accademia"
   },
   "documents": {
     "title": "Documenti",
@@ -602,7 +605,8 @@
     "category": "Categoria",
     "uploadedOn": "Caricato il",
     "relatedDocuments": "Documenti Correlati",
-    "documentPreview": "Anteprima Documento"
+    "documentPreview": "Anteprima Documento",
+    "backToDocuments": "Torna ai Documenti"
   },
   "blog": {
     "title": "Blog",

@@ -64,6 +64,7 @@ export default function SessionTimeout({ children }: SessionTimeoutProps) {
 
   useEffect(() => {
     // Initialize timer
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     resetTimer();
 
     // Activity events to track

@@ -24,6 +24,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash || !hash.includes('access_token')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasToken(false);
       return;
     }
@@ -36,6 +37,7 @@ export default function ResetPasswordPage() {
     const refreshToken = params.get('refresh_token');
 
     if (!accessToken || !refreshToken) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasToken(false);
       return;
     }
@@ -44,8 +46,10 @@ export default function ResetPasswordPage() {
     supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
       .then(({ error }) => {
         if (error) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setHasToken(false);
         } else {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setSessionReady(true);
           // Clean the tokens from the URL to prevent reuse
           window.history.replaceState(null, '', window.location.pathname);

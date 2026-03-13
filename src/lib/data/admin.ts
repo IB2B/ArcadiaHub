@@ -697,14 +697,15 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
       }).catch(console.error);
 
       // Email notification — fetch partner email + name (non-blocking)
-      supabase
-        .from('profiles')
-        .select('email, contact_first_name')
-        .eq('id', currentCase.partner_id)
-        .single()
-        .then(({ data: partner }) => {
+      void (async () => {
+        try {
+          const { data: partner } = await supabase
+            .from('profiles')
+            .select('email, contact_first_name')
+            .eq('id', currentCase.partner_id)
+            .single();
           if (partner?.email) {
-            sendCaseStatusUpdateEmail({
+            await sendCaseStatusUpdateEmail({
               to: partner.email,
               firstName: partner.contact_first_name || 'Partner',
               caseCode: currentCase.case_code,
@@ -713,10 +714,12 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
               newStatus: data.status!,
               notes: historyNote,
               caseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/cases/${id}`,
-            }).catch(console.error);
+            });
           }
-        })
-        .catch(console.error);
+        } catch (e) {
+          console.error(e);
+        }
+      })();
     }
   }
 

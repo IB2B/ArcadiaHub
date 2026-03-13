@@ -72,7 +72,7 @@ export async function getMySuggestions(): Promise<Suggestion[]> {
     return [];
   }
 
-  return (data || []) as Suggestion[];
+  return (data || []) as unknown as Suggestion[];
 }
 
 // ============================================================================
@@ -111,7 +111,7 @@ export async function getAllSuggestions(params: {
     return { suggestions: [], total: 0 };
   }
 
-  return { suggestions: (data || []) as Suggestion[], total: count || 0 };
+  return { suggestions: (data || []) as unknown as Suggestion[], total: count || 0 };
 }
 
 export async function updateSuggestionStatus(

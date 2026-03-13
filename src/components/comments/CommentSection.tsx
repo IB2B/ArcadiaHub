@@ -98,6 +98,7 @@ function useMentions(content: string, setContent: (v: string) => void) {
 
   useEffect(() => {
     if (mentionQuery === null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMentionResults([]);
       return;
     }

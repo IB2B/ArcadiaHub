@@ -99,7 +99,7 @@ interface HeaderProps {
   onMarkAllAsRead?: () => void;
 }
 
-function Header({ user, notifications = [], unreadCount: propUnreadCount, onMarkAsRead, onMarkAllAsRead }: HeaderProps) {
+function Header({ user, notifications = [], unreadCount: propUnreadCount, onMarkAsRead }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [isLoggingOut, startLogoutTransition] = useTransition();
@@ -297,7 +297,7 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
                     </div>
                   ) : (
                     notifications.map((notification) => {
-                      const typeConf = notificationTypeConfig[notification.type] || notificationTypeConfig.INFO;
+                      const typeConf = notificationTypeConfig[notification.type as keyof typeof notificationTypeConfig] || notificationTypeConfig.INFO;
                       const inner = (
                         <div className="flex gap-3 items-start">
                           {/* Type icon */}

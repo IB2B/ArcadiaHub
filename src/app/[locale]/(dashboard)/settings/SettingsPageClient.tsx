@@ -70,6 +70,7 @@ export default function SettingsPageClient() {
   // Load theme from localStorage on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'c1';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);

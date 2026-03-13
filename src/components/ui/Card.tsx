@@ -14,9 +14,9 @@ interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
   action?: ReactNode;
 }
 
-interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
+type CardContentProps = HTMLAttributes<HTMLDivElement>;
 
-interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
+type CardFooterProps = HTMLAttributes<HTMLDivElement>;
 
 const paddingStyles = {
   none: '',
