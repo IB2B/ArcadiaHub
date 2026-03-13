@@ -436,6 +436,7 @@
     "caseDetails": "Case Details",
     "caseHistory": "Case History",
     "statusChanged": "Status changed",
+    "caseOpened": "Case opened",
     "searchPlaceholder": "Search by code or client...",
     "allStatus": "All Status",
     "clear": "Clear",
@@ -455,7 +456,8 @@
       "suspended": "Suspended",
       "completed": "Completed",
       "cancelled": "Cancelled"
-    }
+    },
+    "uploadDoc": "Upload Document"
   },
   "events": {
     "title": "Events",
@@ -507,7 +509,10 @@
       "workshop": "Workshop",
       "webinar": "Webinar",
       "physical": "Physical Event"
-    }
+    },
+    "unregister": "Unregister",
+    "eventFull": "Full",
+    "attendeesCount": "{count} registered"
   },
   "academy": {
     "title": "Academy",
@@ -546,7 +551,10 @@
     "noPreview": "No preview available",
     "downloadMaterials": "Download Materials",
     "downloadHint": "Download slides, documents, and additional resources",
-    "podcast": "Podcast Episode"
+    "podcast": "Podcast Episode",
+    "markComplete": "Mark as Complete",
+    "completed": "Completed",
+    "completedLabel": "Completed"
   },
   "documents": {
     "title": "Documents",

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/database/server';
 import { Database } from '@/types/database.types';
+import { revalidatePath } from 'next/cache';
 
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 
@@ -83,13 +84,44 @@ export async function getAcademyItem(itemId: string): Promise<AcademyContent | n
     return null;
   }
 
-  // Increment view count
-  await supabase
-    .from('academy_content')
-    .update({ view_count: (data.view_count || 0) + 1 })
-    .eq('id', itemId);
+  // Increment view count atomically (BUG-5)
+  await supabase.rpc('increment_view_count', { tbl: 'academy_content', row_id: itemId });
 
   return data;
+}
+
+export async function markContentComplete(
+  contentId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Not authenticated' };
+
+  const { error } = await supabase
+    .from('content_completions')
+    .upsert(
+      { content_id: contentId, user_id: user.id, completed_at: new Date().toISOString() },
+      { onConflict: 'content_id,user_id' }
+    );
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath('/[locale]/(dashboard)/academy/[id]', 'page');
+  return { success: true };
+}
+
+export async function getMyCompletions(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from('content_completions')
+    .select('content_id')
+    .eq('user_id', user.id);
+
+  if (error || !data) return [];
+  return data.map((c: { content_id: string }) => c.content_id);
 }
 
 export async function getAcademyStats(): Promise<{

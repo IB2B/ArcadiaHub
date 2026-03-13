@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getEvent } from '@/lib/data/events';
+import { getEvent, getEventRegistrationStatus } from '@/lib/data/events';
 import EventDetailClient from './EventDetailClient';
 
 interface EventDetailPageProps {
@@ -8,11 +8,21 @@ interface EventDetailPageProps {
 
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
   const { id } = await params;
-  const event = await getEvent(id);
+
+  const [event, registration] = await Promise.all([
+    getEvent(id),
+    getEventRegistrationStatus(id),
+  ]);
 
   if (!event) {
     notFound();
   }
 
-  return <EventDetailClient event={event} />;
+  return (
+    <EventDetailClient
+      event={event}
+      isRegistered={registration.isRegistered}
+      registrationCount={registration.registrationCount}
+    />
+  );
 }

@@ -85,6 +85,7 @@ CREATE POLICY "Admins can update access requests" ON access_requests
 -- ============================================
 DROP POLICY IF EXISTS "Commercials see assigned partner cases" ON cases;
 DROP POLICY IF EXISTS "Commercials can view assigned partner cases" ON cases;
+DROP POLICY IF EXISTS "Commercials manage assigned partner cases" ON cases;
 CREATE POLICY "Commercials manage assigned partner cases" ON cases
   FOR ALL USING (
     public.is_commercial() AND EXISTS (

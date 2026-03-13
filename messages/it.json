@@ -451,6 +451,7 @@
     "caseDetails": "Dettagli Pratica",
     "caseHistory": "Storico Pratica",
     "statusChanged": "Stato cambiato",
+    "caseOpened": "Pratica aperta",
     "searchPlaceholder": "Cerca per codice o cliente...",
     "allStatus": "Tutti gli Stati",
     "clear": "Cancella",
@@ -470,7 +471,8 @@
       "suspended": "Sospesa",
       "completed": "Completata",
       "cancelled": "Annullata"
-    }
+    },
+    "uploadDoc": "Carica documento"
   },
   "events": {
     "title": "Eventi",
@@ -522,7 +524,10 @@
       "workshop": "Workshop",
       "webinar": "Webinar",
       "physical": "Evento Fisico"
-    }
+    },
+    "unregister": "Annulla iscrizione",
+    "eventFull": "Completo",
+    "attendeesCount": "{count} iscritti"
   },
   "academy": {
     "title": "Academy",
@@ -560,7 +565,10 @@
     "noPreview": "Anteprima non disponibile",
     "downloadMaterials": "Scarica Materiali",
     "downloadHint": "Scarica slide, documenti e risorse aggiuntive",
-    "podcast": "Episodio Podcast"
+    "podcast": "Episodio Podcast",
+    "markComplete": "Segna come completato",
+    "completed": "Completato",
+    "completedLabel": "Completato"
   },
   "documents": {
     "title": "Documenti",

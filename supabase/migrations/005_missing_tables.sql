@@ -28,19 +28,23 @@ CREATE INDEX IF NOT EXISTS idx_event_registrations_event_id ON event_registratio
 CREATE INDEX IF NOT EXISTS idx_event_registrations_user_id ON event_registrations(user_id);
 
 -- Partners can see their own registrations
-CREATE POLICY IF NOT EXISTS "Users see own event registrations" ON event_registrations
+DROP POLICY IF EXISTS "Users see own event registrations" ON event_registrations;
+CREATE POLICY "Users see own event registrations" ON event_registrations
   FOR SELECT USING (user_id = auth.uid());
 
 -- Partners can register themselves
-CREATE POLICY IF NOT EXISTS "Users can register for events" ON event_registrations
+DROP POLICY IF EXISTS "Users can register for events" ON event_registrations;
+CREATE POLICY "Users can register for events" ON event_registrations
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- Partners can unregister themselves
-CREATE POLICY IF NOT EXISTS "Users can unregister from events" ON event_registrations
+DROP POLICY IF EXISTS "Users can unregister from events" ON event_registrations;
+CREATE POLICY "Users can unregister from events" ON event_registrations
   FOR DELETE USING (user_id = auth.uid());
 
 -- Admins/Commercials can manage all registrations
-CREATE POLICY IF NOT EXISTS "Staff manage event registrations" ON event_registrations
+DROP POLICY IF EXISTS "Staff manage event registrations" ON event_registrations;
+CREATE POLICY "Staff manage event registrations" ON event_registrations
   FOR ALL USING (public.is_admin() OR public.is_commercial());
 
 -- ============================================
@@ -62,19 +66,23 @@ CREATE INDEX IF NOT EXISTS idx_content_completions_user_id ON content_completion
 CREATE INDEX IF NOT EXISTS idx_content_completions_content_id ON content_completions(content_id);
 
 -- Partners can see their own completions
-CREATE POLICY IF NOT EXISTS "Users see own completions" ON content_completions
+DROP POLICY IF EXISTS "Users see own completions" ON content_completions;
+CREATE POLICY "Users see own completions" ON content_completions
   FOR SELECT USING (user_id = auth.uid());
 
 -- Partners can mark content complete
-CREATE POLICY IF NOT EXISTS "Users can mark content complete" ON content_completions
+DROP POLICY IF EXISTS "Users can mark content complete" ON content_completions;
+CREATE POLICY "Users can mark content complete" ON content_completions
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- Allow upsert (update own completions)
-CREATE POLICY IF NOT EXISTS "Users can update own completions" ON content_completions
+DROP POLICY IF EXISTS "Users can update own completions" ON content_completions;
+CREATE POLICY "Users can update own completions" ON content_completions
   FOR UPDATE USING (user_id = auth.uid());
 
 -- Admins can see all completions
-CREATE POLICY IF NOT EXISTS "Staff see all completions" ON content_completions
+DROP POLICY IF EXISTS "Staff see all completions" ON content_completions;
+CREATE POLICY "Staff see all completions" ON content_completions
   FOR SELECT USING (public.is_admin() OR public.is_commercial());
 
 -- ============================================
@@ -114,22 +122,26 @@ CREATE INDEX IF NOT EXISTS idx_suggestions_user_id ON suggestions(user_id);
 CREATE INDEX IF NOT EXISTS idx_suggestions_status ON suggestions(status);
 
 -- Partners can insert their own suggestions
-CREATE POLICY IF NOT EXISTS "Partners can submit suggestions" ON suggestions
+DROP POLICY IF EXISTS "Partners can submit suggestions" ON suggestions;
+CREATE POLICY "Partners can submit suggestions" ON suggestions
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- Partners can view their own suggestions
-CREATE POLICY IF NOT EXISTS "Partners see own suggestions" ON suggestions
+DROP POLICY IF EXISTS "Partners see own suggestions" ON suggestions;
+CREATE POLICY "Partners see own suggestions" ON suggestions
   FOR SELECT USING (user_id = auth.uid());
 
 -- Admins/Commercials can view all suggestions
-CREATE POLICY IF NOT EXISTS "Staff see all suggestions" ON suggestions
+DROP POLICY IF EXISTS "Staff see all suggestions" ON suggestions;
+CREATE POLICY "Staff see all suggestions" ON suggestions
   FOR SELECT USING (public.is_admin() OR public.is_commercial());
 
 -- Admins/Commercials can update status and admin_reply
-CREATE POLICY IF NOT EXISTS "Staff update suggestions" ON suggestions
+DROP POLICY IF EXISTS "Staff update suggestions" ON suggestions;
+CREATE POLICY "Staff update suggestions" ON suggestions
   FOR UPDATE USING (public.is_admin() OR public.is_commercial());
 
-CREATE TRIGGER update_suggestions_updated_at
+CREATE OR REPLACE TRIGGER update_suggestions_updated_at
   BEFORE UPDATE ON suggestions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -157,21 +169,25 @@ CREATE INDEX IF NOT EXISTS idx_comments_author ON comments(author_id);
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_id);
 
 -- Any authenticated user can read comments
-CREATE POLICY IF NOT EXISTS "Authenticated users can read comments" ON comments
+DROP POLICY IF EXISTS "Authenticated users can read comments" ON comments;
+CREATE POLICY "Authenticated users can read comments" ON comments
   FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- Authenticated users can insert their own comments
-CREATE POLICY IF NOT EXISTS "Authenticated users can post comments" ON comments
+DROP POLICY IF EXISTS "Authenticated users can post comments" ON comments;
+CREATE POLICY "Authenticated users can post comments" ON comments
   FOR INSERT WITH CHECK (author_id = auth.uid());
 
 -- Authors can edit their own comments
-CREATE POLICY IF NOT EXISTS "Authors can update own comments" ON comments
+DROP POLICY IF EXISTS "Authors can update own comments" ON comments;
+CREATE POLICY "Authors can update own comments" ON comments
   FOR UPDATE USING (author_id = auth.uid());
 
 -- Authors and admins can delete comments
-CREATE POLICY IF NOT EXISTS "Authors and admins can delete comments" ON comments
+DROP POLICY IF EXISTS "Authors and admins can delete comments" ON comments;
+CREATE POLICY "Authors and admins can delete comments" ON comments
   FOR DELETE USING (author_id = auth.uid() OR public.is_admin());
 
-CREATE TRIGGER update_comments_updated_at
+CREATE OR REPLACE TRIGGER update_comments_updated_at
   BEFORE UPDATE ON comments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

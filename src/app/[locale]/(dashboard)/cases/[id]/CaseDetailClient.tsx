@@ -1,10 +1,14 @@
 'use client';
 
+import { useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/navigation';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import CaseTimeline from '@/components/cases/CaseTimeline';
 import { Database } from '@/types/database.types';
+import { uploadCaseDocument } from '@/lib/data/cases';
 
 type Case = Database['public']['Tables']['cases']['Row'];
 type CaseDocument = Database['public']['Tables']['case_documents']['Row'];
@@ -77,10 +81,29 @@ function getFileIcon(fileType: string | null) {
 
 export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
   const t = useTranslations('cases');
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isPending, startTransition] = useTransition();
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const status = caseData.status || 'PENDING';
   const config = statusConfig[status] || statusConfig.PENDING;
   const documents = caseData.documents || [];
   const history = caseData.history || [];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    startTransition(async () => {
+      const result = await uploadCaseDocument(caseData.id, file);
+      if (result.success) {
+        router.refresh();
+      } else {
+        setUploadError(result.error || 'Upload failed');
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    });
+  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -143,11 +166,32 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
         {/* Documents Column */}
         <div className="lg:col-span-1">
           <Card padding="none">
-            <CardHeader
-              title={t('documents')}
-              subtitle={t('fileCount', { count: documents.length })}
-              className="p-4 border-b border-[var(--border)]"
-            />
+            <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
+              <CardHeader
+                title={t('documents')}
+                subtitle={t('fileCount', { count: documents.length })}
+              />
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  isLoading={isPending}
+                >
+                  {t('uploadDoc')}
+                </Button>
+              </div>
+            </div>
+            {uploadError && (
+              <p className="px-4 pt-2 text-xs text-[var(--error)]">{uploadError}</p>
+            )}
             <CardContent className="p-4">
               {documents.length > 0 ? (
                 <div className="space-y-2">

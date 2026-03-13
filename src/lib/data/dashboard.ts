@@ -8,6 +8,7 @@ import { getMyNotifications, getUnreadCount } from './notifications';
 import { getLatestAcademyContent } from './academy';
 import { getLatestDocuments } from './documents';
 import { getLatestBlogPosts } from './blog';
+// Note: getActivityFeed uses activity_feed_view directly (BUG-6)
 import { Database } from '@/types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -68,119 +69,40 @@ export async function getActivityFeed(options?: {
   const offset = options?.offset || 0;
   const filterType = options?.type;
 
-  // Fetch more items from each source to ensure we have enough after filtering
-  const fetchLimit = limit + offset + 20;
+  // Single query via UNION ALL view (BUG-6 fix)
+  let query = (supabase as any)
+    .from('activity_feed_view')
+    .select('*', { count: 'exact' })
+    .or(`user_id.eq.${user.id},user_id.is.null`)
+    .order('feed_timestamp', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  const [
-    casesResult,
-    events,
-    content,
-    documents,
-    blogPosts,
-  ] = await Promise.all([
-    getMyCases({ limit: fetchLimit }),
-    getUpcomingEvents(fetchLimit),
-    getLatestAcademyContent(fetchLimit),
-    getLatestDocuments(fetchLimit),
-    getLatestBlogPosts(fetchLimit),
-  ]);
-
-  const activityFeed: ActivityFeedItem[] = [];
-
-  // Add cases
-  if (!filterType || filterType === 'case') {
-    casesResult.data.forEach((c) => {
-      activityFeed.push({
-        id: `case-${c.id}`,
-        type: 'case',
-        title: `Case ${c.case_code}: ${c.client_name}`,
-        description: c.notes || undefined,
-        timestamp: new Date(c.updated_at || c.created_at || new Date()),
-        metadata: {
-          status: c.status || 'PENDING',
-          link: `/cases/${c.id}`,
-        },
-      });
-    });
+  if (filterType) {
+    query = query.eq('feed_type', filterType);
   }
 
-  // Add events
-  if (!filterType || filterType === 'event') {
-    events.forEach((e) => {
-      activityFeed.push({
-        id: `event-${e.id}`,
-        type: 'event',
-        title: e.title,
-        description: e.description || undefined,
-        timestamp: new Date(e.created_at || new Date()),
-        metadata: {
-          category: e.event_type,
-          link: `/events/${e.id}`,
-        },
-      });
-    });
+  const { data, count, error } = await query;
+
+  if (error) {
+    console.error('Error fetching activity feed:', error);
+    return { data: [], count: 0 };
   }
 
-  // Add academy content
-  if (!filterType || filterType === 'content') {
-    content.forEach((c) => {
-      activityFeed.push({
-        id: `content-${c.id}`,
-        type: 'content',
-        title: c.title,
-        description: c.description || undefined,
-        timestamp: new Date(c.created_at || new Date()),
-        image: c.thumbnail_url || undefined,
-        metadata: {
-          category: c.content_type,
-          link: `/academy/${c.id}`,
-        },
-      });
-    });
-  }
+  const activityFeed: ActivityFeedItem[] = (data || []).map((row: any) => ({
+    id: `${row.feed_type}-${row.id}`,
+    type: row.feed_type as ActivityFeedItem['type'],
+    title: row.title,
+    description: row.description || undefined,
+    timestamp: new Date(row.feed_timestamp),
+    image: row.feed_image || undefined,
+    metadata: {
+      status: row.feed_type === 'case' ? row.feed_meta : undefined,
+      category: row.feed_type !== 'case' ? row.feed_meta : undefined,
+      link: row.feed_link || undefined,
+    },
+  }));
 
-  // Add documents
-  if (!filterType || filterType === 'document') {
-    documents.forEach((d) => {
-      activityFeed.push({
-        id: `document-${d.id}`,
-        type: 'document',
-        title: d.title,
-        description: d.description || undefined,
-        timestamp: new Date(d.created_at || new Date()),
-        metadata: {
-          category: d.category,
-          link: `/documents/${d.id}`,
-        },
-      });
-    });
-  }
-
-  // Add blog posts
-  if (!filterType || filterType === 'blog') {
-    blogPosts.forEach((b) => {
-      activityFeed.push({
-        id: `blog-${b.id}`,
-        type: 'blog',
-        title: b.title,
-        description: b.excerpt || undefined,
-        timestamp: new Date(b.published_at || b.created_at || new Date()),
-        image: b.featured_image || undefined,
-        metadata: {
-          category: b.category || undefined,
-          link: `/blog/${b.slug}`,
-        },
-      });
-    });
-  }
-
-  // Sort by timestamp (newest first)
-  activityFeed.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-  const totalCount = activityFeed.length;
-  const paginatedData = activityFeed.slice(offset, offset + limit);
-
-  return { data: paginatedData, count: totalCount };
+  return { data: activityFeed, count: count || 0 };
 }
 
 export async function getDashboardData(): Promise<DashboardData> {

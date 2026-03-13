@@ -62,6 +62,11 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
     return null;
   }
 
+  // Increment view count atomically (BUG-5)
+  if (data) {
+    await supabase.rpc('increment_view_count', { tbl: 'blog_posts', row_id: data.id });
+  }
+
   return data;
 }
 

@@ -441,6 +441,7 @@
     "caseDetails": "Details du Dossier",
     "caseHistory": "Historique du Dossier",
     "statusChanged": "Statut modifie",
+    "caseOpened": "Dossier ouvert",
     "searchPlaceholder": "Rechercher par code ou client...",
     "allStatus": "Tous les Statuts",
     "clear": "Effacer",
@@ -460,7 +461,8 @@
       "suspended": "Suspendu",
       "completed": "Termine",
       "cancelled": "Annule"
-    }
+    },
+    "uploadDoc": "Télécharger un document"
   },
   "events": {
     "title": "Evenements",
@@ -512,7 +514,10 @@
       "workshop": "Atelier",
       "webinar": "Webinaire",
       "physical": "Evenement Physique"
-    }
+    },
+    "unregister": "Se désinscrire",
+    "eventFull": "Complet",
+    "attendeesCount": "{count} inscrits"
   },
   "academy": {
     "title": "Academy",
@@ -550,7 +555,10 @@
     "noPreview": "Apercu non disponible",
     "downloadMaterials": "Telecharger les Materiaux",
     "downloadHint": "Telecharger les slides, documents et ressources supplementaires",
-    "podcast": "Episode de Podcast"
+    "podcast": "Episode de Podcast",
+    "markComplete": "Marquer comme terminé",
+    "completed": "Terminé",
+    "completedLabel": "Terminé"
   },
   "documents": {
     "title": "Documents",

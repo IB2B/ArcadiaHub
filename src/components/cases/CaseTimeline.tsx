@@ -89,6 +89,8 @@ function CaseTimeline({ history }: CaseTimelineProps) {
           const newStatusConfig = statusConfig[item.new_status] || statusConfig.PENDING;
           const oldStatusConfig = item.old_status ? statusConfig[item.old_status] : null;
 
+          const isInitialEntry = !item.old_status;
+
           return (
             <div key={item.id} className="relative flex gap-3 sm:gap-4">
               {/* Timeline dot */}
@@ -96,7 +98,7 @@ function CaseTimeline({ history }: CaseTimelineProps) {
                 relative z-10 flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
                 ${index === 0 ? 'bg-[var(--primary)] text-white' : 'bg-[var(--card)] border-2 border-[var(--border)] text-[var(--text-muted)]'}
               `}>
-                {icons.status}
+                {isInitialEntry ? icons.create : icons.status}
               </div>
 
               {/* Content */}
@@ -104,18 +106,29 @@ function CaseTimeline({ history }: CaseTimelineProps) {
                 <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-3 sm:p-4">
                   {/* Status change */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-[var(--text)]">{t('statusChanged')}</span>
-                    {oldStatusConfig && (
+                    {isInitialEntry ? (
                       <>
-                        <Badge variant={oldStatusConfig.variant} size="sm">
-                          {t(`statuses.${oldStatusConfig.key}`)}
+                        <span className="text-sm font-medium text-[var(--text)]">{t('caseOpened')}</span>
+                        <Badge variant={newStatusConfig.variant} size="sm">
+                          {t(`statuses.${newStatusConfig.key}`)}
                         </Badge>
-                        <span className="text-[var(--text-muted)]">&rarr;</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm font-medium text-[var(--text)]">{t('statusChanged')}</span>
+                        {oldStatusConfig && (
+                          <>
+                            <Badge variant={oldStatusConfig.variant} size="sm">
+                              {t(`statuses.${oldStatusConfig.key}`)}
+                            </Badge>
+                            <span className="text-[var(--text-muted)]">&rarr;</span>
+                          </>
+                        )}
+                        <Badge variant={newStatusConfig.variant} size="sm">
+                          {t(`statuses.${newStatusConfig.key}`)}
+                        </Badge>
                       </>
                     )}
-                    <Badge variant={newStatusConfig.variant} size="sm">
-                      {t(`statuses.${newStatusConfig.key}`)}
-                    </Badge>
                   </div>
 
                   {/* Notes */}

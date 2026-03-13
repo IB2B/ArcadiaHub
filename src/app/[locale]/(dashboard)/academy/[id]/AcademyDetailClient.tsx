@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { format } from 'date-fns';
@@ -7,12 +8,14 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import { Database } from '@/types/database.types';
+import { markContentComplete } from '@/lib/data/academy';
 
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 
 interface AcademyDetailClientProps {
   item: AcademyContent;
   relatedContent: AcademyContent[];
+  isCompleted: boolean;
 }
 
 const contentTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info' | 'default'; key: string }> = {
@@ -74,9 +77,25 @@ function getVimeoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-export default function AcademyDetailClient({ item, relatedContent }: AcademyDetailClientProps) {
+export default function AcademyDetailClient({ item, relatedContent, isCompleted }: AcademyDetailClientProps) {
   const t = useTranslations('academy');
+  const [completed, setCompleted] = useState(isCompleted);
+  const [isPending, startTransition] = useTransition();
+  const [completeError, setCompleteError] = useState<string | null>(null);
   const typeConfig = contentTypeConfig[item.content_type] || contentTypeConfig.VIDEO;
+
+  const handleMarkComplete = () => {
+    if (completed) return;
+    setCompleteError(null);
+    startTransition(async () => {
+      const result = await markContentComplete(item.id);
+      if (result.success) {
+        setCompleted(true);
+      } else {
+        setCompleteError(result.error || 'Failed to mark as complete');
+      }
+    });
+  };
 
   const renderMedia = () => {
     if (item.content_type === 'VIDEO' || item.content_type === 'RECORDING') {
@@ -195,16 +214,45 @@ export default function AcademyDetailClient({ item, relatedContent }: AcademyDet
 
           {/* Title & Description */}
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <Badge variant={typeConfig.variant}>
-                {t(`types.${typeConfig.key}`)}
-              </Badge>
-              {item.year && (
-                <Badge variant="default">{item.year}</Badge>
-              )}
-              {item.theme && (
-                <Badge variant="default">{item.theme}</Badge>
-              )}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={typeConfig.variant}>
+                  {t(`types.${typeConfig.key}`)}
+                </Badge>
+                {item.year && (
+                  <Badge variant="default">{item.year}</Badge>
+                )}
+                {item.theme && (
+                  <Badge variant="default">{item.theme}</Badge>
+                )}
+                {completed && (
+                  <Badge variant="success">
+                    {t('completed')}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                {!completed ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleMarkComplete}
+                    isLoading={isPending}
+                  >
+                    {t('markComplete')}
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-sm text-[var(--success)]">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    {t('completedLabel')}
+                  </div>
+                )}
+                {completeError && (
+                  <p className="text-xs text-[var(--error)]">{completeError}</p>
+                )}
+              </div>
             </div>
 
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)] mb-4">

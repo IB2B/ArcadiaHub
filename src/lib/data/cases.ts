@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/database/server';
 import { Database } from '@/types/database.types';
+import { revalidatePath } from 'next/cache';
+import { uploadFile } from '@/lib/services/storage';
 
 type Case = Database['public']['Tables']['cases']['Row'];
 type CaseInsert = Database['public']['Tables']['cases']['Insert'];
@@ -164,6 +166,43 @@ export async function updateCaseStatus(
     return { success: false, error: error.message };
   }
 
+  return { success: true };
+}
+
+export async function uploadCaseDocument(
+  caseId: string,
+  file: File
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Not authenticated' };
+
+  // Verify the case belongs to the current user
+  const { data: caseData, error: caseError } = await supabase
+    .from('cases')
+    .select('id')
+    .eq('id', caseId)
+    .eq('partner_id', user.id)
+    .single();
+
+  if (caseError || !caseData) return { success: false, error: 'Case not found' };
+
+  const uploadResult = await uploadFile('case-documents', file, `${caseId}`);
+  if (!uploadResult.success || !uploadResult.url) {
+    return { success: false, error: uploadResult.error || 'Upload failed' };
+  }
+
+  const { error } = await supabase.from('case_documents').insert({
+    case_id: caseId,
+    title: file.name,
+    file_url: uploadResult.url,
+    file_type: file.type || null,
+    uploaded_by: user.id,
+  });
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath(`/[locale]/(dashboard)/cases/${caseId}`, 'page');
   return { success: true };
 }
 

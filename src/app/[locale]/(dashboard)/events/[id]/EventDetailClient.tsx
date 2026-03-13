@@ -1,15 +1,21 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/navigation';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import AddToCalendarButton from '@/components/events/AddToCalendarButton';
 import { Database, Json } from '@/types/database.types';
+import { registerForEvent, unregisterFromEvent } from '@/lib/data/events';
 
 type Event = Database['public']['Tables']['events']['Row'];
 
 interface EventDetailClientProps {
   event: Event;
+  isRegistered: boolean;
+  registrationCount: number;
 }
 
 const eventTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info'; key: string }> = {
@@ -106,11 +112,45 @@ interface Attachment {
   url: string;
 }
 
-export default function EventDetailClient({ event }: EventDetailClientProps) {
+export default function EventDetailClient({ event, isRegistered, registrationCount }: EventDetailClientProps) {
   const t = useTranslations('events');
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [registered, setRegistered] = useState(isRegistered);
+  const [regCount, setRegCount] = useState(registrationCount);
+  const [regError, setRegError] = useState<string | null>(null);
   const typeConfig = eventTypeConfig[event.event_type] || eventTypeConfig.TRAINING;
   const isPast = isEventPast(event.start_datetime);
+  const isFull = event.max_capacity !== null && regCount >= event.max_capacity && !registered;
   const attachments = (event.attachments as Attachment[] | null) || [];
+
+  const handleRegister = () => {
+    setRegError(null);
+    startTransition(async () => {
+      const result = await registerForEvent(event.id);
+      if (result.success) {
+        setRegistered(true);
+        setRegCount((c) => c + 1);
+        router.refresh();
+      } else {
+        setRegError(result.error || 'Registration failed');
+      }
+    });
+  };
+
+  const handleUnregister = () => {
+    setRegError(null);
+    startTransition(async () => {
+      const result = await unregisterFromEvent(event.id);
+      if (result.success) {
+        setRegistered(false);
+        setRegCount((c) => Math.max(0, c - 1));
+        router.refresh();
+      } else {
+        setRegError(result.error || 'Failed to unregister');
+      }
+    });
+  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -135,13 +175,35 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               </h1>
             </div>
             {!isPast && (
-              <AddToCalendarButton
-                title={event.title}
-                description={event.description || ''}
-                startDate={event.start_datetime}
-                endDate={event.end_datetime || undefined}
-                location={event.location || event.meeting_link || ''}
-              />
+              <div className="flex items-center gap-2 flex-wrap">
+                <AddToCalendarButton
+                  title={event.title}
+                  description={event.description || ''}
+                  startDate={event.start_datetime}
+                  endDate={event.end_datetime || undefined}
+                  location={event.location || event.meeting_link || ''}
+                />
+                {registered ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleUnregister}
+                    isLoading={isPending}
+                  >
+                    {t('unregister')}
+                  </Button>
+                ) : isFull ? (
+                  <Badge variant="default" size="md">{t('eventFull')}</Badge>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={handleRegister}
+                    isLoading={isPending}
+                  >
+                    {t('register')}
+                  </Button>
+                )}
+              </div>
             )}
           </div>
 
@@ -202,6 +264,22 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           </div>
         </div>
       </Card>
+
+      {/* Registration error */}
+      {regError && (
+        <p className="text-sm text-[var(--error)] mt-2">{regError}</p>
+      )}
+
+      {/* Attendee count */}
+      {!isPast && regCount > 0 && (
+        <p className="text-sm text-[var(--text-muted)] flex items-center gap-1">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+          </svg>
+          {t('attendeesCount', { count: regCount })}
+          {event.max_capacity && ` / ${event.max_capacity}`}
+        </p>
+      )}
 
       {/* Description and Attachments */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

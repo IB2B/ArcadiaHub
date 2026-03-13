@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type EventInsert = Database['public']['Tables']['events']['Insert'];
+type EventRegistration = Database['public']['Tables']['event_registrations']['Row'];
 
 export async function getEvents(options?: {
   eventType?: string;
@@ -110,6 +111,92 @@ export async function createEvent(
 
   revalidatePath('/[locale]/(dashboard)/events', 'page');
   return { success: true, data };
+}
+
+export async function registerForEvent(
+  eventId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Not authenticated' };
+
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id, is_published, start_datetime, max_capacity')
+    .eq('id', eventId)
+    .maybeSingle();
+
+  if (eventError) return { success: false, error: eventError.message };
+  if (!event) return { success: false, error: 'Event not found' };
+  if (!event.is_published) return { success: false, error: 'Event not available' };
+  if (new Date(event.start_datetime) < new Date()) return { success: false, error: 'Event has already passed' };
+
+  if (event.max_capacity) {
+    const { count } = await supabase
+      .from('event_registrations')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_id', eventId);
+    if ((count || 0) >= event.max_capacity) return { success: false, error: 'Event is full' };
+  }
+
+  const { error } = await supabase
+    .from('event_registrations')
+    .insert({ event_id: eventId, user_id: user.id });
+
+  if (error) {
+    if (error.code === '23505') return { success: false, error: 'Already registered' };
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/[locale]/(dashboard)/events/[id]', 'page');
+  return { success: true };
+}
+
+export async function unregisterFromEvent(
+  eventId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Not authenticated' };
+
+  const { error } = await supabase
+    .from('event_registrations')
+    .delete()
+    .eq('event_id', eventId)
+    .eq('user_id', user.id);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath('/[locale]/(dashboard)/events/[id]', 'page');
+  return { success: true };
+}
+
+export async function getEventRegistrationStatus(eventId: string): Promise<{
+  isRegistered: boolean;
+  registrationCount: number;
+}> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [regResult, countResult] = await Promise.all([
+    user
+      ? supabase
+          .from('event_registrations')
+          .select('id')
+          .eq('event_id', eventId)
+          .eq('user_id', user.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from('event_registrations')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_id', eventId),
+  ]);
+
+  return {
+    isRegistered: !!(regResult as { data: unknown }).data,
+    registrationCount: (countResult as { count: number | null }).count || 0,
+  };
 }
 
 export async function getEventStats(): Promise<{
