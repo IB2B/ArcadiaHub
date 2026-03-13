@@ -372,7 +372,8 @@
     "admin": "Admin",
     "adminDashboard": "Panneau Admin",
     "more": "Plus",
-    "signOut": "Se deconnecter"
+    "signOut": "Se deconnecter",
+    "suggestions": "Suggestions"
   },
   "dashboard": {
     "welcome": "Bon retour",
@@ -735,6 +736,7 @@
       "academy": "Academy",
       "documents": "Documents",
       "blog": "Blog",
+      "suggestions": "Suggestions",
       "settings": "Parametres",
       "backToDashboard": "Retour au Tableau de Bord"
     },

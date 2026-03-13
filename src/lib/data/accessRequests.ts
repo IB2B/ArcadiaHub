@@ -3,7 +3,7 @@
 import { createServiceSupabaseClient } from '@/lib/database/server';
 import { requireRole } from '@/lib/auth/guards';
 import { notifyAdminsAccessRequestSubmitted } from '@/lib/services/notificationService';
-import { sendPartnerWelcomeEmail } from '@/lib/email';
+import { sendPartnerWelcomeEmail, sendAccessRequestReceivedEmail, sendAccessRequestRejectionEmail } from '@/lib/email';
 
 export type AccessRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -97,19 +97,21 @@ export async function submitAccessRequest(
       return { success: false, error: error.message };
     }
 
-    // Notify admins about the new access request
-    try {
-      await notifyAdminsAccessRequestSubmitted({
-        id: result.id,
-        company_name: data.company_name,
-        contact_email: data.contact_email,
-        contact_first_name: data.contact_first_name,
-        contact_last_name: data.contact_last_name,
-      });
-    } catch (notifyError) {
-      // Don't fail the request if notification fails
-      console.error('Error sending notification:', notifyError);
-    }
+    // Notify admins about the new access request (non-blocking)
+    notifyAdminsAccessRequestSubmitted({
+      id: result.id,
+      company_name: data.company_name,
+      contact_email: data.contact_email,
+      contact_first_name: data.contact_first_name,
+      contact_last_name: data.contact_last_name,
+    }).catch(console.error);
+
+    // Send confirmation email to the applicant (non-blocking)
+    sendAccessRequestReceivedEmail({
+      to: data.contact_email,
+      firstName: data.contact_first_name,
+      companyName: data.company_name,
+    }).catch(console.error);
 
     return { success: true, requestId: result.id };
   } catch (error) {
@@ -495,6 +497,14 @@ export async function rejectAccessRequest(
     console.error('Error rejecting access request:', updateError);
     return { success: false, error: updateError.message };
   }
+
+  // 3. Send rejection email to the applicant (non-blocking)
+  sendAccessRequestRejectionEmail({
+    to: request.contact_email,
+    firstName: request.contact_first_name,
+    companyName: request.company_name,
+    reason: notes,
+  }).catch(console.error);
 
   return { success: true };
 }

@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getBlogPost, incrementBlogViewCount } from '@/lib/data/blog';
+import { getComments } from '@/lib/data/comments';
+import { createClient } from '@/lib/database/server';
 import BlogPostClient from './BlogPostClient';
 
 interface BlogPostPageProps {
@@ -17,5 +19,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Increment view count
   await incrementBlogViewCount(slug);
 
-  return <BlogPostClient post={post} />;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const comments = await getComments('blog_post', post.id);
+
+  return <BlogPostClient post={post} comments={comments} currentUserId={user?.id} />;
 }

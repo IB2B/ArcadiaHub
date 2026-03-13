@@ -9,6 +9,8 @@ import Button from '@/components/ui/Button';
 import AddToCalendarButton from '@/components/events/AddToCalendarButton';
 import { Database, Json } from '@/types/database.types';
 import { registerForEvent, unregisterFromEvent } from '@/lib/data/events';
+import CommentSection from '@/components/comments/CommentSection';
+import type { Comment } from '@/lib/data/comments';
 
 type Event = Database['public']['Tables']['events']['Row'];
 
@@ -16,6 +18,8 @@ interface EventDetailClientProps {
   event: Event;
   isRegistered: boolean;
   registrationCount: number;
+  comments?: Comment[];
+  currentUserId?: string;
 }
 
 const eventTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info'; key: string }> = {
@@ -112,7 +116,7 @@ interface Attachment {
   url: string;
 }
 
-export default function EventDetailClient({ event, isRegistered, registrationCount }: EventDetailClientProps) {
+export default function EventDetailClient({ event, isRegistered, registrationCount, comments = [], currentUserId }: EventDetailClientProps) {
   const t = useTranslations('events');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -369,6 +373,18 @@ export default function EventDetailClient({ event, isRegistered, registrationCou
           </Card>
         </div>
       </div>
+
+      {/* Comments */}
+      <Card>
+        <CardContent className="p-4 sm:p-6">
+          <CommentSection
+            comments={comments}
+            entityType="event"
+            entityId={event.id}
+            currentUserId={currentUserId}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

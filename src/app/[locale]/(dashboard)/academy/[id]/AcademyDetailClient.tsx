@@ -4,11 +4,13 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { format } from 'date-fns';
-import Card from '@/components/ui/Card';
+import Card, { CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import { Database } from '@/types/database.types';
 import { markContentComplete } from '@/lib/data/academy';
+import CommentSection from '@/components/comments/CommentSection';
+import type { Comment } from '@/lib/data/comments';
 
 type AcademyContent = Database['public']['Tables']['academy_content']['Row'];
 
@@ -16,6 +18,8 @@ interface AcademyDetailClientProps {
   item: AcademyContent;
   relatedContent: AcademyContent[];
   isCompleted: boolean;
+  comments?: Comment[];
+  currentUserId?: string;
 }
 
 const contentTypeConfig: Record<string, { variant: 'primary' | 'success' | 'warning' | 'info' | 'default'; key: string }> = {
@@ -77,7 +81,7 @@ function getVimeoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-export default function AcademyDetailClient({ item, relatedContent, isCompleted }: AcademyDetailClientProps) {
+export default function AcademyDetailClient({ item, relatedContent, isCompleted, comments = [], currentUserId }: AcademyDetailClientProps) {
   const t = useTranslations('academy');
   const [completed, setCompleted] = useState(isCompleted);
   const [isPending, startTransition] = useTransition();
@@ -372,6 +376,18 @@ export default function AcademyDetailClient({ item, relatedContent, isCompleted 
           )}
         </div>
       </div>
+
+      {/* Comments */}
+      <Card>
+        <CardContent className="p-4 sm:p-6">
+          <CommentSection
+            comments={comments}
+            entityType="academy_content"
+            entityId={item.id}
+            currentUserId={currentUserId}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

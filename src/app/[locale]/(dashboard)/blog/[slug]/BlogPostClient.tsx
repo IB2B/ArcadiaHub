@@ -1,13 +1,17 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Card from '@/components/ui/Card';
+import Card, { CardContent } from '@/components/ui/Card';
 import { Database } from '@/types/database.types';
+import CommentSection from '@/components/comments/CommentSection';
+import type { Comment } from '@/lib/data/comments';
 
 type BlogPost = Database['public']['Tables']['blog_posts']['Row'];
 
 interface BlogPostClientProps {
   post: BlogPost;
+  comments?: Comment[];
+  currentUserId?: string;
 }
 
 const icons = {
@@ -35,7 +39,7 @@ const icons = {
   ),
 };
 
-export default function BlogPostClient({ post }: BlogPostClientProps) {
+export default function BlogPostClient({ post, comments = [], currentUserId }: BlogPostClientProps) {
   const t = useTranslations('blog');
 
   const formatDate = (dateString: string | null) => {
@@ -65,9 +69,9 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto">
       {/* Article Card */}
-      <Card className="max-w-4xl mx-auto">
+      <Card>
         {/* Featured Image */}
         {post.featured_image && (
           <div className="aspect-video w-full overflow-hidden rounded-xl mb-6">
@@ -137,6 +141,18 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
             </div>
           </div>
         )}
+      </Card>
+
+      {/* Comments */}
+      <Card>
+        <CardContent className="p-4 sm:p-6">
+          <CommentSection
+            comments={comments}
+            entityType="blog_post"
+            entityId={post.id}
+            currentUserId={currentUserId}
+          />
+        </CardContent>
       </Card>
     </div>
   );

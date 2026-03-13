@@ -2,18 +2,14 @@
 
 import { createServiceSupabaseClient } from '@/lib/database/server';
 
+// Must match DB constraint: CHECK (type IN ('INFO', 'CASE_UPDATE', 'EVENT', 'CONTENT', 'MENTION', 'SUGGESTION_REPLY'))
 type NotificationType =
-  | 'event_created'
-  | 'event_updated'
-  | 'case_created'
-  | 'case_status_changed'
-  | 'case_document_added'
-  | 'document_published'
-  | 'academy_content_published'
-  | 'blog_post_published'
-  | 'partner_registered'
-  | 'access_request_submitted'
-  | 'system_announcement';
+  | 'INFO'
+  | 'CASE_UPDATE'
+  | 'EVENT'
+  | 'CONTENT'
+  | 'MENTION'
+  | 'SUGGESTION_REPLY';
 
 type UserRole = 'ADMIN' | 'PARTNER' | 'COMMERCIAL';
 
@@ -134,7 +130,7 @@ export async function notifyEventPublished(event: {
   await createNotificationsForUsers(partners, {
     title: `New ${event.event_type.toLowerCase()}: ${event.title}`,
     message: `A new event has been scheduled for ${eventDate}. Register now!`,
-    type: 'event_created',
+    type: 'EVENT',
     link: `/events/${event.id}`,
   });
 }
@@ -152,7 +148,7 @@ export async function notifyEventUpdated(event: {
   await createNotificationsForUsers(partners, {
     title: `Event updated: ${event.title}`,
     message: 'The event details have been updated. Please check the latest information.',
-    type: 'event_updated',
+    type: 'EVENT',
     link: `/events/${event.id}`,
   });
 }
@@ -173,7 +169,7 @@ export async function notifyCaseCreated(caseData: {
   await createNotification(caseData.partner_id, {
     title: `New case created: ${caseData.case_code}`,
     message: `A new case for ${caseData.client_name} has been created.`,
-    type: 'case_created',
+    type: 'CASE_UPDATE',
     link: `/cases/${caseData.id}`,
   });
 }
@@ -199,7 +195,7 @@ export async function notifyCaseStatusChanged(caseData: {
   await createNotification(caseData.partner_id, {
     title: `Case ${caseData.case_code} status updated`,
     message: `Status changed from ${statusLabels[caseData.old_status] || caseData.old_status} to ${statusLabels[caseData.new_status] || caseData.new_status}.`,
-    type: 'case_status_changed',
+    type: 'CASE_UPDATE',
     link: `/cases/${caseData.id}`,
   });
 }
@@ -216,7 +212,7 @@ export async function notifyCaseDocumentAdded(caseData: {
   await createNotification(caseData.partner_id, {
     title: `New document for case ${caseData.case_code}`,
     message: `"${caseData.document_name}" has been added to your case.`,
-    type: 'case_document_added',
+    type: 'CASE_UPDATE',
     link: `/cases/${caseData.case_id}`,
   });
 }
@@ -234,7 +230,7 @@ export async function notifyAdminsCaseCreated(caseData: {
   await createNotificationsForUsers(admins, {
     title: `New case submitted: ${caseData.case_code}`,
     message: `A new case for ${caseData.client_name} requires review.`,
-    type: 'case_created',
+    type: 'CASE_UPDATE',
     link: `/admin/cases/${caseData.id}`,
   });
 }
@@ -264,7 +260,7 @@ export async function notifyDocumentPublished(document: {
   await createNotificationsForUsers(partners, {
     title: `New ${categoryLabels[document.category] || 'document'} available`,
     message: `"${document.title}" is now available in the documents section.`,
-    type: 'document_published',
+    type: 'CONTENT',
     link: '/documents',
   });
 }
@@ -294,7 +290,7 @@ export async function notifyAcademyContentPublished(content: {
   await createNotificationsForUsers(partners, {
     title: `New academy ${typeLabels[content.content_type] || 'content'} available`,
     message: `Check out "${content.title}" in the Academy section.`,
-    type: 'academy_content_published',
+    type: 'CONTENT',
     link: '/academy',
   });
 }
@@ -315,7 +311,7 @@ export async function notifyBlogPostPublished(post: {
   await createNotificationsForUsers(partners, {
     title: `New blog post: ${post.title}`,
     message: 'Read the latest news and updates from Harlock.',
-    type: 'blog_post_published',
+    type: 'CONTENT',
     link: `/blog/${post.slug}`,
   });
 }
@@ -345,7 +341,7 @@ export async function sendSystemAnnouncement(
   await createNotificationsForUsers(uniqueUsers, {
     title,
     message,
-    type: 'system_announcement',
+    type: 'INFO',
   });
 }
 
@@ -362,7 +358,7 @@ export async function notifyNewPartnerRegistration(partner: {
   await createNotificationsForUsers(admins, {
     title: `New partner registration: ${partner.company_name}`,
     message: `${partner.email} has registered as a new partner.`,
-    type: 'partner_registered',
+    type: 'INFO',
     link: `/admin/partners/${partner.id}`,
   });
 }
@@ -370,6 +366,77 @@ export async function notifyNewPartnerRegistration(partner: {
 // ============================================
 // ACCESS REQUEST NOTIFICATIONS
 // ============================================
+
+// ============================================
+// MENTION NOTIFICATIONS
+// ============================================
+
+/**
+ * Notify a user when they are @mentioned in a comment
+ */
+export async function notifyUserMentioned(data: {
+  mentionedUserId: string;
+  authorName: string;
+  entityType: string;
+  entityTitle: string;
+  entityLink: string;
+  commentId: string;
+  commentPreview?: string;
+}): Promise<void> {
+  const entityTypeLabels: Record<string, string> = {
+    case: 'Case',
+    blog_post: 'Blog Post',
+    event: 'Event',
+    academy_content: 'Academy',
+  };
+
+  const label = entityTypeLabels[data.entityType] || 'post';
+  const preview = data.commentPreview ? ` · "${data.commentPreview}"` : '';
+
+  await createNotification(data.mentionedUserId, {
+    title: `${data.authorName} mentioned you`,
+    message: `You were tagged in a comment on ${label}: "${data.entityTitle}"${preview}`,
+    type: 'MENTION',
+    link: `${data.entityLink}#comment-${data.commentId}`,
+  });
+}
+
+// ============================================
+// SUGGESTION NOTIFICATIONS
+// ============================================
+
+/**
+ * Notify a user when an admin replies to their suggestion
+ */
+export async function notifySuggestionReply(data: {
+  userId: string;
+  suggestionSubject: string;
+  suggestionId: string;
+}): Promise<void> {
+  await createNotification(data.userId, {
+    title: 'Reply to your suggestion',
+    message: `An admin replied to your suggestion: "${data.suggestionSubject}"`,
+    type: 'SUGGESTION_REPLY',
+    link: `/suggestions`,
+  });
+}
+
+/**
+ * Notify admins when a new suggestion is submitted
+ */
+export async function notifyAdminsSuggestionSubmitted(data: {
+  userId: string;
+  subject: string;
+}): Promise<void> {
+  const admins = await getAllAdmins();
+
+  await createNotificationsForUsers(admins, {
+    title: `New suggestion: ${data.subject}`,
+    message: 'A partner has submitted a new suggestion.',
+    type: 'INFO',
+    link: `/admin/suggestions`,
+  });
+}
 
 /**
  * Notify admins when a new access request is submitted
@@ -386,7 +453,7 @@ export async function notifyAdminsAccessRequestSubmitted(request: {
   await createNotificationsForUsers(admins, {
     title: `New access request: ${request.company_name}`,
     message: `${request.contact_first_name} ${request.contact_last_name} (${request.contact_email}) has submitted an access request.`,
-    type: 'access_request_submitted',
+    type: 'INFO',
     link: `/admin/access-requests`,
   });
 }

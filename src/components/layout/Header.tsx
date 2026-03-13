@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useCallback, useRef, useEffect, useMemo, useTransition } from 'react';
+import React, { memo, useState, useCallback, useRef, useEffect, useMemo, useTransition } from 'react';
 import { Link, usePathname } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
@@ -11,6 +11,57 @@ import { logout } from '@/lib/auth/actions';
 import { Database } from '@/types/database.types';
 
 type Notification = Database['public']['Tables']['notifications']['Row'];
+
+const notificationTypeConfig: Record<string, { color: string; icon: React.ReactNode }> = {
+  MENTION: {
+    color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 1 0-8 0 4 4 0 0 0 8 0Zm0 0v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-9 9m4.5-1.206a8.959 8.959 0 0 1-4.5 1.207" />
+      </svg>
+    ),
+  },
+  CASE_UPDATE: {
+    color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+      </svg>
+    ),
+  },
+  EVENT: {
+    color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+      </svg>
+    ),
+  },
+  CONTENT: {
+    color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+      </svg>
+    ),
+  },
+  SUGGESTION_REPLY: {
+    color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+      </svg>
+    ),
+  },
+  INFO: {
+    color: 'bg-[var(--primary-light)] text-[var(--primary)]',
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+      </svg>
+    ),
+  },
+};
 
 const icons = {
   bell: (
@@ -215,7 +266,15 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
             >
               {icons.bell}
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--error)] rounded-full" />
+                unreadCount > 9 ? (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-[var(--error)] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                    9+
+                  </span>
+                ) : (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-[var(--error)] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                    {unreadCount}
+                  </span>
+                )
               )}
             </button>
 
@@ -228,51 +287,64 @@ function Header({ user, notifications = [], unreadCount: propUnreadCount, onMark
                     <Badge variant="primary" size="sm">{unreadCount} new</Badge>
                   )}
                 </div>
-                <div className="max-h-80 overflow-y-auto scrollbar-slim">
+                <div className="max-h-96 overflow-y-auto scrollbar-slim divide-y divide-[var(--border)]">
                   {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-[var(--text-muted)] text-sm">
-                      No notifications
+                    <div className="p-6 text-center">
+                      <div className="w-10 h-10 rounded-full bg-[var(--card-hover)] flex items-center justify-center mx-auto mb-2 text-[var(--text-muted)]">
+                        {icons.bell}
+                      </div>
+                      <p className="text-sm text-[var(--text-muted)]">No notifications yet</p>
                     </div>
                   ) : (
-                    notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        onClick={() => {
-                          if (!notification.is_read && onMarkAsRead) {
-                            onMarkAsRead(notification.id);
-                          }
-                        }}
-                        className={`block px-4 py-3 hover:bg-[var(--card-hover)] transition-colors cursor-pointer ${
-                          !notification.is_read ? 'bg-[var(--primary-light)]' : ''
-                        }`}
-                      >
-                        {notification.link ? (
-                          <Link href={notification.link} className="block">
-                            <p className="text-sm font-medium text-[var(--text)]">{notification.title}</p>
+                    notifications.map((notification) => {
+                      const typeConf = notificationTypeConfig[notification.type] || notificationTypeConfig.INFO;
+                      const inner = (
+                        <div className="flex gap-3 items-start">
+                          {/* Type icon */}
+                          <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 ${typeConf.color}`}>
+                            {typeConf.icon}
+                          </div>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm leading-snug ${!notification.is_read ? 'font-semibold text-[var(--text)]' : 'font-medium text-[var(--text)]'}`}>
+                              {notification.title}
+                            </p>
                             {notification.message && (
-                              <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">
+                              <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2 leading-relaxed">
                                 {notification.message}
                               </p>
                             )}
-                            <p className="text-xs text-[var(--text-light)] mt-1">
+                            <p className="text-xs text-[var(--text-light)] mt-1" suppressHydrationWarning>
                               {formatNotificationTime(notification.created_at)}
                             </p>
-                          </Link>
-                        ) : (
-                          <>
-                            <p className="text-sm font-medium text-[var(--text)]">{notification.title}</p>
-                            {notification.message && (
-                              <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">
-                                {notification.message}
-                              </p>
-                            )}
-                            <p className="text-xs text-[var(--text-light)] mt-1">
-                              {formatNotificationTime(notification.created_at)}
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    ))
+                          </div>
+                          {/* Unread dot */}
+                          {!notification.is_read && (
+                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-[var(--primary)] mt-1.5" />
+                          )}
+                        </div>
+                      );
+
+                      return (
+                        <div
+                          key={notification.id}
+                          onClick={() => {
+                            if (!notification.is_read && onMarkAsRead) {
+                              onMarkAsRead(notification.id);
+                            }
+                          }}
+                          className={`px-4 py-3 hover:bg-[var(--card-hover)] transition-colors cursor-pointer ${
+                            !notification.is_read ? 'bg-[var(--primary-light)]/40' : ''
+                          }`}
+                        >
+                          {notification.link ? (
+                            <Link href={notification.link} className="block" onClick={() => setShowNotifications(false)}>
+                              {inner}
+                            </Link>
+                          ) : inner}
+                        </div>
+                      );
+                    })
                   )}
                 </div>
                 <Link

@@ -54,6 +54,11 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   ),
+  suggestions: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+    </svg>
+  ),
   collapse: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
@@ -92,6 +97,7 @@ const navItemsConfig: NavItemConfig[] = [
   { key: 'documents', translationKey: 'documents', href: '/documents', icon: 'documents' },
   { key: 'cases', translationKey: 'myCases', href: '/cases', icon: 'cases', badge: 3 },
   { key: 'blog', translationKey: 'blog', href: '/blog', icon: 'blog' },
+  { key: 'suggestions', translationKey: 'suggestions', href: '/suggestions', icon: 'suggestions' },
 ];
 
 // Admin icon

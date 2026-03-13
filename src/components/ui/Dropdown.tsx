@@ -47,7 +47,10 @@ function Dropdown({
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const generatedId = useId();
-  const inputId = id || generatedId;
+  // Only assign a generated id when there's a label that needs to reference it.
+  // Putting a generated id on an unlabelled button causes server/client mismatch
+  // because the useId counter shifts when the surrounding component tree changes.
+  const inputId = id || (label ? generatedId : undefined);
 
   const selectedLabel = options.find((o) => o.value === value)?.label ?? placeholder ?? '';
   const hasValue = value !== '' && value !== undefined;
@@ -157,7 +160,7 @@ function Dropdown({
 
   return (
     <div className={hasWidthClass ? className : `w-full ${className}`} ref={ref}>
-      {label && (
+      {label && inputId && (
         <label
           htmlFor={inputId}
           className="block text-sm font-medium text-[var(--text)] mb-1.5"
@@ -169,7 +172,7 @@ function Dropdown({
       <div className="relative">
         <button
           ref={buttonRef}
-          id={inputId}
+          {...(inputId ? { id: inputId } : {})}
           type="button"
           disabled={disabled}
           onClick={handleToggle}

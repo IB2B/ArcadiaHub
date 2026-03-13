@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getAcademyItem, getAcademyContent, getMyCompletions } from '@/lib/data/academy';
+import { getComments } from '@/lib/data/comments';
+import { createClient } from '@/lib/database/server';
 import AcademyDetailClient from './AcademyDetailClient';
 
 interface AcademyDetailPageProps {
@@ -9,9 +11,12 @@ interface AcademyDetailPageProps {
 export default async function AcademyDetailPage({ params }: AcademyDetailPageProps) {
   const { id } = await params;
 
-  const [item, completions] = await Promise.all([
+  const supabase = await createClient();
+  const [{ data: { user } }, item, completions, comments] = await Promise.all([
+    supabase.auth.getUser(),
     getAcademyItem(id),
     getMyCompletions(),
+    getComments('academy_content', id),
   ]);
 
   if (!item) {
@@ -27,6 +32,8 @@ export default async function AcademyDetailPage({ params }: AcademyDetailPagePro
       item={item}
       relatedContent={relatedContent}
       isCompleted={completions.includes(id)}
+      comments={comments}
+      currentUserId={user?.id}
     />
   );
 }

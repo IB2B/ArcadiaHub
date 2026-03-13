@@ -7,8 +7,10 @@ import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import CaseTimeline from '@/components/cases/CaseTimeline';
+import CommentSection from '@/components/comments/CommentSection';
 import { Database } from '@/types/database.types';
 import { uploadCaseDocument } from '@/lib/data/cases';
+import type { Comment } from '@/lib/data/comments';
 
 type Case = Database['public']['Tables']['cases']['Row'];
 type CaseDocument = Database['public']['Tables']['case_documents']['Row'];
@@ -21,6 +23,8 @@ type CaseWithDetails = Case & {
 
 interface CaseDetailClientProps {
   caseData: CaseWithDetails;
+  comments?: Comment[];
+  currentUserId?: string;
 }
 
 const statusConfig: Record<string, { variant: 'warning' | 'info' | 'default' | 'success' | 'error'; key: string }> = {
@@ -79,7 +83,7 @@ function getFileIcon(fileType: string | null) {
   return icons.document;
 }
 
-export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
+export default function CaseDetailClient({ caseData, comments = [], currentUserId }: CaseDetailClientProps) {
   const t = useTranslations('cases');
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -250,6 +254,18 @@ export default function CaseDetailClient({ caseData }: CaseDetailClientProps) {
           </Card>
         </div>
       </div>
+
+      {/* Comments */}
+      <Card className="mt-6">
+        <CardContent className="p-4 sm:p-6">
+          <CommentSection
+            comments={comments}
+            entityType="case"
+            entityId={caseData.id}
+            currentUserId={currentUserId}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { createClient, createServiceSupabaseClient } from '@/lib/database/server';
 import { Database, Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
-import { sendPartnerWelcomeEmail } from '@/lib/email';
+import { sendPartnerWelcomeEmail, sendCaseStatusUpdateEmail, sendCaseDocumentAddedEmail, sendUserInviteEmail } from '@/lib/email';
 import { requireRole } from '@/lib/auth/guards';
 import {
   notifyEventPublished,
@@ -306,6 +306,175 @@ export async function deletePartner(id: string): Promise<{ success: boolean; err
   return { success: true };
 }
 
+// ============================================================================
+// SUB-USER MANAGEMENT
+// ============================================================================
+
+export interface SubUserData {
+  email: string;
+  contact_first_name: string;
+  contact_last_name: string;
+  phone?: string;
+  company_name: string;
+}
+
+/**
+ * Create a sub-user under a partner company (admin or commercial only)
+ * The sub-user gets role=PARTNER and created_by=currentUserId
+ */
+export async function createSubUser(
+  parentPartnerId: string,
+  data: SubUserData
+): Promise<{ success: boolean; error?: string; userId?: string }> {
+  let currentUser;
+  try {
+    currentUser = await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const supabase = await createServiceSupabaseClient();
+
+  // Get parent partner info for the invite email
+  const { data: parent } = await supabase
+    .from('profiles')
+    .select('company_name, contact_first_name, contact_last_name')
+    .eq('id', parentPartnerId)
+    .single();
+
+  const tempPassword = crypto.randomUUID() + 'Aa1!';
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email: data.email,
+    password: tempPassword,
+    email_confirm: true,
+    user_metadata: {
+      company_name: data.company_name,
+      contact_first_name: data.contact_first_name,
+      contact_last_name: data.contact_last_name,
+    },
+  });
+
+  if (authError) {
+    return { success: false, error: authError.message };
+  }
+
+  const userId = authData.user.id;
+
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({
+      company_name: data.company_name,
+      contact_first_name: data.contact_first_name,
+      contact_last_name: data.contact_last_name,
+      phone: data.phone || null,
+      role: 'PARTNER',
+      is_active: false,
+      created_by: parentPartnerId,
+    })
+    .eq('id', userId);
+
+  if (profileError) {
+    await supabase.auth.admin.deleteUser(userId);
+    return { success: false, error: profileError.message };
+  }
+
+  // Generate setup link
+  const { data: linkData } = await supabase.auth.admin.generateLink({
+    type: 'recovery',
+    email: data.email,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
+    },
+  });
+
+  // Send invite email (non-blocking)
+  if (linkData?.properties?.action_link) {
+    const inviterName = parent
+      ? `${parent.contact_first_name} ${parent.contact_last_name}`.trim()
+      : 'Your account manager';
+    sendUserInviteEmail({
+      to: data.email,
+      firstName: data.contact_first_name,
+      companyName: data.company_name,
+      invitedByName: inviterName,
+      setupUrl: linkData.properties.action_link,
+    }).catch(console.error);
+  }
+
+  revalidatePath('/admin/partners');
+  return { success: true, userId };
+}
+
+/**
+ * Get sub-users created under a partner
+ */
+export async function getSubUsers(parentPartnerId: string): Promise<Profile[]> {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
+    return [];
+  }
+
+  const supabase = await createServiceSupabaseClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('created_by', parentPartnerId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching sub-users:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Resend invite email to a sub-user
+ */
+export async function resendSubUserInvite(
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireRole(['ADMIN', 'COMMERCIAL']);
+  } catch {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const supabase = await createServiceSupabaseClient();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, contact_first_name, company_name, created_by')
+    .eq('id', userId)
+    .single();
+
+  if (!profile?.email) return { success: false, error: 'User not found' };
+
+  const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+    type: 'recovery',
+    email: profile.email,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
+    },
+  });
+
+  if (linkError) return { success: false, error: linkError.message };
+
+  if (linkData?.properties?.action_link) {
+    await sendUserInviteEmail({
+      to: profile.email,
+      firstName: profile.contact_first_name || 'User',
+      companyName: profile.company_name || '',
+      invitedByName: 'Your account manager',
+      setupUrl: linkData.properties.action_link,
+    });
+  }
+
+  return { success: true };
+}
+
 /**
  * Upload partner logo to storage
  */
@@ -503,7 +672,7 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
   const supabase = await createClient();
 
   // Get current case to track status change
-  const { data: currentCase } = await supabase.from('cases').select('status, case_code, partner_id').eq('id', id).single();
+  const { data: currentCase } = await supabase.from('cases').select('status, case_code, partner_id, client_name').eq('id', id).single();
 
   const { error } = await supabase
     .from('cases')
@@ -517,8 +686,8 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
   // DB trigger log_case_status_change() handles the history INSERT on status UPDATE.
   // We only need to notify the partner here.
   if (data.status && currentCase?.status !== data.status) {
-    // Notify the partner about the status change
     if (currentCase?.partner_id && currentCase.status) {
+      // In-app notification (non-blocking)
       notifyCaseStatusChanged({
         id,
         case_code: currentCase.case_code,
@@ -526,6 +695,28 @@ export async function updateCase(id: string, data: TablesUpdate<'cases'>, histor
         old_status: currentCase.status,
         new_status: data.status,
       }).catch(console.error);
+
+      // Email notification — fetch partner email + name (non-blocking)
+      supabase
+        .from('profiles')
+        .select('email, contact_first_name')
+        .eq('id', currentCase.partner_id)
+        .single()
+        .then(({ data: partner }) => {
+          if (partner?.email) {
+            sendCaseStatusUpdateEmail({
+              to: partner.email,
+              firstName: partner.contact_first_name || 'Partner',
+              caseCode: currentCase.case_code,
+              clientName: currentCase.client_name || '',
+              oldStatus: currentCase.status!,
+              newStatus: data.status!,
+              notes: historyNote,
+              caseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/cases/${id}`,
+            }).catch(console.error);
+          }
+        })
+        .catch(console.error);
     }
   }
 

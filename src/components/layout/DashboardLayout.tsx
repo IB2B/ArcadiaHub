@@ -6,6 +6,7 @@ import Header from './Header';
 import BottomNav from './BottomNav';
 import SessionTimeout from '@/components/SessionTimeout';
 import { useNotifications } from '@/hooks/useNotifications';
+import { FeedbackButton } from '@/components/suggestions/SuggestionModal';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -45,6 +46,9 @@ function DashboardLayout({ children, user }: DashboardLayoutProps) {
 
         {/* Mobile Bottom Navigation */}
         <BottomNav userRole={user?.role} />
+
+        {/* Floating Feedback Button */}
+        <FeedbackButton />
       </div>
     </SessionTimeout>
   );

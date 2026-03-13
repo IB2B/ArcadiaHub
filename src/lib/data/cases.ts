@@ -180,7 +180,7 @@ export async function uploadCaseDocument(
   // Verify the case belongs to the current user
   const { data: caseData, error: caseError } = await supabase
     .from('cases')
-    .select('id')
+    .select('id, case_code, partner_id')
     .eq('id', caseId)
     .eq('partner_id', user.id)
     .single();
@@ -201,6 +201,9 @@ export async function uploadCaseDocument(
   });
 
   if (error) return { success: false, error: error.message };
+
+  // No notification needed here — partner is uploading their own document.
+  // Admin document uploads (which notify the partner) are handled in admin flows.
 
   revalidatePath(`/[locale]/(dashboard)/cases/${caseId}`, 'page');
   return { success: true };
